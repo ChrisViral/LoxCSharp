@@ -10,6 +10,9 @@ namespace Lox.Syntax.Statements;
 public sealed record WhileStatement(LoxExpression Condition, LoxStatement BodyStatement) : LoxStatement
 {
     /// <inheritdoc />
+    public override void Accept(IStatementVisitor visitor) => visitor.VisitWhileStatement(this);
+
+    /// <inheritdoc />
     public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitWhileStatement(this);
 
     /// <inheritdoc />

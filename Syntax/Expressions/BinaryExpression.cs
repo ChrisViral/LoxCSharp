@@ -11,8 +11,8 @@ namespace Lox.Syntax.Expressions;
 public record BinaryExpression(LoxExpression LeftExpression, Token Operator, LoxExpression RightExpression) : LoxExpression
 {
     /// <inheritdoc />
-    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitBinaryExpression(this);
+    public override void Accept(IExpressionVisitor visitor) => visitor.VisitBinaryExpression(this);
 
     /// <inheritdoc />
-    public sealed override string ToString() => $"{this.LeftExpression} {this.Operator.Lexeme} {this.RightExpression}";
+    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitBinaryExpression(this);
 }

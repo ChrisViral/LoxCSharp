@@ -9,13 +9,13 @@ public abstract record LoxStatement
     /// Handles an expression visitor
     /// </summary>
     /// <param name="visitor">Expression visitor</param>
+    public abstract void Accept(IStatementVisitor visitor);
+
+    /// <summary>
+    /// Handles an expression visitor
+    /// </summary>
+    /// <param name="visitor">Expression visitor</param>
     /// <typeparam name="T">Visitor return type</typeparam>
     /// <returns>The visitor result</returns>
     public abstract T Accept<T>(IStatementVisitor<T> visitor);
-
-    /// <summary>
-    /// Expression string representation
-    /// </summary>
-    /// <returns>The code-like string representation of the expression</returns>
-    public override string ToString() => string.Empty;
 }

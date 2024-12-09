@@ -15,7 +15,7 @@ namespace Lox.Runtime;
 /// <summary>
 /// Lox program interpreter
 /// </summary>
-public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVisitor<object?>
+public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVisitor
 {
     #region Properties
     /// <summary>
@@ -134,17 +134,16 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
 
     #region Statement visitor
     /// <inheritdoc />
-    public object? VisitPrintStatement(PrintStatement statement)
+    public void VisitPrintStatement(PrintStatement statement)
     {
         LoxValue value = Evaluate(statement.Expression);
         Console.WriteLine(value.ToString());
-        return null;
     }
 
     /// <inheritdoc />
     /// <exception cref="ReturnInterrupt">The return value</exception>
     [DoesNotReturn]
-    public object VisitReturnStatement(ReturnStatement statement)
+    public void VisitReturnStatement(ReturnStatement statement)
     {
         if (statement.Value is null) throw new ReturnInterrupt();
 
@@ -153,7 +152,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     }
 
     /// <inheritdoc />
-    public object? VisitIfStatement(IfStatement statement)
+    public void VisitIfStatement(IfStatement statement)
     {
         LoxValue condition = Evaluate(statement.Condition);
         if (IsTruthy(condition))
@@ -164,22 +163,19 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
         {
             Execute(statement.ElseBranch);
         }
-
-        return null;
     }
 
     /// <inheritdoc />
-    public object? VisitWhileStatement(WhileStatement statement)
+    public void VisitWhileStatement(WhileStatement statement)
     {
         while (IsTruthy(Evaluate(statement.Condition)))
         {
             Execute(statement.BodyStatement);
         }
-        return null;
     }
 
     /// <inheritdoc />
-    public object? VisitForStatement(ForStatement statement)
+    public void VisitForStatement(ForStatement statement)
     {
         bool pushedScope = false;
         try
@@ -245,11 +241,10 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
                 this.CurrentEnvironment.PopScope();
             }
         }
-        return null;
     }
 
     /// <inheritdoc />
-    public object? VisitBlockStatement(BlockStatement block)
+    public void VisitBlockStatement(BlockStatement block)
     {
         this.CurrentEnvironment.PushScope();
         try
@@ -263,19 +258,13 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
         {
             this.CurrentEnvironment.PopScope();
         }
-
-        return null;
     }
 
     /// <inheritdoc />
-    public object? VisitExpressionStatement(ExpressionStatement statement)
-    {
-        Evaluate(statement.Expression);
-        return null;
-    }
+    public void VisitExpressionStatement(ExpressionStatement statement) => Evaluate(statement.Expression);
 
     /// <inheritdoc />
-    public object? VisitVariableDeclaration(VariableDeclaration declaration)
+    public void VisitVariableDeclaration(VariableDeclaration declaration)
     {
         if (declaration.Initializer is not null)
         {
@@ -286,15 +275,13 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
         {
             this.CurrentEnvironment.DefineVariable(declaration.Identifier);
         }
-        return null;
     }
 
     /// <inheritdoc />
-    public object? VisitFunctionDeclaration(FunctionDeclaration declaration)
+    public void VisitFunctionDeclaration(FunctionDeclaration declaration)
     {
         FunctionDefinition function = new(declaration, this.CurrentEnvironment.MakeClosure());
         this.CurrentEnvironment.DefineVariable(declaration.Identifier, function);
-        return null;
     }
     #endregion
 

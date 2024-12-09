@@ -7,8 +7,8 @@
 public sealed record GroupingExpression(LoxExpression InnerExpression) : LoxExpression
 {
     /// <inheritdoc />
-    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitGroupingExpression(this);
+    public override void Accept(IExpressionVisitor visitor) => visitor.VisitGroupingExpression(this);
 
     /// <inheritdoc />
-    public override string ToString() => $"({this.InnerExpression})";
+    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitGroupingExpression(this);
 }

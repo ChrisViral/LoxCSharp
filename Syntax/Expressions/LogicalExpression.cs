@@ -11,5 +11,8 @@ namespace Lox.Syntax.Expressions;
 public sealed record LogicalExpression(LoxExpression LeftExpression, Token Operator, LoxExpression RightExpression) : BinaryExpression(LeftExpression, Operator, RightExpression)
 {
     /// <inheritdoc />
+    public override void Accept(IExpressionVisitor visitor) => visitor.VisitLogicalExpression(this);
+
+    /// <inheritdoc />
     public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitLogicalExpression(this);
 }

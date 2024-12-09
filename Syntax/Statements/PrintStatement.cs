@@ -9,6 +9,9 @@ namespace Lox.Syntax.Statements;
 public sealed record PrintStatement(LoxExpression Expression) : LoxStatement
 {
     /// <inheritdoc />
+    public override void Accept(IStatementVisitor visitor) => visitor.VisitPrintStatement(this);
+
+    /// <inheritdoc />
     public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitPrintStatement(this);
 
     /// <inheritdoc />

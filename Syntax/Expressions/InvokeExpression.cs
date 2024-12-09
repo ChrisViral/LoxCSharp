@@ -12,8 +12,8 @@ namespace Lox.Syntax.Expressions;
 public sealed record InvokeExpression(LoxExpression Target, ReadOnlyCollection<LoxExpression> Parameters, Token Terminator) : LoxExpression
 {
     /// <inheritdoc />
-    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitInvokeExpression(this);
+    public override void Accept(IExpressionVisitor visitor) => visitor.VisitInvokeExpression(this);
 
     /// <inheritdoc />
-    public override string ToString() => $"{this.Target}({string.Join(", ", this.Parameters)})";
+    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitInvokeExpression(this);
 }

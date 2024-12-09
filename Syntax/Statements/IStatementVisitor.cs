@@ -5,6 +5,66 @@ namespace Lox.Syntax.Statements;
 /// <summary>
 /// Statement visitor interface
 /// </summary>
+public interface IStatementVisitor
+{
+    /// <summary>
+    /// Handles <see cref="ExpressionStatement"/> visits
+    /// </summary>
+    /// <param name="statement">Statement visited</param>
+    void VisitExpressionStatement(ExpressionStatement statement);
+
+    /// <summary>
+    /// Handles <see cref="PrintStatement"/> visits
+    /// </summary>
+    /// <param name="statement">Statement visited</param>
+    void VisitPrintStatement(PrintStatement statement);
+
+    /// <summary>
+    /// Handles <see cref="ReturnStatement"/> visits
+    /// </summary>
+    /// <param name="statement">Statement visited</param>
+    void VisitReturnStatement(ReturnStatement statement);
+
+    /// <summary>
+    /// Handles <see cref="IfStatement"/> visits
+    /// </summary>
+    /// <param name="statement">Statement visited</param>
+    void VisitIfStatement(IfStatement statement);
+
+    /// <summary>
+    /// Handles <see cref="WhileStatement"/> visits
+    /// </summary>
+    /// <param name="statement">Statement visited</param>
+    void VisitWhileStatement(WhileStatement statement);
+
+    /// <summary>
+    /// Handles <see cref="WhileStatement"/> visits
+    /// </summary>
+    /// <param name="statement">Statement visited</param>
+    void VisitForStatement(ForStatement statement);
+
+    /// <summary>
+    /// Handles <see cref="BlockStatement"/> visits
+    /// </summary>
+    /// <param name="block">Block visited</param>
+    void VisitBlockStatement(BlockStatement block);
+
+    /// <summary>
+    /// Handles <see cref="VariableDeclaration"/> visits
+    /// </summary>
+    /// <param name="declaration">Statement visited</param>
+    void VisitVariableDeclaration(VariableDeclaration declaration);
+
+    /// <summary>
+    /// Handles <see cref="FunctionDeclaration"/> visits
+    /// </summary>
+    /// <param name="declaration">Declaration visited</param>
+    void VisitFunctionDeclaration(FunctionDeclaration declaration);
+}
+
+/// <summary>
+/// Statement visitor interface
+/// </summary>
 /// <typeparam name="T">Visitor return type</typeparam>
 public interface IStatementVisitor<out T>
 {

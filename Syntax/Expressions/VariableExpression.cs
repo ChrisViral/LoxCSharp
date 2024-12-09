@@ -9,8 +9,8 @@ namespace Lox.Syntax.Expressions;
 public sealed record VariableExpression(Token Identifier) : LoxExpression
 {
     /// <inheritdoc />
-    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitVariableExpression(this);
+    public override void Accept(IExpressionVisitor visitor) => visitor.VisitVariableExpression(this);
 
     /// <inheritdoc />
-    public override string ToString() => this.Identifier.Lexeme;
+    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitVariableExpression(this);
 }

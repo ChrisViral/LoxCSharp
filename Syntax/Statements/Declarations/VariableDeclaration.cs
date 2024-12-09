@@ -11,11 +11,8 @@ namespace Lox.Syntax.Statements.Declarations;
 public sealed record VariableDeclaration(Token Identifier, LoxExpression? Initializer) : LoxStatement
 {
     /// <inheritdoc />
-    public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitVariableDeclaration(this);
+    public override void Accept(IStatementVisitor visitor) => visitor.VisitVariableDeclaration(this);
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return this.Initializer is not null ? $"var {this.Identifier.Lexeme} = {this.Initializer};" : $"var {this.Identifier.Lexeme};";
-    }
+    public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitVariableDeclaration(this);
 }

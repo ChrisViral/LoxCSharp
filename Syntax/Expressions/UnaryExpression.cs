@@ -10,8 +10,8 @@ namespace Lox.Syntax.Expressions;
 public sealed record UnaryExpression(Token Operator, LoxExpression InnerExpression) : LoxExpression
 {
     /// <inheritdoc />
-    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitUnaryExpression(this);
+    public override void Accept(IExpressionVisitor visitor) => visitor.VisitUnaryExpression(this);
 
     /// <inheritdoc />
-    public override string ToString() => this.Operator.Lexeme + this.InnerExpression;
+    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitUnaryExpression(this);
 }

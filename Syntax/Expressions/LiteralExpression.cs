@@ -9,13 +9,8 @@ namespace Lox.Syntax.Expressions;
 public sealed record LiteralExpression(LoxValue Value) : LoxExpression
 {
     /// <inheritdoc />
-    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitLiteralExpression(this);
+    public override void Accept(IExpressionVisitor visitor) => visitor.VisitLiteralExpression(this);
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return this.Value.Type is LoxValue.LiteralType.STRING
-               ? $"\"{this.Value.StringValue}\""
-               : this.Value.ToString();
-    }
+    public override T Accept<T>(IExpressionVisitor<T> visitor) => visitor.VisitLiteralExpression(this);
 }

@@ -11,17 +11,8 @@ namespace Lox.Syntax.Statements;
 public sealed record IfStatement(LoxExpression Condition, LoxStatement IfBranch, LoxStatement? ElseBranch) : LoxStatement
 {
     /// <inheritdoc />
-    public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitIfStatement(this);
+    public override void Accept(IStatementVisitor visitor) => visitor.VisitIfStatement(this);
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        string result = $"if ({this.Condition})\n    {this.IfBranch}";
-        if (this.ElseBranch is not null)
-        {
-            result += "\n    " + this.ElseBranch;
-        }
-
-        return result;
-    }
+    public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitIfStatement(this);
 }

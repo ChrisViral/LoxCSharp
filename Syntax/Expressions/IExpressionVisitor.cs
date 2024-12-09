@@ -3,6 +3,60 @@
 /// <summary>
 /// Expression visitor interface
 /// </summary>
+public interface IExpressionVisitor
+{
+    /// <summary>
+    /// Handles <see cref="LiteralExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitLiteralExpression(LiteralExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="VariableExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitVariableExpression(VariableExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="GroupingExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitGroupingExpression(GroupingExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="UnaryExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitUnaryExpression(UnaryExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="BinaryExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitBinaryExpression(BinaryExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="BinaryExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitLogicalExpression(LogicalExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="AssignmentExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitAssignmentExpression(AssignmentExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="InvokeExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitInvokeExpression(InvokeExpression expression);
+}
+
+/// <summary>
+/// Expression visitor interface
+/// </summary>
 /// <typeparam name="T">Visitor return type</typeparam>
 public interface IExpressionVisitor<out T>
 {

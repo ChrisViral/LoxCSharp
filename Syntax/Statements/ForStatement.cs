@@ -12,11 +12,8 @@ namespace Lox.Syntax.Statements;
 public sealed record ForStatement(LoxStatement? Initializer, LoxExpression? Condition, ExpressionStatement? Increment, LoxStatement BodyStatement) : LoxStatement
 {
     /// <inheritdoc />
-    public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitForStatement(this);
+    public override void Accept(IStatementVisitor visitor) => visitor.VisitForStatement(this);
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"for ({this.Initializer?.ToString() ?? ";"} {this.Condition?.ToString() ?? string.Empty}; {this.Increment?.Expression.ToString() ?? string.Empty})\n    {this.BodyStatement}";
-    }
+    public override T Accept<T>(IStatementVisitor<T> visitor) => visitor.VisitForStatement(this);
 }
