@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
-using CodeCrafters.Interpreter.Exceptions;
 using JetBrains.Annotations;
+using Lox.Exceptions;
 
-namespace CodeCrafters.Interpreter.Runtime;
+namespace Lox.Runtime;
 
 /// <summary>
 /// Literal value wrapper<br/>

@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-using CodeCrafters.Interpreter.Exceptions;
-using CodeCrafters.Interpreter.Scanning;
+using Lox.Exceptions;
+using Lox.Scanning;
 
-namespace CodeCrafters.Interpreter.Runtime.Functions.Native;
+namespace Lox.Runtime.Functions.Native;
 
 /// <summary>
 /// Native function base class

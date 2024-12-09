@@ -1,7 +1,7 @@
-﻿using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax.Expressions;
+﻿using Lox.Scanning;
+using Lox.Syntax.Expressions;
 
-namespace CodeCrafters.Interpreter.Syntax.Statements.Declarations;
+namespace Lox.Syntax.Statements.Declarations;
 
 /// <summary>
 /// Variable declaration statement

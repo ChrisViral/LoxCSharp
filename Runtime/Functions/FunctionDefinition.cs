@@ -1,8 +1,8 @@
-﻿using CodeCrafters.Interpreter.Interrupts;
-using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax.Statements.Declarations;
+﻿using Lox.Interrupts;
+using Lox.Scanning;
+using Lox.Syntax.Statements.Declarations;
 
-namespace CodeCrafters.Interpreter.Runtime.Functions;
+namespace Lox.Runtime.Functions;
 
 /// <summary>
 /// Runtime defined function object

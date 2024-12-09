@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text;
-using CodeCrafters.Interpreter.Scanning;
+using Lox.Scanning;
 
-namespace CodeCrafters.Interpreter.Syntax.Statements.Declarations;
+namespace Lox.Syntax.Statements.Declarations;
 
 /// <summary>
 /// Function declaration statement

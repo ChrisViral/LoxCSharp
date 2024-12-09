@@ -1,6 +1,6 @@
-﻿using CodeCrafters.Interpreter.Syntax.Statements.Declarations;
+﻿using Lox.Syntax.Statements.Declarations;
 
-namespace CodeCrafters.Interpreter.Syntax.Statements;
+namespace Lox.Syntax.Statements;
 
 /// <summary>
 /// Statement visitor interface

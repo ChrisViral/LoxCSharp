@@ -1,7 +1,6 @@
-﻿using CodeCrafters.Interpreter.Scanning;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
-namespace CodeCrafters.Interpreter.Exceptions;
+namespace Lox.Exceptions;
 
 /// <summary>
 /// Invalid literal type exception

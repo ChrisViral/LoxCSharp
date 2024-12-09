@@ -1,7 +1,7 @@
-﻿using CodeCrafters.Interpreter.Runtime;
-using CodeCrafters.Interpreter.Utils;
+﻿using Lox.Runtime;
+using Lox.Utils;
 
-namespace CodeCrafters.Interpreter.Scanning;
+namespace Lox.Scanning;
 
 /// <summary>
 /// Lox Token

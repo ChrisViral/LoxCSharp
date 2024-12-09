@@ -1,10 +1,10 @@
 ﻿using System.Collections.ObjectModel;
-using CodeCrafters.Interpreter.Exceptions;
-using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax.Expressions;
-using CodeCrafters.Interpreter.Utils;
+using Lox.Exceptions;
+using Lox.Scanning;
+using Lox.Syntax.Expressions;
+using Lox.Utils;
 
-namespace CodeCrafters.Interpreter.Parsing;
+namespace Lox.Parsing;
 
 public partial class LoxParser
 {

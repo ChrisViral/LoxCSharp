@@ -1,4 +1,4 @@
-﻿namespace CodeCrafters.Interpreter.Syntax.Expressions;
+﻿namespace Lox.Syntax.Expressions;
 
 /// <summary>
 /// Grouping expression

@@ -1,14 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
-using CodeCrafters.Interpreter.Parsing;
-using CodeCrafters.Interpreter.Runtime;
-using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax;
-using CodeCrafters.Interpreter.Syntax.Expressions;
-using CodeCrafters.Interpreter.Syntax.Statements;
+using Lox.Parsing;
+using Lox.Runtime;
+using Lox.Scanning;
+using Lox.Syntax;
+using Lox.Syntax.Expressions;
+using Lox.Syntax.Statements;
 
-namespace CodeCrafters.Interpreter.Utils;
+namespace Lox.Utils;
 
 /// <summary>
 /// Lox REPL helper

@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text;
 
-namespace CodeCrafters.Interpreter.Syntax.Statements;
+namespace Lox.Syntax.Statements;
 
 /// <summary>
 /// Block statement

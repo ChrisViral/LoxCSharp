@@ -1,4 +1,4 @@
-﻿namespace CodeCrafters.Interpreter.Runtime;
+﻿namespace Lox.Runtime;
 
 /// <summary>
 /// Lox custom class object

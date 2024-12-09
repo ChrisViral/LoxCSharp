@@ -1,9 +1,8 @@
-﻿using CodeCrafters.Interpreter.Exceptions;
-using CodeCrafters.Interpreter.Exceptions.Runtime;
-using CodeCrafters.Interpreter.Scanning;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Lox.Exceptions.Runtime;
+using Lox.Scanning;
 
-namespace CodeCrafters.Interpreter.Utils;
+namespace Lox.Utils;
 
 [PublicAPI]
 public static class LoxErrorUtils

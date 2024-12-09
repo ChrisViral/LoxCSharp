@@ -1,7 +1,6 @@
-﻿using CodeCrafters.Interpreter.Runtime;
-using CodeCrafters.Interpreter.Scanning;
+﻿using Lox.Runtime;
 
-namespace CodeCrafters.Interpreter.Syntax.Expressions;
+namespace Lox.Syntax.Expressions;
 
 /// <summary>
 /// Literal expression

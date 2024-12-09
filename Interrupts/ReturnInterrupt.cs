@@ -1,6 +1,6 @@
-﻿using CodeCrafters.Interpreter.Runtime;
+﻿using Lox.Runtime;
 
-namespace CodeCrafters.Interpreter.Interrupts;
+namespace Lox.Interrupts;
 
 /// <summary>
 /// Lox return interrupt

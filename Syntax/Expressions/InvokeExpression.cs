@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using CodeCrafters.Interpreter.Scanning;
+using Lox.Scanning;
 
-namespace CodeCrafters.Interpreter.Syntax.Expressions;
+namespace Lox.Syntax.Expressions;
 
 /// <summary>
 /// Invoke expression

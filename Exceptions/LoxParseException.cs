@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace CodeCrafters.Interpreter.Exceptions;
+namespace Lox.Exceptions;
 
 /// <summary>
 /// Lox parser exception

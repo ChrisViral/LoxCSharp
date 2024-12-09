@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
-using CodeCrafters.Interpreter.Runtime;
 using JetBrains.Annotations;
+using Lox.Runtime;
 
-namespace CodeCrafters.Interpreter.Scanning;
+namespace Lox.Scanning;
 
 /// <summary>
 /// Lox tokens

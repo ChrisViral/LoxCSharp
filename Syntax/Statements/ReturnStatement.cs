@@ -1,7 +1,7 @@
-﻿using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax.Expressions;
+﻿using Lox.Scanning;
+using Lox.Syntax.Expressions;
 
-namespace CodeCrafters.Interpreter.Syntax.Statements;
+namespace Lox.Syntax.Statements;
 
 /// <summary>
 /// Return statement

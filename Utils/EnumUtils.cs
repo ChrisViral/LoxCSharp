@@ -5,7 +5,7 @@ using JetBrains.Annotations;
  * You are free to redistribute, share, adapt, etc. as long as the original author (stupid_chris/Christophe Savard) is properly, clearly, *
 \* and explicitly credited, that you do not use this material to a commercial use, and that you distribute it under the same license.     */
 
-namespace CodeCrafters.Interpreter.Utils;
+namespace Lox.Utils;
 
 /// <summary>
 /// Fast <see cref="Enum"/> parsing and writing utility class

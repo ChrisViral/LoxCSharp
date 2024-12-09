@@ -1,12 +1,12 @@
-﻿using CodeCrafters.Interpreter.Exceptions;
-using CodeCrafters.Interpreter.Runtime.Functions;
-using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax.Expressions;
-using CodeCrafters.Interpreter.Syntax.Statements;
-using CodeCrafters.Interpreter.Syntax.Statements.Declarations;
-using CodeCrafters.Interpreter.Utils;
+﻿using Lox.Exceptions;
+using Lox.Runtime.Functions;
+using Lox.Scanning;
+using Lox.Syntax.Expressions;
+using Lox.Syntax.Statements;
+using Lox.Syntax.Statements.Declarations;
+using Lox.Utils;
 
-namespace CodeCrafters.Interpreter.Parsing;
+namespace Lox.Parsing;
 
 public partial class LoxParser
 {

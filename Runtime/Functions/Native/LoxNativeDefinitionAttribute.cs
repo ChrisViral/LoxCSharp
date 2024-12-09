@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace CodeCrafters.Interpreter.Runtime.Functions.Native;
+namespace Lox.Runtime.Functions.Native;
 
 /// <summary>
 /// Lox native definition

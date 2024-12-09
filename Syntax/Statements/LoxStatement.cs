@@ -1,4 +1,4 @@
-﻿namespace CodeCrafters.Interpreter.Syntax.Statements;
+﻿namespace Lox.Syntax.Statements;
 
 /// <summary>
 /// Expression base class

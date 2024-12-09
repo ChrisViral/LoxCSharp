@@ -1,7 +1,7 @@
-﻿using CodeCrafters.Interpreter.Scanning;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Lox.Scanning;
 
-namespace CodeCrafters.Interpreter.Exceptions.Runtime;
+namespace Lox.Exceptions.Runtime;
 
 /// <summary>
 /// Generalized Lox runtime exception

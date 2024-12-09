@@ -1,6 +1,7 @@
-﻿using CodeCrafters.Interpreter.Exceptions.Runtime;
-using CodeCrafters.Interpreter.Scanning;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using Lox.Scanning;
+
+namespace Lox.Exceptions.Runtime;
 
 /// <summary>
 /// Lox invalid operation exception

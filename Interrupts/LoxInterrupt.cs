@@ -1,4 +1,4 @@
-﻿namespace CodeCrafters.Interpreter.Interrupts;
+﻿namespace Lox.Interrupts;
 
 /// <summary>
 /// Lox interrupt base class

@@ -1,12 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using CodeCrafters.Interpreter.Exceptions;
-using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax.Statements;
-using CodeCrafters.Interpreter.Utils;
+using Lox.Exceptions;
+using Lox.Scanning;
+using Lox.Syntax.Statements;
+using Lox.Utils;
 
-namespace CodeCrafters.Interpreter.Parsing;
+namespace Lox.Parsing;
 
 /// <summary>
 /// Lox source file parser

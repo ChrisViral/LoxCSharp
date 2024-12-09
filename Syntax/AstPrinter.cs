@@ -1,8 +1,8 @@
-﻿using CodeCrafters.Interpreter.Syntax.Expressions;
-using CodeCrafters.Interpreter.Syntax.Statements;
-using CodeCrafters.Interpreter.Syntax.Statements.Declarations;
+﻿using Lox.Syntax.Expressions;
+using Lox.Syntax.Statements;
+using Lox.Syntax.Statements.Declarations;
 
-namespace CodeCrafters.Interpreter.Syntax;
+namespace Lox.Syntax;
 
 /// <summary>
 /// Abstract Syntax Tree printer

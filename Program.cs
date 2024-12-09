@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
-using CodeCrafters.Interpreter.Parsing;
-using CodeCrafters.Interpreter.Runtime;
-using CodeCrafters.Interpreter.Scanning;
-using CodeCrafters.Interpreter.Syntax.Statements;
-using CodeCrafters.Interpreter.Utils;
+using Lox.Parsing;
+using Lox.Runtime;
+using Lox.Scanning;
+using Lox.Syntax.Statements;
+using Lox.Utils;
 
 if (args is [] or ["-r", not null])
 {

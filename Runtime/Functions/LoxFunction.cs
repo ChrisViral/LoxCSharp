@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
-using CodeCrafters.Interpreter.Scanning;
+using Lox.Scanning;
 
-namespace CodeCrafters.Interpreter.Runtime.Functions;
+namespace Lox.Runtime.Functions;
 
 /// <summary>
 /// Lox function type

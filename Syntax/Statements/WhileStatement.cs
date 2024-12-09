@@ -1,6 +1,6 @@
-﻿using CodeCrafters.Interpreter.Syntax.Expressions;
+﻿using Lox.Syntax.Expressions;
 
-namespace CodeCrafters.Interpreter.Syntax.Statements;
+namespace Lox.Syntax.Statements;
 
 /// <summary>
 /// While statement
