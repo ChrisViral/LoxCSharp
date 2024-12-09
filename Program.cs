@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Lox.Parsing;
+using Lox.Resolving;
 using Lox.Runtime;
 using Lox.Scanning;
 using Lox.Syntax.Statements;
@@ -54,15 +55,17 @@ ReadOnlyCollection<Token> tokens = await scanner.TokenizeAsync();
 
 LoxParser parser = new(tokens);
 ReadOnlyCollection<LoxStatement> program = await parser.ParseAsync();
-
-LoxInterpreter interpreter = new();
-await interpreter.InterpretAsync(program);
-
 if (LoxErrorUtils.HadParsingError)
 {
     Environment.Exit(65);   // Data error
 }
-else if (LoxErrorUtils.HadRuntimeError)
+
+LoxInterpreter interpreter = new();
+LoxResolver resolver = new(interpreter);
+await resolver.ResolveAsync(program);
+await interpreter.InterpretAsync(program);
+
+if (LoxErrorUtils.HadRuntimeError)
 {
     Environment.Exit(70);   // Software error
 }

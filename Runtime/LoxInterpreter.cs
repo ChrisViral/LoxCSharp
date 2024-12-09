@@ -17,6 +17,13 @@ namespace Lox.Runtime;
 /// </summary>
 public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVisitor
 {
+    #region Fields
+    /// <summary>
+    /// Locals resolve dictionary
+    /// </summary>
+    private readonly Dictionary<LoxExpression, Index> locals = new(ExpressionReferenceComparer.Comparer);
+    #endregion
+
     #region Properties
     /// <summary>
     /// Runtime environment
@@ -44,7 +51,6 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
         }
     }
     #endregion
-
 
     #region Interpreter
     /// <summary>
@@ -130,6 +136,23 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     /// <param name="loxExpression">Expression to evaluate</param>
     /// <returns>The result of the expression</returns>
     public LoxValue Evaluate(LoxExpression loxExpression) => loxExpression.Accept(this);
+
+    /// <summary>
+    /// Sets the resolve depth for a given expression
+    /// </summary>
+    /// <param name="expression">Expression to save the resolve depth for</param>
+    /// <param name="depth">Resolve depth</param>
+    public void SetResolveDepth(LoxExpression expression, Index depth) => this.locals[expression] = depth;
+
+    /// <summary>
+    /// Resolves a variables value
+    /// </summary>
+    /// <param name="identifier">Variable identifier</param>
+    /// <param name="expression">Variable expression</param>
+    /// <returns>The resolved variable's value</returns>
+    private LoxValue ResolveVariable(in Token identifier, LoxExpression expression) => this.locals.TryGetValue(expression, out Index depth)
+                                                                                           ? this.CurrentEnvironment.GetVariableAt(identifier, depth)
+                                                                                           : this.CurrentEnvironment.GetGlobalVariable(identifier);
     #endregion
 
     #region Statement visitor
@@ -280,7 +303,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     /// <inheritdoc />
     public void VisitFunctionDeclaration(FunctionDeclaration declaration)
     {
-        FunctionDefinition function = new(declaration, this.CurrentEnvironment.MakeClosure());
+        FunctionDefinition function = new(declaration, this.CurrentEnvironment.Capture());
         this.CurrentEnvironment.DefineVariable(declaration.Identifier, function);
     }
     #endregion
@@ -290,7 +313,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     public LoxValue VisitLiteralExpression(LiteralExpression expression) => expression.Value;
 
     /// <inheritdoc />
-    public LoxValue VisitVariableExpression(VariableExpression expression) => this.CurrentEnvironment.GetVariable(expression.Identifier);
+    public LoxValue VisitVariableExpression(VariableExpression expression) => ResolveVariable(expression.Identifier, expression);
 
     /// <inheritdoc />
     public LoxValue VisitGroupingExpression(GroupingExpression expression) => Evaluate(expression.InnerExpression);
@@ -426,7 +449,14 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     public LoxValue VisitAssignmentExpression(AssignmentExpression expression)
     {
         LoxValue value = Evaluate(expression.Value);
-        this.CurrentEnvironment.SetVariable(expression.Identifier, value);
+        if (this.locals.TryGetValue(expression, out Index depth))
+        {
+            this.CurrentEnvironment.SetVariableAt(expression.Identifier, value, depth);
+        }
+        else
+        {
+            this.CurrentEnvironment.SetGlobalVariable(expression.Identifier, value);
+        }
         return value;
     }
 
@@ -440,19 +470,19 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
 
         // Check that the arity matches
         LoxObject target = value.ObjectValue;
-        if (target.Arity != expression.Parameters.Count) throw new LoxInvalidOperationException($"Expected {target.Arity} arguments but got {expression.Parameters.Count}.");
+        if (target.Arity != expression.Arguments.Count) throw new LoxInvalidOperationException($"Expected {target.Arity} arguments but got {expression.Arguments.Count}.");
 
         LoxValue[] parameters;
-        if (expression.Parameters.Count is 0)
+        if (expression.Arguments.Count is 0)
         {
             parameters = [];
         }
         else
         {
-            parameters = new LoxValue[expression.Parameters.Count];
+            parameters = new LoxValue[expression.Arguments.Count];
             for (int i = 0; i < parameters.Length; i++)
             {
-                parameters[i] = Evaluate(expression.Parameters[i]);
+                parameters[i] = Evaluate(expression.Arguments[i]);
             }
         }
 

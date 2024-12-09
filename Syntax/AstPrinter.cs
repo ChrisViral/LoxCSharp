@@ -128,8 +128,8 @@ public class AstPrinter : IExpressionVisitor<string>, IStatementVisitor<string>
     /// <inheritdoc />
     public string VisitInvokeExpression(InvokeExpression expression)
     {
-        return expression.Parameters.Count > 0
-                   ? $"(invoke {expression.Target.Accept(this)} {string.Join(' ', expression.Parameters.Select(a => a.Accept(this)))})"
+        return expression.Arguments.Count > 0
+                   ? $"(invoke {expression.Target.Accept(this)} {string.Join(' ', expression.Arguments.Select(a => a.Accept(this)))})"
                    : $"(invoke {expression.Target.Accept(this)})";
     }
     #endregion

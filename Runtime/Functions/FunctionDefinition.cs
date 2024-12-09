@@ -12,7 +12,7 @@ public sealed class FunctionDefinition : LoxFunction
     /// <summary>
     /// Function closure
     /// </summary>
-    private readonly LoxEnvironment.Scope closure;
+    private readonly LoxEnvironment closure;
     /// <summary>
     /// Associated function declaration
     /// </summary>
@@ -23,7 +23,7 @@ public sealed class FunctionDefinition : LoxFunction
     /// </summary>
     /// <param name="declaration">Function declaration to define</param>
     /// <param name="closure">Function closure</param>
-    public FunctionDefinition(FunctionDeclaration declaration, LoxEnvironment.Scope closure) : base(declaration.Identifier, FunctionKind.FUNCTION)
+    public FunctionDefinition(FunctionDeclaration declaration, LoxEnvironment closure) : base(declaration.Identifier, FunctionKind.FUNCTION)
     {
         this.closure     = closure;
         this.declaration = declaration;
@@ -33,18 +33,18 @@ public sealed class FunctionDefinition : LoxFunction
     /// <inheritdoc />
     public override LoxValue Invoke(LoxInterpreter interpreter, in ReadOnlySpan<LoxValue> arguments)
     {
-        LoxEnvironment functionEnvironment = new(interpreter.CurrentEnvironment, this.closure);
-        functionEnvironment.PushScope();
+        LoxEnvironment environment = this.closure.Capture();
+        environment.PushScope();
         for (int i = 0; i < this.Arity; i++)
         {
             Token parameter = this.declaration.Parameters[i];
             LoxValue argument = arguments[i];
-            functionEnvironment.DefineVariable(parameter, argument);
+            environment.DefineVariable(parameter, argument);
         }
 
         try
         {
-            interpreter.ExecuteWithEnv(this.declaration.Body.Statements, functionEnvironment);
+            interpreter.ExecuteWithEnv(this.declaration.Body.Statements, environment);
         }
         catch (ReturnInterrupt returnValue)
         {
@@ -52,7 +52,7 @@ public sealed class FunctionDefinition : LoxFunction
         }
         finally
         {
-            functionEnvironment.PopScope();
+            environment.PopScope();
         }
 
         return LoxValue.Nil;

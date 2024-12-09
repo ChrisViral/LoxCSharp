@@ -7,9 +7,9 @@ namespace Lox.Syntax.Expressions;
 /// Invoke expression
 /// </summary>
 /// <param name="Target">Invocation target</param>
-/// <param name="Parameters">Invocation parameters</param>
+/// <param name="Arguments">Invocation parameters</param>
 /// <param name="Terminator">Invocation terminating token</param>
-public sealed record InvokeExpression(LoxExpression Target, ReadOnlyCollection<LoxExpression> Parameters, Token Terminator) : LoxExpression
+public sealed record InvokeExpression(LoxExpression Target, ReadOnlyCollection<LoxExpression> Arguments, Token Terminator) : LoxExpression
 {
     /// <inheritdoc />
     public override void Accept(IExpressionVisitor visitor) => visitor.VisitInvokeExpression(this);
