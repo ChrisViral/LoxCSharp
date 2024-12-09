@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Lox.Runtime;
+using Lox.Runtime.Functions;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
@@ -24,9 +25,17 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     }
 
     /// <summary>
+    /// Variable data
+    /// </summary>
+    /// <param name="State">Variable initialization state</param>
+    /// <param name="Usages">Variable usages</param>
+    /// <param name="Identifier">Variable identifier</param>
+    private readonly record struct VariableData(State State, int Usages, Token Identifier);
+
+    /// <summary>
     /// Resolver scope
     /// </summary>
-    private sealed class Scope() : Dictionary<string, State>(DEFAULT_CAPACITY, StringComparer.Ordinal);
+    private sealed class Scope() : Dictionary<string, VariableData>(DEFAULT_CAPACITY, StringComparer.Ordinal);
 
     #region Constants
     /// <summary>
@@ -44,6 +53,10 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// Variable definition stack
     /// </summary>
     private readonly Stack<Scope> scopes = new(DEFAULT_CAPACITY);
+    /// <summary>
+    /// Current resolver function kind
+    /// </summary>
+    private FunctionKind currentFunctionKind;
     #endregion
 
     #region Resolver
@@ -85,17 +98,28 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <summary>
     /// Closes an opened scope
     /// </summary>
-    private void CloseScope() => this.scopes.Pop();
+    private void CloseScope()
+    {
+        Scope popped = this.scopes.Pop();
+        foreach ((_, int usages, Token identifier) in popped.Values)
+        {
+            if (usages is 0)
+            {
+                LoxErrorUtils.ReportParseWarning(identifier, $"Unused variable '{identifier.Lexeme}'.");
+            }
+        }
+    }
 
     /// <summary>
     /// Declares a variable in the current scope
     /// </summary>
     /// <param name="identifier">Variable identifier</param>
-    private void DeclareVariable(in Token identifier)
+    /// <param name="state">Variable initial state, defaults to <see cref="State.UNDEFINED"/></param>
+    private void DeclareVariable(in Token identifier, in State state = State.UNDEFINED)
     {
-        if (this.scopes.TryPeek(out Scope? scope))
+        if (this.scopes.TryPeek(out Scope? scope) && !scope.TryAdd(identifier.Lexeme, new VariableData(state, 0, identifier)))
         {
-            scope[identifier.Lexeme] = State.UNDEFINED;
+            LoxErrorUtils.ReportParseError(identifier, "Already a variable with this name in this scope.");
         }
     }
 
@@ -107,7 +131,7 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     {
         if (this.scopes.TryPeek(out Scope? scope))
         {
-            scope[identifier.Lexeme] = State.DEFINED;
+            scope[identifier.Lexeme] = new VariableData(State.DEFINED, 0, identifier);
         }
     }
 
@@ -121,9 +145,10 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
         int depth = 1;
         foreach (Scope scope in this.scopes)
         {
-            if (scope.ContainsKey(identifier.Lexeme))
+            if (scope.TryGetValue(identifier.Lexeme, out VariableData data))
             {
                 this.interpreter.SetResolveDepth(expression, ^depth);
+                scope[identifier.Lexeme] = data with { Usages = data.Usages + 1 };
                 return;
             }
             depth++;
@@ -133,16 +158,20 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <summary>
     /// Resolves a function
     /// </summary>
-    /// <param name="function">Funciton declaration</param>
-    private void ResolveFunction(FunctionDeclaration function)
+    /// <param name="function">Function declaration</param>
+    /// <param name="kind">Entered function kind</param>
+    private void ResolveFunction(FunctionDeclaration function, FunctionKind kind)
     {
+        FunctionKind enclosingKind = this.currentFunctionKind;
+        this.currentFunctionKind = kind;
         OpenScope();
         foreach (Token parameter in function.Parameters)
         {
-            DefineVariable(parameter);
+            DeclareVariable(parameter, State.DEFINED);
         }
         Resolve(function.Body.Statements);
         CloseScope();
+        this.currentFunctionKind = enclosingKind;
     }
     #endregion
 
@@ -156,6 +185,11 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <inheritdoc />
     public void VisitReturnStatement(ReturnStatement statement)
     {
+        if (this.currentFunctionKind is FunctionKind.NONE)
+        {
+            LoxErrorUtils.ReportParseError(statement.Keyword, "Can't return from top-level code.");
+        }
+
         if (statement.Value is not null)
         {
             Resolve(statement.Value);
@@ -234,8 +268,8 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <inheritdoc />
     public void VisitFunctionDeclaration(FunctionDeclaration declaration)
     {
-        DefineVariable(declaration.Identifier);
-        ResolveFunction(declaration);
+        DeclareVariable(declaration.Identifier, State.DEFINED);
+        ResolveFunction(declaration, FunctionKind.FUNCTION);
     }
     #endregion
 
@@ -247,8 +281,8 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     public void VisitVariableExpression(VariableExpression expression)
     {
         if (this.scopes.TryPeek(out Scope? scope)
-         && scope.TryGetValue(expression.Identifier.Lexeme, out State state)
-         && state is State.UNDEFINED)
+         && scope.TryGetValue(expression.Identifier.Lexeme, out VariableData data)
+         && data.State is State.UNDEFINED)
         {
             LoxErrorUtils.ReportParseError(expression.Identifier, "Can't read local variable in its own initializer.");
         }

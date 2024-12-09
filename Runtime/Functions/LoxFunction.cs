@@ -8,6 +8,7 @@ namespace Lox.Runtime.Functions;
 /// </summary>
 public enum FunctionKind
 {
+    NONE,
     FUNCTION,
     METHOD,
     NATIVE

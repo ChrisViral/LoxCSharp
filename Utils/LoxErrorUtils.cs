@@ -91,12 +91,35 @@ public static class LoxErrorUtils
     public static void ReportParseError(in Token token, string message) => ReportError(token.Line, token.IsEOF ? "at end" : $"at '{token.Lexeme}'", message);
 
     /// <summary>
+    /// Reports a warning at the specified token
+    /// </summary>
+    /// <param name="token">Error token</param>
+    /// <param name="message">Error message</param>
+    public static void ReportParseWarning(in Token token, string message) => ReportWarningInternal($"[line {token.Line}] Warning {(token.IsEOF ? "at end" : $"at '{token.Lexeme}'")}: {message}");
+
+    /// <summary>
     /// Prints out an error message and sets the error flag
     /// </summary>
     /// <param name="message">Error message</param>
     private static void ReportErrorInternal(string message)
     {
         HadParsingError = true;
+        if (BufferErrors)
+        {
+            ErrorBuffer.Enqueue(message);
+        }
+        else
+        {
+            Console.Error.WriteLine(message);
+        }
+    }
+
+    /// <summary>
+    /// Prints out an warning message
+    /// </summary>
+    /// <param name="message">Warning message</param>
+    private static void ReportWarningInternal(string message)
+    {
         if (BufferErrors)
         {
             ErrorBuffer.Enqueue(message);

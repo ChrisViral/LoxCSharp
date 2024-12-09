@@ -62,6 +62,11 @@ if (LoxErrorUtils.HadParsingError)
 LoxInterpreter interpreter = new();
 LoxResolver resolver = new(interpreter);
 await resolver.ResolveAsync(program);
+if (LoxErrorUtils.HadParsingError)
+{
+    Environment.Exit(65);   // Data error
+}
+
 await interpreter.InterpretAsync(program);
 
 if (LoxErrorUtils.HadRuntimeError)
