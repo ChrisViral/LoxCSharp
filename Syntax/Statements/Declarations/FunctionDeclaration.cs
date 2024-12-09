@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Text;
 using Lox.Scanning;
 
 namespace Lox.Syntax.Statements.Declarations;

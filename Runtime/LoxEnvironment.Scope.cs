@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using JetBrains.Annotations;
 using Lox.Exceptions.Runtime;
 using Lox.Scanning;
 
@@ -10,22 +9,24 @@ public partial class LoxEnvironment
     /// <summary>
     /// Scope data table
     /// </summary>
-    /// <param name="identifierComparer">Key comparer</param>
-    [PublicAPI]
-    public sealed class Scope(IEqualityComparer<string> identifierComparer) : IDictionary<string, LoxValue>
+    private sealed class Scope : IDictionary<string, LoxValue>
     {
         #region Constants
         /// <summary>
         /// Default scope capacity
         /// </summary>
-        private const int DEFAULT_SCOPE_CAPACITY = 10;
+        private const int DEFAULT_SCOPE_CAPACITY = 4;
         #endregion
 
         #region Fields
         /// <summary>
         /// Environment backing dictionary
         /// </summary>
-        private readonly Dictionary<string, LoxValue> values = new(DEFAULT_SCOPE_CAPACITY, identifierComparer);
+        private readonly Dictionary<string, LoxValue> values = new(DEFAULT_SCOPE_CAPACITY, StringComparer.Ordinal);
+        /// <summary>
+        /// Native variable identifier set
+        /// </summary>
+        private readonly HashSet<string> natives = new(StringComparer.Ordinal);
         #endregion
 
         #region Properties
@@ -44,9 +45,13 @@ public partial class LoxEnvironment
             get => this.values.TryGetValue(identifier.Lexeme, out LoxValue value)
                        ? value
                        : throw new LoxRuntimeException($"Undefined variable'{identifier.Lexeme}'.", identifier);
-            set => this.values[identifier.Lexeme] = this.values.ContainsKey(identifier.Lexeme)
-                                                        ? value
-                                                        : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
+            set
+            {
+                if (this.natives.Contains(identifier.Lexeme)) throw new LoxRuntimeException($"Trying to redefine Lox native '{identifier.Lexeme}'.", identifier);
+                this.values[identifier.Lexeme] = this.values.ContainsKey(identifier.Lexeme)
+                                                     ? value
+                                                     : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
+            }
         }
 
         /// <summary>
@@ -66,16 +71,32 @@ public partial class LoxEnvironment
         /// </summary>
         /// <param name="identifier">Variable identifier token</param>
         /// <param name="value">Variable value</param>
-        public void DefineVariable(in Token identifier, in LoxValue value) => this.values[identifier.Lexeme] = value;
+        public void DefineVariable(in Token identifier, in LoxValue value)
+        {
+            if (this.natives.Contains(identifier.Lexeme)) throw new LoxRuntimeException($"Trying to redefine Lox native '{identifier.Lexeme}'.", identifier);
+            this.values[identifier.Lexeme] = value;
+        }
 
         /// <summary>
-        /// Tries ans set the variable for the given identifier
+        /// Creates a new variable for the given identifier with the specified value
+        /// </summary>
+        /// <param name="identifier">Variable identifier token</param>
+        /// <param name="value">Variable value</param>
+        public void DefineNative(in Token identifier, in LoxValue value)
+        {
+            if (!this.natives.Add(identifier.Lexeme)) throw new LoxRuntimeException($"Already defined native '{identifier.Lexeme}'.", identifier);
+            this.values[identifier.Lexeme] = value;
+        }
+
+        /// <summary>
+        /// Tries and set the variable for the given identifier
         /// </summary>
         /// <param name="identifier">Variable identifier token</param>
         /// <param name="value">Variable value</param>
         /// <returns><see langword="true"/> if the variable was found and set, otherwise <see langword="false"/></returns>
         public bool TrySetVariable(in Token identifier, in LoxValue value)
         {
+            if (this.natives.Contains(identifier.Lexeme)) throw new LoxRuntimeException($"Trying to set Lox native '{identifier.Lexeme}'.", identifier);
             if (!this.values.ContainsKey(identifier.Lexeme)) return false;
 
             this.values[identifier.Lexeme] = value;
@@ -103,23 +124,19 @@ public partial class LoxEnvironment
         /// </summary>
         /// <param name="identifier">Variable identifier token</param>
         /// <returns><see langword="true"/> if the variable was successfully removed, otherwise <see langword="false"/></returns>
-        public bool DeleteVariable(in Token identifier) => this.values.Remove(identifier.Lexeme);
+        public bool DeleteVariable(in Token identifier)
+        {
+            if (this.natives.Contains(identifier.Lexeme)) throw new LoxRuntimeException($"Trying to delete Lox native '{identifier.Lexeme}'.", identifier);
+            return this.values.Remove(identifier.Lexeme);
+        }
 
         /// <summary>
         /// Clears all the variables held in the environment
         /// </summary>
-        public void Clear() => this.values.Clear();
-
-        /// <summary>
-        /// Copies the variables from this scope to the other, without overriding variables in the other scope
-        /// </summary>
-        /// <param name="other">Scope to copy variables into</param>
-        public void CopyVariables(Scope other)
+        public void Clear()
         {
-            foreach ((string identifier, LoxValue value) in this.values)
-            {
-                other.values.TryAdd(identifier, value);
-            }
+            if (this == GlobalScope) throw new LoxRuntimeException("Cannot clear global scope.");
+            this.values.Clear();
         }
 
         /// <inheritdoc cref="IDictionary{TKey,TValue}.GetEnumerator" />

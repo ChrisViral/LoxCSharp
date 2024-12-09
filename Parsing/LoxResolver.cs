@@ -6,7 +6,7 @@ using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 using Lox.Utils;
 
-namespace Lox.Resolving;
+namespace Lox.Parsing;
 
 /// <summary>
 /// Lox resolver
@@ -26,14 +26,24 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <summary>
     /// Resolver scope
     /// </summary>
-    private sealed class Scope() : Dictionary<string, State>(StringComparer.Ordinal);
+    private sealed class Scope() : Dictionary<string, State>(DEFAULT_CAPACITY, StringComparer.Ordinal);
+
+    #region Constants
+    /// <summary>
+    /// Default collection capacity
+    /// </summary>
+    private const int DEFAULT_CAPACITY = 4;
+    #endregion
 
     #region Fields
     /// <summary>
     /// Interpreter instance
     /// </summary>
     private readonly LoxInterpreter interpreter = interpreter;
-    private readonly Stack<Scope> scopes = [];
+    /// <summary>
+    /// Variable definition stack
+    /// </summary>
+    private readonly Stack<Scope> scopes = new(DEFAULT_CAPACITY);
     #endregion
 
     #region Resolver

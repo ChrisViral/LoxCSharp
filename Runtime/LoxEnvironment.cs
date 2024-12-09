@@ -1,5 +1,8 @@
-﻿using JetBrains.Annotations;
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using Lox.Exceptions.Runtime;
+using Lox.Runtime.Functions.Native;
 using Lox.Scanning;
 
 namespace Lox.Runtime;
@@ -7,6 +10,7 @@ namespace Lox.Runtime;
 /// <summary>
 /// Lox runtime environment
 /// </summary>
+[PublicAPI]
 public sealed partial class LoxEnvironment
 {
     #region Constants
@@ -18,43 +22,49 @@ public sealed partial class LoxEnvironment
     /// Stack depth limit
     /// </summary>
     private const int STACK_LIMIT = byte.MaxValue;
+
+    /// <summary>
+    /// Global environment scope
+    /// </summary>
+    private static readonly Scope GlobalScope = new();
     #endregion
 
     #region Fields
-    private readonly Scope globalScope;
+    /// <summary>
+    /// Execution stack
+    /// </summary>
     private readonly List<Scope> stack;
-    private readonly IEqualityComparer<string> identifierComparer;
     #endregion
 
     #region Constructors
     /// <summary>
     /// Creates a new Lox environment
     /// </summary>
-    public LoxEnvironment() : this(DEFAULT_CAPACITY, StringComparer.Ordinal) { }
-
-    /// <summary>
-    /// Creates a new Lox environment
-    /// </summary>
-    /// <param name="stackCapacity">Stack depth initial capacity</param>
-    /// <param name="identifierComparer">Variable name comparer</param>
-    public LoxEnvironment(int stackCapacity, IEqualityComparer<string> identifierComparer)
-    {
-        this.identifierComparer = identifierComparer;
-        this.stack              = new List<Scope>(stackCapacity);
-        this.globalScope        = new Scope(identifierComparer);
-        this.stack.Add(this.globalScope);
-    }
+    public LoxEnvironment() => this.stack = new List<Scope>(DEFAULT_CAPACITY) { GlobalScope };
 
     /// <summary>
     /// Lox environment clone constructor
     /// </summary>
     /// <param name="other">Other environment to clone</param>
-    private LoxEnvironment(LoxEnvironment other)
+    private LoxEnvironment(LoxEnvironment other) => this.stack = [..other.stack];
+
+    /// <summary>
+    /// LoxEnvironment static constructor
+    /// </summary>
+    static LoxEnvironment()
     {
-        this.identifierComparer = other.identifierComparer;
-        this.stack              = new List<Scope>(other.stack.Capacity);
-        this.stack.AddRange(other.stack);
-        this.globalScope = other.globalScope;
+        // Load all native functions
+        Type nativeType = typeof(LoxNativeFunction);
+        foreach (Type type in Assembly.GetExecutingAssembly()
+                                      .DefinedTypes
+                                      .Where(ti => ti is { IsAbstract: false, IsClass: true, IsGenericType: false }
+                                                && ti.IsSubclassOf(nativeType))
+                                      .Select(ti => ti.AsType()))
+        {
+            // Instantiate function instances and define global
+            LoxNativeFunction nativeFunction = (LoxNativeFunction)Activator.CreateInstance(type)!;
+            DefineNativeVariable(nativeFunction.Identifier, nativeFunction);
+        }
     }
     #endregion
 
@@ -66,10 +76,10 @@ public sealed partial class LoxEnvironment
     public void PushScope()
     {
         // Stack overflow
-        if (this.stack.Count == STACK_LIMIT) throw new StackOverflowException("Lox stack limit reached");
+        if (this.stack.Count is STACK_LIMIT) throw new StackOverflowException("Lox stack limit reached");
 
         // Push onto stack
-        this.stack.Add(new Scope(this.identifierComparer));
+        this.stack.Add(new Scope());
     }
 
     /// <summary>
@@ -108,7 +118,7 @@ public sealed partial class LoxEnvironment
     /// Defines a nil set global variable
     /// </summary>
     /// <param name="identifier">Variable identifier token</param>
-    public void DefineGlobalVariable(in Token identifier) => this.globalScope.DefineVariable(identifier, LoxValue.Nil);
+    public static void DefineGlobalVariable(in Token identifier) => GlobalScope.DefineVariable(identifier, LoxValue.Nil);
 
     /// <summary>
     /// Defines a variable with the specified value at the top of the stack
@@ -130,7 +140,14 @@ public sealed partial class LoxEnvironment
     /// </summary>
     /// <param name="identifier">Variable identifier token</param>
     /// <param name="value">Variable value</param>
-    public void DefineGlobalVariable(in Token identifier, in LoxValue value) => this.globalScope.DefineVariable(identifier, value);
+    public static void DefineGlobalVariable(in Token identifier, in LoxValue value) => GlobalScope.DefineVariable(identifier, value);
+
+    /// <summary>
+    /// Defines a global variable with the specified value
+    /// </summary>
+    /// <param name="identifier">Variable identifier token</param>
+    /// <param name="value">Variable value</param>
+    private static void DefineNativeVariable(in Token identifier, in LoxValue value) => GlobalScope.DefineNative(identifier, value);
 
     /// <summary>
     /// Sets the value of the topmost specified variable of the given name
@@ -158,13 +175,7 @@ public sealed partial class LoxEnvironment
     /// <param name="value">Variable value</param>
     /// <param name="index">Index to set the variable at</param>
     /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
-    public void SetVariableAt(in Token identifier, in LoxValue value, in Index index)
-    {
-        if (!this.stack[index].TrySetVariable(identifier, value))
-        {
-            throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.");
-        }
-    }
+    public void SetVariableAt(in Token identifier, in LoxValue value, in Index index) => this.stack[index][identifier] = value;
 
     /// <summary>
     /// Sets the value of the specified global variable
@@ -172,9 +183,9 @@ public sealed partial class LoxEnvironment
     /// <param name="identifier">Variable identifier token</param>
     /// <param name="value">Variable value</param>
     /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
-    public void SetGlobalVariable(in Token identifier, in LoxValue value)
+    public static void SetGlobalVariable(in Token identifier, in LoxValue value)
     {
-        if (!this.globalScope.TrySetVariable(identifier, value))
+        if (!GlobalScope.TrySetVariable(identifier, value))
         {
             throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.");
         }
@@ -206,9 +217,7 @@ public sealed partial class LoxEnvironment
     /// <param name="index">Index to get the variable at</param>
     /// <returns>The value of the variable</returns>
     /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
-    public LoxValue GetVariableAt(in Token identifier, in Index index) => this.stack[index].TryGetVariable(identifier, out LoxValue value)
-                                                                              ? value
-                                                                              : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
+    public LoxValue GetVariableAt(in Token identifier, in Index index) => this.stack[index][identifier];
 
     /// <summary>
     /// Gets the value of the specified global variable
@@ -216,9 +225,9 @@ public sealed partial class LoxEnvironment
     /// <param name="identifier">Variable identifier token</param>
     /// <returns>The value of the variable</returns>
     /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
-    public LoxValue GetGlobalVariable(in Token identifier) => this.globalScope.TryGetVariable(identifier, out LoxValue value)
-                                                                  ? value
-                                                                  : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
+    public static LoxValue GetGlobalVariable(in Token identifier) => GlobalScope.TryGetVariable(identifier, out LoxValue value)
+                                                                         ? value
+                                                                         : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
 
     /// <summary>
     /// Checks if the specified variable exists somewhere within the stack
@@ -250,7 +259,7 @@ public sealed partial class LoxEnvironment
     /// </summary>
     /// <param name="identifier">Variable identifier token</param>
     /// <returns><see langword="true"/> if the variable exists, otherwise <see langword="false"/></returns>
-    public bool IsGlobalVariableDefined(in Token identifier) => this.globalScope.IsVariableDefined(identifier);
+    public static bool IsGlobalVariableDefined(in Token identifier) => GlobalScope.IsVariableDefined(identifier);
 
     /// <summary>
     /// Deletes the specified variable from the stack
@@ -282,6 +291,6 @@ public sealed partial class LoxEnvironment
     /// </summary>
     /// <param name="identifier">Variable identifier to delete</param>
     /// <returns><see langword="true"/> if the variable was found and deleted, otherwise <see langword="false"/></returns>
-    public bool DeleteGlobalVariable(in Token identifier) => this.globalScope.DeleteVariable(identifier);
+    public static bool DeleteGlobalVariable(in Token identifier) => GlobalScope.DeleteVariable(identifier);
     #endregion
 }

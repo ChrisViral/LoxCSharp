@@ -16,7 +16,7 @@ public enum FunctionKind
 /// <summary>
 /// Lox function object
 /// </summary>
-public abstract class LoxFunction : LoxObject
+public abstract class LoxFunction : LoxInvokable
 {
     /// <summary>
     /// Function identifier
@@ -48,8 +48,8 @@ public abstract class LoxFunction : LoxObject
         string kind = this.Kind switch
         {
             FunctionKind.FUNCTION => "fn",
-            FunctionKind.METHOD   => "fn class",
-            FunctionKind.NATIVE   => "fn native",
+            FunctionKind.METHOD   => "mthd",
+            FunctionKind.NATIVE   => "fn-native",
             _                     => throw new InvalidEnumArgumentException(nameof(this.Kind), (int)this.Kind, typeof(FunctionKind))
         };
         return $"<{kind} {this.Identifier.Lexeme}>";

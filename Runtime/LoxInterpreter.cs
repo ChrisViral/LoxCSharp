@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using Lox.Exceptions.Runtime;
 using Lox.Interrupts;
 using Lox.Runtime.Functions;
-using Lox.Runtime.Functions.Native;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
@@ -29,27 +27,6 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     /// Runtime environment
     /// </summary>
     public LoxEnvironment CurrentEnvironment { get; private set; } = new();
-    #endregion
-
-    #region Constructors
-    /// <summary>
-    /// Creates a new Lox interpreter
-    /// </summary>
-    public LoxInterpreter()
-    {
-        // Load all native functions
-        Type nativeType = typeof(LoxNativeFunction);
-        foreach (Type type in Assembly.GetExecutingAssembly()
-                                      .DefinedTypes
-                                      .Where(ti => ti is { IsAbstract: false, IsClass: true, IsGenericType: false }
-                                                && ti.IsSubclassOf(nativeType))
-                                      .Select(ti => ti.AsType()))
-        {
-            // Instantiate function instances and define global
-            LoxNativeFunction nativeFunction = (LoxNativeFunction)Activator.CreateInstance(type)!;
-            this.CurrentEnvironment.DefineGlobalVariable(nativeFunction.Identifier, nativeFunction);
-        }
-    }
     #endregion
 
     #region Interpreter
@@ -152,7 +129,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     /// <returns>The resolved variable's value</returns>
     private LoxValue ResolveVariable(in Token identifier, LoxExpression expression) => this.locals.TryGetValue(expression, out Index depth)
                                                                                            ? this.CurrentEnvironment.GetVariableAt(identifier, depth)
-                                                                                           : this.CurrentEnvironment.GetGlobalVariable(identifier);
+                                                                                           : LoxEnvironment.GetGlobalVariable(identifier);
     #endregion
 
     #region Statement visitor
@@ -455,7 +432,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
         }
         else
         {
-            this.CurrentEnvironment.SetGlobalVariable(expression.Identifier, value);
+            LoxEnvironment.SetGlobalVariable(expression.Identifier, value);
         }
         return value;
     }
@@ -466,10 +443,10 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     {
         // Check that the target is callable
         LoxValue value = Evaluate(expression.Target);
-        if (value.Type is not LoxValue.LiteralType.OBJECT) throw new LoxInvalidOperationException("Can only call functions and classes", expression.Terminator);
+        if (value.Type is not LoxValue.LiteralType.OBJECT
+         || value.ObjectValue is not LoxInvokable target) throw new LoxInvalidOperationException("Can only call functions and classes", expression.Terminator);
 
         // Check that the arity matches
-        LoxObject target = value.ObjectValue;
         if (target.Arity != expression.Arguments.Count) throw new LoxInvalidOperationException($"Expected {target.Arity} arguments but got {expression.Arguments.Count}.");
 
         LoxValue[] parameters;

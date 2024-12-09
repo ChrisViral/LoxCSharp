@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using Lox.Parsing;
-using Lox.Resolving;
 using Lox.Runtime;
 using Lox.Scanning;
 using Lox.Syntax.Statements;
