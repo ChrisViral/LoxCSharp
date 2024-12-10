@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Lox.Interrupts;
 using Lox.Runtime.Types;
-using Lox.Runtime.Types.Classes;
 using Lox.Runtime.Types.Functions;
+using Lox.Runtime.Types.Types;
 using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 
@@ -171,8 +171,8 @@ public sealed partial class LoxInterpreter
     public void VisitClassDeclaration(ClassDeclaration declaration)
     {
         this.CurrentEnvironment.DefineVariable(declaration.Identifier);
-        ClassDefinition classDefinition = new(declaration.Identifier);
-        this.CurrentEnvironment.SetVariable(declaration.Identifier, classDefinition);
+        TypeDefinition typeDefinition = new(declaration.Identifier);
+        this.CurrentEnvironment.SetVariable(declaration.Identifier, typeDefinition);
     }
     #endregion
 }

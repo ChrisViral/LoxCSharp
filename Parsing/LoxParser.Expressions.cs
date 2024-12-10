@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using Lox.Exceptions;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
@@ -177,11 +178,25 @@ public partial class LoxParser
     private LoxExpression ParseInvokeExpression(in ReadOnlySpan<Token> tokens)
     {
         LoxExpression expression = ParsePrimaryExpression(tokens);
-        while (TryMatchToken(tokens, TokenType.LEFT_PAREN, out _))
+        while (TryMatchToken(tokens, [TokenType.LEFT_PAREN, TokenType.DOT], out Token token))
         {
-            ReadOnlyCollection<LoxExpression> parameters = ParseInvokeExpressionParameters(tokens);
-            Token terminator = EnsureNextToken(tokens, TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
-            expression = new InvokeExpression(expression, parameters, terminator);
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+            switch (token.Type)
+            {
+                case TokenType.LEFT_PAREN:
+                    ReadOnlyCollection<LoxExpression> parameters = ParseInvokeExpressionParameters(tokens);
+                    Token terminator = EnsureNextToken(tokens, TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+                    expression = new InvokeExpression(expression, parameters, terminator);
+                    break;
+
+                case TokenType.DOT:
+                    Token identifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, "Expect property name after '.'.");
+                    expression = new AccessExpression(expression, identifier);
+                    break;
+
+                default:
+                    throw new InvalidEnumArgumentException(nameof(token.Type), (int)token.Type, typeof(TokenType));
+            }
         }
         return expression;
     }

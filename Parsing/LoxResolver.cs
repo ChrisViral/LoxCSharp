@@ -328,6 +328,9 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     }
 
     /// <inheritdoc />
+    public void VisitAccessExpression(AccessExpression expression) => Resolve(expression.Target);
+
+    /// <inheritdoc />
     public void VisitInvokeExpression(InvokeExpression expression)
     {
         Resolve(expression.Target);

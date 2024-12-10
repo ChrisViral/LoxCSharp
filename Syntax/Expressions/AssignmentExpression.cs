@@ -6,6 +6,7 @@ namespace Lox.Syntax.Expressions;
 /// Variable expression
 /// </summary>
 /// <param name="Identifier">Variable identifier</param>
+/// <param name="Value">Value to assign</param>
 public sealed record AssignmentExpression(Token Identifier, LoxExpression Value) : LoxExpression
 {
     /// <inheritdoc />

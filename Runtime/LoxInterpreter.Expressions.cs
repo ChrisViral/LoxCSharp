@@ -1,5 +1,6 @@
 ﻿using Lox.Exceptions.Runtime;
 using Lox.Runtime.Types;
+using Lox.Runtime.Types.Types;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
 
@@ -160,6 +161,15 @@ public sealed partial class LoxInterpreter
         }
 
         return value;
+    }
+
+    /// <inheritdoc />
+    public LoxValue VisitAccessExpression(AccessExpression expression)
+    {
+        LoxValue target = Evaluate(expression.Target);
+        if (target.Type is not LoxValue.LiteralType.OBJECT || target.ObjectValue is not LoxInstance instance) throw new LoxRuntimeException("Only instances have properties.", expression.Identifier);
+
+        return instance.GetProperty(expression.Identifier);
     }
 
     /// <inheritdoc />

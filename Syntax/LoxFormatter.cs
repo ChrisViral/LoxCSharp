@@ -406,6 +406,13 @@ public class LoxFormatter : IExpressionVisitor, IStatementVisitor
     }
 
     /// <inheritdoc />
+    public void VisitAccessExpression(AccessExpression expression)
+    {
+        FormatExpression(expression.Target);
+        this.codeBuilder.Append('.').Append(expression.Identifier.Lexeme);
+    }
+
+    /// <inheritdoc />
     public void VisitInvokeExpression(InvokeExpression expression)
     {
         FormatExpression(expression.Target);

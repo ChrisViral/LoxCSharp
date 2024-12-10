@@ -1,12 +1,12 @@
 ﻿using Lox.Scanning;
 
-namespace Lox.Runtime.Types.Classes;
+namespace Lox.Runtime.Types.Types;
 
 /// <summary>
-/// Lox class object
+/// Lox type object
 /// </summary>
 /// <param name="identifier">Object identifier</param>
-public abstract class LoxClass(in Token identifier) : LoxInvokable(identifier)
+public abstract class LoxType(in Token identifier) : LoxInvokable(identifier)
 {
     /// <inheritdoc />
     public override int Arity => 0;
