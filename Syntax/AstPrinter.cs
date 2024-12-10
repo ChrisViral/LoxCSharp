@@ -1,6 +1,4 @@
 ﻿using Lox.Syntax.Expressions;
-using Lox.Syntax.Statements;
-using Lox.Syntax.Statements.Declarations;
 
 namespace Lox.Syntax;
 

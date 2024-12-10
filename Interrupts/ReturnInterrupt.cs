@@ -1,5 +1,4 @@
-﻿using Lox.Runtime;
-using Lox.Runtime.Types;
+﻿using Lox.Runtime.Types;
 
 namespace Lox.Interrupts;
 

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using JetBrains.Annotations;
-using Lox.Runtime;
 using Lox.Runtime.Types;
 
 namespace Lox.Scanning;

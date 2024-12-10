@@ -1,11 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Lox.Exceptions.Runtime;
-using Lox.Interrupts;
+﻿using Lox.Exceptions.Runtime;
 using Lox.Runtime.Types;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
-using Lox.Syntax.Statements.Declarations;
 using Lox.Utils;
 
 namespace Lox.Runtime;
