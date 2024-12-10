@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Lox.Exceptions.Runtime;
-using Lox.Runtime.Functions.Native;
+using Lox.Runtime.Types;
+using Lox.Runtime.Types.Functions.Native;
 using Lox.Scanning;
 
 namespace Lox.Runtime;
@@ -26,7 +26,7 @@ public sealed partial class LoxEnvironment
     /// <summary>
     /// Global environment scope
     /// </summary>
-    private static readonly Scope GlobalScope = new();
+    private static readonly Global GlobalScope = new();
     #endregion
 
     #region Fields
@@ -54,11 +54,10 @@ public sealed partial class LoxEnvironment
     static LoxEnvironment()
     {
         // Load all native functions
-        Type nativeType = typeof(LoxNativeFunction);
         foreach (Type type in Assembly.GetExecutingAssembly()
                                       .DefinedTypes
                                       .Where(ti => ti is { IsAbstract: false, IsClass: true, IsGenericType: false }
-                                                && ti.IsSubclassOf(nativeType))
+                                                && ti.IsSubclassOf(typeof(LoxNativeFunction)))
                                       .Select(ti => ti.AsType()))
         {
             // Instantiate function instances and define global
@@ -115,12 +114,6 @@ public sealed partial class LoxEnvironment
     public void DefineVariableAt(in Token identifier, in Index index) => this.stack[index].DefineVariable(identifier, LoxValue.Nil);
 
     /// <summary>
-    /// Defines a nil set global variable
-    /// </summary>
-    /// <param name="identifier">Variable identifier token</param>
-    public static void DefineGlobalVariable(in Token identifier) => GlobalScope.DefineVariable(identifier, LoxValue.Nil);
-
-    /// <summary>
     /// Defines a variable with the specified value at the top of the stack
     /// </summary>
     /// <param name="identifier">Variable identifier token</param>
@@ -134,20 +127,6 @@ public sealed partial class LoxEnvironment
     /// <param name="value">Variable value</param>
     /// <param name="index">Index to define the variable at</param>
     public void DefineVariableAt(in Token identifier, in LoxValue value, in Index index) => this.stack[index].DefineVariable(identifier, value);
-
-    /// <summary>
-    /// Defines a global variable with the specified value
-    /// </summary>
-    /// <param name="identifier">Variable identifier token</param>
-    /// <param name="value">Variable value</param>
-    public static void DefineGlobalVariable(in Token identifier, in LoxValue value) => GlobalScope.DefineVariable(identifier, value);
-
-    /// <summary>
-    /// Defines a global variable with the specified value
-    /// </summary>
-    /// <param name="identifier">Variable identifier token</param>
-    /// <param name="value">Variable value</param>
-    private static void DefineNativeVariable(in Token identifier, in LoxValue value) => GlobalScope.DefineNative(identifier, value);
 
     /// <summary>
     /// Sets the value of the topmost specified variable of the given name
@@ -178,20 +157,6 @@ public sealed partial class LoxEnvironment
     public void SetVariableAt(in Token identifier, in LoxValue value, in Index index) => this.stack[index][identifier] = value;
 
     /// <summary>
-    /// Sets the value of the specified global variable
-    /// </summary>
-    /// <param name="identifier">Variable identifier token</param>
-    /// <param name="value">Variable value</param>
-    /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
-    public static void SetGlobalVariable(in Token identifier, in LoxValue value)
-    {
-        if (!GlobalScope.TrySetVariable(identifier, value))
-        {
-            throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.");
-        }
-    }
-
-    /// <summary>
     /// Gets the value of the specified variable in the stack
     /// </summary>
     /// <param name="identifier">Variable identifier token</param>
@@ -220,16 +185,6 @@ public sealed partial class LoxEnvironment
     public LoxValue GetVariableAt(in Token identifier, in Index index) => this.stack[index][identifier];
 
     /// <summary>
-    /// Gets the value of the specified global variable
-    /// </summary>
-    /// <param name="identifier">Variable identifier token</param>
-    /// <returns>The value of the variable</returns>
-    /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
-    public static LoxValue GetGlobalVariable(in Token identifier) => GlobalScope.TryGetVariable(identifier, out LoxValue value)
-                                                                         ? value
-                                                                         : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
-
-    /// <summary>
     /// Checks if the specified variable exists somewhere within the stack
     /// </summary>
     /// <param name="identifier">Variable identifier token</param>
@@ -255,13 +210,6 @@ public sealed partial class LoxEnvironment
     public bool IsVariableDefinedAt(in Token identifier, in Index index) => this.stack[index].IsVariableDefined(identifier);
 
     /// <summary>
-    /// Checks if the specified global variable exists
-    /// </summary>
-    /// <param name="identifier">Variable identifier token</param>
-    /// <returns><see langword="true"/> if the variable exists, otherwise <see langword="false"/></returns>
-    public static bool IsGlobalVariableDefined(in Token identifier) => GlobalScope.IsVariableDefined(identifier);
-
-    /// <summary>
     /// Deletes the specified variable from the stack
     /// </summary>
     /// <param name="identifier">Variable identifier to delete</param>
@@ -285,6 +233,59 @@ public sealed partial class LoxEnvironment
     /// <param name="index">Index to delete the variable at</param>
     /// <returns><see langword="true"/> if the variable was found and deleted, otherwise <see langword="false"/></returns>
     public bool DeleteVariableAt(in Token identifier, in Index index) => this.stack[index].DeleteVariable(identifier);
+    #endregion
+
+    #region Static methods
+    /// <summary>
+    /// Defines a nil set global variable
+    /// </summary>
+    /// <param name="identifier">Variable identifier token</param>
+    public static void DefineGlobalVariable(in Token identifier) => GlobalScope.DefineVariable(identifier, LoxValue.Nil);
+
+    /// <summary>
+    /// Defines a global variable with the specified value
+    /// </summary>
+    /// <param name="identifier">Variable identifier token</param>
+    /// <param name="value">Variable value</param>
+    public static void DefineGlobalVariable(in Token identifier, in LoxValue value) => GlobalScope.DefineVariable(identifier, value);
+
+    /// <summary>
+    /// Defines a global variable with the specified value
+    /// </summary>
+    /// <param name="identifier">Variable identifier token</param>
+    /// <param name="value">Variable value</param>
+    private static void DefineNativeVariable(in Token identifier, in LoxValue value) => GlobalScope.DefineNative(identifier, value);
+
+    /// <summary>
+    /// Sets the value of the specified global variable
+    /// </summary>
+    /// <param name="identifier">Variable identifier token</param>
+    /// <param name="value">Variable value</param>
+    /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
+    public static void SetGlobalVariable(in Token identifier, in LoxValue value)
+    {
+        if (!GlobalScope.TrySetVariable(identifier, value))
+        {
+            throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.");
+        }
+    }
+
+    /// <summary>
+    /// Gets the value of the specified global variable
+    /// </summary>
+    /// <param name="identifier">Variable identifier token</param>
+    /// <returns>The value of the variable</returns>
+    /// <exception cref="LoxRuntimeException">If the variable is undefined</exception>
+    public static LoxValue GetGlobalVariable(in Token identifier) => GlobalScope.TryGetVariable(identifier, out LoxValue value)
+                                                                         ? value
+                                                                         : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
+
+    /// <summary>
+    /// Checks if the specified global variable exists
+    /// </summary>
+    /// <param name="identifier">Variable identifier token</param>
+    /// <returns><see langword="true"/> if the variable exists, otherwise <see langword="false"/></returns>
+    public static bool IsGlobalVariableDefined(in Token identifier) => GlobalScope.IsVariableDefined(identifier);
 
     /// <summary>
     /// Deletes the specified global variable
