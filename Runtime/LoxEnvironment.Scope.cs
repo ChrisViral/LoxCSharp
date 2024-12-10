@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Lox.Exceptions.Runtime;
-using Lox.Runtime.Types;
-using Lox.Scanning;
+using Lox.Scanner;
 
 namespace Lox.Runtime;
 

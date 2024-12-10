@@ -1,10 +1,10 @@
 ﻿using Lox.Exceptions.Runtime;
+using Lox.Runtime;
 using Lox.Runtime.Types;
-using Lox.Runtime.Types.Types;
-using Lox.Scanning;
+using Lox.Scanner;
 using Lox.Syntax.Expressions;
 
-namespace Lox.Runtime;
+namespace Lox.Interpreter;
 
 public sealed partial class LoxInterpreter
 {

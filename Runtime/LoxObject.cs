@@ -1,6 +1,4 @@
-﻿using Lox.Scanning;
-
-namespace Lox.Runtime.Types;
+﻿namespace Lox.Runtime;
 
 /// <summary>
 /// Lox custom class object

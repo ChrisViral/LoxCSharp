@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Lox.Interrupts;
+using Lox.Runtime;
+using Lox.Runtime.Functions;
 using Lox.Runtime.Types;
-using Lox.Runtime.Types.Functions;
-using Lox.Runtime.Types.Types;
 using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 
-namespace Lox.Runtime;
+namespace Lox.Interpreter;
 
 public sealed partial class LoxInterpreter
 {

@@ -1,6 +1,6 @@
-﻿using Lox.Scanning;
+﻿using Lox.Interpreter;
 
-namespace Lox.Runtime.Types;
+namespace Lox.Runtime;
 
 /// <summary>
 /// Lox invokable interface

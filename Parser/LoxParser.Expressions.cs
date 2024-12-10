@@ -1,11 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Lox.Exceptions;
-using Lox.Scanning;
+using Lox.Scanner;
 using Lox.Syntax.Expressions;
 using Lox.Utils;
 
-namespace Lox.Parsing;
+namespace Lox.Parser;
 
 public partial class LoxParser
 {

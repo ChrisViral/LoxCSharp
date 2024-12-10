@@ -4,7 +4,7 @@ using System.Globalization;
 using JetBrains.Annotations;
 using Lox.Exceptions;
 
-namespace Lox.Runtime.Types;
+namespace Lox.Runtime;
 
 /// <summary>
 /// Literal value wrapper<br/>

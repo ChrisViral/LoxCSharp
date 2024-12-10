@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
 using JetBrains.Annotations;
 using Lox.Exceptions.Runtime;
-using Lox.Runtime.Types;
-using Lox.Runtime.Types.Functions.Native;
-using Lox.Scanning;
+using Lox.Runtime.Functions.Native;
+using Lox.Scanner;
 
 namespace Lox.Runtime;
 

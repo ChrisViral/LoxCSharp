@@ -18,9 +18,9 @@ public sealed class ExpressionReferenceComparer : IEqualityComparer<LoxExpressio
     /// </summary>
     private ExpressionReferenceComparer() { }
 
-    /// <inheritdoc cref="IEqualityComparer{T}.Equals(T, T)"/>
-    public bool Equals(LoxExpression? a, LoxExpression? b) => ReferenceEquals(a, b);
+    /// <inheritdoc />
+    public bool Equals(LoxExpression? x, LoxExpression? y) => ReferenceEquals(x, y);
 
-    /// <inheritdoc cref="IEqualityComparer{T}.GetHashCode()"/>
+    /// <inheritdoc />
     public int GetHashCode(LoxExpression obj) => RuntimeHelpers.GetHashCode(obj);
 }

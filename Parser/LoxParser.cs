@@ -2,11 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Lox.Exceptions;
-using Lox.Scanning;
+using Lox.Scanner;
 using Lox.Syntax.Statements;
 using Lox.Utils;
 
-namespace Lox.Parsing;
+namespace Lox.Parser;
 
 /// <summary>
 /// Lox source file parser

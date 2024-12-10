@@ -1,7 +1,7 @@
-﻿using Lox.Runtime.Types;
+﻿using Lox.Runtime;
 using Lox.Utils;
 
-namespace Lox.Scanning;
+namespace Lox.Scanner;
 
 /// <summary>
 /// Lox Token

@@ -1,12 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reflection;
-using Lox.Parsing;
-using Lox.Runtime;
-using Lox.Scanning;
+using Lox.Parser;
+using Lox.Scanner;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
+using Lox.Utils;
 
-namespace Lox.Utils;
+namespace Lox.Interpreter;
 
 /// <summary>
 /// Lox REPL helper

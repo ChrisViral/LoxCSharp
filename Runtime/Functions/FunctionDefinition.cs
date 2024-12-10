@@ -1,9 +1,10 @@
-﻿using Lox.Interrupts;
-using Lox.Runtime.Types.Types;
-using Lox.Scanning;
+﻿using Lox.Interpreter;
+using Lox.Interrupts;
+using Lox.Runtime.Types;
+using Lox.Scanner;
 using Lox.Syntax.Statements.Declarations;
 
-namespace Lox.Runtime.Types.Functions;
+namespace Lox.Runtime.Functions;
 
 /// <summary>
 /// Runtime defined function object

@@ -1,5 +1,5 @@
 ﻿using JetBrains.Annotations;
-using Lox.Scanning;
+using Lox.Scanner;
 
 namespace Lox.Exceptions.Runtime;
 

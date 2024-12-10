@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Lox.Exceptions.Runtime;
-using Lox.Scanning;
+using Lox.Scanner;
 
 namespace Lox.Utils;
 

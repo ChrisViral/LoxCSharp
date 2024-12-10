@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using JetBrains.Annotations;
-using Lox.Runtime.Types;
+using Lox.Runtime;
 
-namespace Lox.Scanning;
+namespace Lox.Scanner;
 
 /// <summary>
 /// Lox tokens

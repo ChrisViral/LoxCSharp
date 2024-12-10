@@ -1,11 +1,11 @@
 ﻿using Lox.Exceptions.Runtime;
-using Lox.Runtime.Types;
-using Lox.Scanning;
+using Lox.Runtime;
+using Lox.Scanner;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
 using Lox.Utils;
 
-namespace Lox.Runtime;
+namespace Lox.Interpreter;
 
 /// <summary>
 /// Lox program interpreter

@@ -1,8 +1,8 @@
 ﻿using Lox.Exceptions.Runtime;
-using Lox.Runtime.Types.Functions;
-using Lox.Scanning;
+using Lox.Runtime.Functions;
+using Lox.Scanner;
 
-namespace Lox.Runtime.Types.Types;
+namespace Lox.Runtime.Types;
 
 /// <summary>
 /// Lox object instance

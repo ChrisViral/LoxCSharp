@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using Lox.Exceptions;
-using Lox.Scanning;
+using Lox.Scanner;
 
-namespace Lox.Runtime.Types.Functions.Native;
+namespace Lox.Runtime.Functions.Native;
 
 /// <summary>
 /// Native function base class

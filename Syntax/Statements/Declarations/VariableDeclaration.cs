@@ -1,4 +1,4 @@
-﻿using Lox.Scanning;
+﻿using Lox.Scanner;
 using Lox.Syntax.Expressions;
 
 namespace Lox.Syntax.Statements.Declarations;

@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
-using Lox.Runtime.Types;
+using Lox.Runtime;
 using Lox.Utils;
 
-namespace Lox.Scanning;
+namespace Lox.Scanner;
 
 /// <summary>
 /// Lox source file scanner

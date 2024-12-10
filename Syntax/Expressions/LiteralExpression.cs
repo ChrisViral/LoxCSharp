@@ -1,4 +1,4 @@
-﻿using Lox.Runtime.Types;
+﻿using Lox.Runtime;
 
 namespace Lox.Syntax.Expressions;
 

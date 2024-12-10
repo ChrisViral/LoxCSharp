@@ -1,7 +1,8 @@
 using System.Collections.ObjectModel;
-using Lox.Parsing;
-using Lox.Runtime;
-using Lox.Scanning;
+using Lox.Interpreter;
+using Lox.Parser;
+using Lox.Resolver;
+using Lox.Scanner;
 using Lox.Syntax.Statements;
 using Lox.Utils;
 

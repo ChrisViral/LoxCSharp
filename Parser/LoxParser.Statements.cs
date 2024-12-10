@@ -1,14 +1,13 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using Lox.Exceptions;
-using Lox.Runtime.Types.Functions;
-using Lox.Scanning;
+using Lox.Runtime.Functions;
+using Lox.Scanner;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 using Lox.Utils;
 
-namespace Lox.Parsing;
+namespace Lox.Parser;
 
 public partial class LoxParser
 {

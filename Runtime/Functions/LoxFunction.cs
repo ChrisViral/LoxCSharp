@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel;
 using Lox.Exceptions.Runtime;
-using Lox.Scanning;
+using Lox.Interpreter;
+using Lox.Scanner;
 
-namespace Lox.Runtime.Types.Functions;
+namespace Lox.Runtime.Functions;
 
 /// <summary>
 /// Lox function type

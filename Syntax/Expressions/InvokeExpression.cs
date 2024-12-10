@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using Lox.Scanning;
+using Lox.Scanner;
 
 namespace Lox.Syntax.Expressions;
 
