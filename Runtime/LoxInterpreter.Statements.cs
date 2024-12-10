@@ -160,7 +160,7 @@ public sealed partial class LoxInterpreter
     public void VisitFunctionDeclaration(FunctionDeclaration declaration)
     {
         this.CurrentEnvironment.DefineVariable(declaration.Identifier);
-        FunctionDefinition functionDefinition = new(declaration, this.CurrentEnvironment.Capture());
+        FunctionDefinition functionDefinition = new(declaration, this.CurrentEnvironment.Capture(), FunctionKind.FUNCTION);
         this.CurrentEnvironment.SetVariable(declaration.Identifier, functionDefinition);
     }
 
@@ -175,7 +175,7 @@ public sealed partial class LoxInterpreter
         Dictionary<string, FunctionDefinition> methods = new(declaration.Methods.Count, StringComparer.Ordinal);
         foreach (MethodDeclaration methodDeclaration in declaration.Methods)
         {
-            methods[methodDeclaration.Identifier.Lexeme] = new FunctionDefinition(methodDeclaration, this.CurrentEnvironment.Capture());
+            methods[methodDeclaration.Identifier.Lexeme] = new FunctionDefinition(methodDeclaration, this.CurrentEnvironment.Capture(), FunctionKind.METHOD);
         }
 
         TypeDefinition typeDefinition = new(declaration.Identifier, methods);

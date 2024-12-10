@@ -7,8 +7,9 @@ namespace Lox.Runtime.Types.Types;
 /// <summary>
 /// Lox type object
 /// </summary>
-/// <param name="identifier">Object identifier</param>
-public abstract class LoxType(in Token identifier, Dictionary<string, FunctionDefinition> methods) : LoxInvokable(identifier)
+/// <param name="identifier">Type identifier</param>
+/// <param name="methods">Type methods</param>
+public abstract class LoxType(in Token identifier, Dictionary<string, FunctionDefinition> methods) : LoxObject, IInvokable
 {
     /// <summary>
     /// Methods defined on this type
@@ -16,7 +17,12 @@ public abstract class LoxType(in Token identifier, Dictionary<string, FunctionDe
     private readonly Dictionary<string, FunctionDefinition> methods = methods;
 
     /// <inheritdoc />
-    public override int Arity => 0;
+    public int Arity => 0;
+
+    /// <summary>
+    /// Type identifier
+    /// </summary>
+    public Token Identifier { get; } = identifier;
 
     /// <summary>
     /// Tries to get a method definition on the type
@@ -27,7 +33,7 @@ public abstract class LoxType(in Token identifier, Dictionary<string, FunctionDe
     public virtual bool TryGetMethod(in Token identifier, [MaybeNullWhen(false)] out FunctionDefinition method) => this.methods.TryGetValue(identifier.Lexeme, out method);
 
     /// <inheritdoc />
-    public override LoxValue Invoke(LoxInterpreter interpreter, in ReadOnlySpan<LoxValue> arguments) => new LoxInstance(this);
+    public LoxValue Invoke(LoxInterpreter interpreter, in ReadOnlySpan<LoxValue> arguments) => new LoxInstance(this);
 
     /// <inheritdoc />
     public override string ToString() => $"[class {this.Identifier.Lexeme}]";

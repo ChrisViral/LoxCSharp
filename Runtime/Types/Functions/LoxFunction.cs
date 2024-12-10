@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Lox.Exceptions.Runtime;
 using Lox.Scanning;
 
 namespace Lox.Runtime.Types.Functions;
@@ -17,7 +18,7 @@ public enum FunctionKind
 /// <summary>
 /// Lox function object
 /// </summary>
-public abstract class LoxFunction : LoxInvokable
+public abstract class LoxFunction : LoxObject, IInvokable
 {
     /// <summary>
     /// Function kind
@@ -25,16 +26,33 @@ public abstract class LoxFunction : LoxInvokable
     public FunctionKind Kind { get; protected init; }
 
     /// <summary>
+    /// Function identifier
+    /// </summary>
+    public Token Identifier { get; protected init; }
+
+    /// <inheritdoc />
+    public virtual int Arity { get; protected init; }
+
+    /// <summary>
     /// Creates a new Lox function with the specified name
     /// </summary>
     /// <param name="identifier">Function identifier</param>
     /// <param name="kind">Function kind</param>
-    protected LoxFunction(in Token identifier, FunctionKind kind) : base(identifier) => this.Kind = kind;
+    protected LoxFunction(in Token identifier, FunctionKind kind)
+    {
+        this.Kind       = kind;
+        this.Identifier = identifier;
+    }
+
+    /// <inheritdoc />
+    public abstract LoxValue Invoke(LoxInterpreter interpreter, in ReadOnlySpan<LoxValue> arguments);
 
     /// <summary>
     /// String representation of the function
     /// </summary>
     /// <returns>String representation of the function</returns>
+    /// <exception cref="LoxRuntimeException">Invalid function type</exception>
+    /// <exception cref="InvalidEnumArgumentException">Unknown function type</exception>
     public override string ToString()
     {
         string kind = this.Kind switch
@@ -42,6 +60,7 @@ public abstract class LoxFunction : LoxInvokable
             FunctionKind.FUNCTION => "fn",
             FunctionKind.METHOD   => "mthd",
             FunctionKind.NATIVE   => "fn-native",
+            FunctionKind.NONE     => throw new LoxRuntimeException("Invalid function type"),
             _                     => throw new InvalidEnumArgumentException(nameof(this.Kind), (int)this.Kind, typeof(FunctionKind))
         };
         return $"<{kind} {this.Identifier.Lexeme}>";

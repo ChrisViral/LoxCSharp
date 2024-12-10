@@ -23,7 +23,8 @@ public sealed class FunctionDefinition : LoxFunction
     /// </summary>
     /// <param name="declaration">Function declaration to define</param>
     /// <param name="closure">Function closure</param>
-    public FunctionDefinition(FunctionDeclaration declaration, LoxEnvironment closure) : base(declaration.Identifier, FunctionKind.FUNCTION)
+    /// <param name="kind">The function kind</param>
+    public FunctionDefinition(FunctionDeclaration declaration, LoxEnvironment closure, FunctionKind kind) : base(declaration.Identifier, kind)
     {
         this.closure     = closure;
         this.declaration = declaration;

@@ -263,7 +263,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     /// <param name="output">Output value parameter</param>
     /// <typeparam name="T">Lox object type</typeparam>
     /// <returns><see langword="true"/> if this value is a <see cref="LoxObject"/>, otherwise <see langword="false"/></returns>
-    public bool TryGetObject<T>([MaybeNullWhen(false)] out T output) where T : LoxObject?
+    public bool TryGetObject<T>([MaybeNullWhen(false)] out T output)
     {
         if (this.Type is LiteralType.OBJECT && this.objectValue is T value)
         {
@@ -271,7 +271,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
             return true;
         }
 
-        output = null;
+        output = default;
         return false;
     }
 

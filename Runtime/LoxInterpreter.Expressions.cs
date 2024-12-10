@@ -190,7 +190,7 @@ public sealed partial class LoxInterpreter
     {
         // Check that the target is callable
         LoxValue value = Evaluate(expression.Target);
-        if (!value.TryGetObject(out LoxInvokable? target)) throw new LoxInvalidOperationException("Can only call functions and classes", expression.Terminator);
+        if (!value.TryGetObject(out IInvokable? target)) throw new LoxInvalidOperationException("Can only call functions and classes", expression.Terminator);
 
         // Check that the arity matches
         if (target!.Arity != expression.Arguments.Count) throw new LoxInvalidOperationException($"Expected {target.Arity} arguments but got {expression.Arguments.Count}.");
