@@ -150,6 +150,36 @@ public class LoxFormatter : IExpressionVisitor, IStatementVisitor
     private void FormatExpression(LoxExpression expression) => expression.Accept(this);
 
     /// <summary>
+    /// Formats a function declaration
+    /// </summary>
+    /// <param name="declaration">Function to format</param>
+    private void FormatFunction(FunctionDeclaration declaration)
+    {
+        this.codeBuilder.Append(declaration.Identifier.Lexeme).Append('(');
+        switch (declaration.Parameters.Count)
+        {
+            case 0:
+                break;
+
+            case 1:
+                this.codeBuilder.Append(declaration.Parameters[0].Lexeme);
+                break;
+
+            default:
+                this.codeBuilder.Append(declaration.Parameters[0].Lexeme);
+                for (int i = 1; i < declaration.Parameters.Count; i++)
+                {
+                    this.codeBuilder.Append(", ").Append(declaration.Parameters[i].Lexeme);
+                }
+                break;
+        }
+
+        this.codeBuilder.Append(')');
+        AppendNewline();
+        FormatStatement(declaration.Body);
+    }
+
+    /// <summary>
     /// Appends the current indent
     /// </summary>
     private void AppendIndent() => this.codeBuilder.Append(this.indent, this.CurrentIndentSize);
@@ -305,28 +335,26 @@ public class LoxFormatter : IExpressionVisitor, IStatementVisitor
     /// <inheritdoc />
     public void VisitFunctionDeclaration(FunctionDeclaration declaration)
     {
-        this.codeBuilder.Append("fun ").Append(declaration.Identifier.Lexeme).Append('(');
-        switch (declaration.Parameters.Count)
+        this.codeBuilder.Append("fun ");
+        FormatFunction(declaration);
+    }
+
+    /// <inheritdoc />
+    public void VisitMethodDeclaration(MethodDeclaration declaration) => FormatFunction(declaration);
+
+    /// <inheritdoc />
+    public void VisitClassDeclaration(ClassDeclaration declaration)
+    {
+        this.codeBuilder.Append("class ").AppendLine(declaration.Identifier.Lexeme);
+        this.codeBuilder.Append('{').AppendLine();
+        using (IndentScope.Open(ref this.currentDepth))
         {
-            case 0:
-                break;
-
-            case 1:
-                this.codeBuilder.Append(declaration.Parameters[0].Lexeme);
-                break;
-
-            default:
-                this.codeBuilder.Append(declaration.Parameters[0].Lexeme);
-                for (int i = 1; i < declaration.Parameters.Count; i++)
-                {
-                    this.codeBuilder.Append(", ").Append(declaration.Parameters[i].Lexeme);
-                }
-                break;
+            foreach (MethodDeclaration method in declaration.Methods)
+            {
+                FormatFunction(method);
+            }
         }
-
-        this.codeBuilder.Append(')');
-        AppendNewline();
-        FormatStatement(declaration.Body);
+        this.codeBuilder.Append('}').AppendLine();
     }
     #endregion
 

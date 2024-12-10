@@ -164,13 +164,9 @@ public partial class LoxParser
     /// <returns>The parsed expression</returns>
     private LoxExpression ParseUnaryExpression(in ReadOnlySpan<Token> tokens)
     {
-        if (TryMatchToken(tokens, [TokenType.BANG, TokenType.MINUS], out Token operatorToken))
-        {
-            LoxExpression innerExpression = ParseUnaryExpression(tokens);
-            return new UnaryExpression(operatorToken, innerExpression);
-        }
-
-        return ParseInvokeExpression(tokens);
+        return TryMatchToken(tokens, [TokenType.BANG, TokenType.MINUS], out Token operatorToken)
+                   ? new UnaryExpression(operatorToken, ParseUnaryExpression(tokens))
+                   : ParseInvokeExpression(tokens);
     }
 
     /// <summary>
@@ -198,7 +194,7 @@ public partial class LoxParser
     private ReadOnlyCollection<LoxExpression> ParseInvokeExpressionParameters(in ReadOnlySpan<Token> tokens)
     {
         // Return early if there's no parameters
-        if (CheckCurrentToken(tokens, TokenType.RIGHT_PAREN)) return new ReadOnlyCollection<LoxExpression>(Array.Empty<LoxExpression>());
+        if (CheckEOF(tokens) || CheckCurrentToken(tokens, TokenType.RIGHT_PAREN)) return new ReadOnlyCollection<LoxExpression>(Array.Empty<LoxExpression>());
 
         List<LoxExpression> parameters = new(4);
         do
@@ -211,7 +207,7 @@ public partial class LoxParser
             parameters.Add(ParseExpression(tokens));
         }
         while (TryMatchToken(tokens, TokenType.COMMA, out _));
-
+        parameters.TrimExcess();
         return parameters.AsReadOnly();
     }
 

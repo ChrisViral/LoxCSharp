@@ -60,6 +60,18 @@ public interface IStatementVisitor
     /// </summary>
     /// <param name="declaration">Declaration visited</param>
     void VisitFunctionDeclaration(FunctionDeclaration declaration);
+
+    /// <summary>
+    /// Handles <see cref="MethodDeclaration"/> visits
+    /// </summary>
+    /// <param name="declaration">Declaration visited</param>
+    void VisitMethodDeclaration(MethodDeclaration declaration);
+
+    /// <summary>
+    /// Handles <see cref="ClassDeclaration"/> visits
+    /// </summary>
+    /// <param name="declaration">Declaration visited</param>
+    void VisitClassDeclaration(ClassDeclaration declaration);
 }
 
 /// <summary>
@@ -130,4 +142,18 @@ public interface IStatementVisitor<out T>
     /// <param name="declaration">Declaration visited</param>
     /// <returns>The return value for the given declaration</returns>
     T VisitFunctionDeclaration(FunctionDeclaration declaration);
+
+    /// <summary>
+    /// Handles <see cref="MethodDeclaration"/> visits
+    /// </summary>
+    /// <param name="declaration">Declaration visited</param>
+    /// <returns>The return value for the given declaration</returns>
+    T VisitMethodDeclaration(MethodDeclaration declaration);
+
+    /// <summary>
+    /// Handles <see cref="ClassDeclaration"/> visits
+    /// </summary>
+    /// <param name="declaration">Declaration visited</param>
+    /// <returns>The return value for the given declaration</returns>
+    T VisitClassDeclaration(ClassDeclaration declaration);
 }

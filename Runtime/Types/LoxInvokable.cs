@@ -1,9 +1,12 @@
-﻿namespace Lox.Runtime.Types;
+﻿using Lox.Scanning;
+
+namespace Lox.Runtime.Types;
 
 /// <summary>
 /// Lox invokable object
 /// </summary>
-public abstract class LoxInvokable : LoxObject
+/// <param name="identifier">Object identifier</param>
+public abstract class LoxInvokable(in Token identifier) : LoxObject(identifier)
 {
     /// <summary>
     /// Invocation arity

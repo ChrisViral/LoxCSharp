@@ -30,7 +30,7 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <param name="State">Variable initialization state</param>
     /// <param name="Usages">Variable usages</param>
     /// <param name="Identifier">Variable identifier</param>
-    private readonly record struct VariableData(State State, int Usages, Token Identifier);
+    private readonly record struct VariableData(Token Identifier, State State, int Usages);
 
     /// <summary>
     /// Resolver scope
@@ -101,7 +101,7 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     private void CloseScope()
     {
         Scope popped = this.scopes.Pop();
-        foreach ((_, int usages, Token identifier) in popped.Values)
+        foreach ((Token identifier, _, int usages) in popped.Values)
         {
             if (usages is 0)
             {
@@ -117,7 +117,7 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <param name="state">Variable initial state, defaults to <see cref="State.UNDEFINED"/></param>
     private void DeclareVariable(in Token identifier, in State state = State.UNDEFINED)
     {
-        if (this.scopes.TryPeek(out Scope? scope) && !scope.TryAdd(identifier.Lexeme, new VariableData(state, 0, identifier)))
+        if (this.scopes.TryPeek(out Scope? scope) && !scope.TryAdd(identifier.Lexeme, new VariableData(identifier, state, 0)))
         {
             LoxErrorUtils.ReportParseError(identifier, "Already a variable with this name in this scope.");
         }
@@ -131,7 +131,7 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     {
         if (this.scopes.TryPeek(out Scope? scope))
         {
-            scope[identifier.Lexeme] = new VariableData(State.DEFINED, 0, identifier);
+            scope[identifier.Lexeme] = new VariableData(identifier, State.DEFINED, 0);
         }
     }
 
@@ -271,6 +271,16 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
         DeclareVariable(declaration.Identifier, State.DEFINED);
         ResolveFunction(declaration, FunctionKind.FUNCTION);
     }
+
+    /// <inheritdoc />
+    public void VisitMethodDeclaration(MethodDeclaration declaration)
+    {
+        DeclareVariable(declaration.Identifier, State.DEFINED);
+        ResolveFunction(declaration, FunctionKind.METHOD);
+    }
+
+    /// <inheritdoc />
+    public void VisitClassDeclaration(ClassDeclaration declaration) => DeclareVariable(declaration.Identifier, State.DEFINED);
     #endregion
 
     #region Expression visitor

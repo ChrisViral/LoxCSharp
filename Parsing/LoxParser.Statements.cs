@@ -1,4 +1,6 @@
-﻿using Lox.Exceptions;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using Lox.Exceptions;
 using Lox.Runtime.Types.Functions;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
@@ -21,13 +23,17 @@ public partial class LoxParser
         try
         {
             Token currentToken = MoveNextToken(tokens);
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (currentToken.Type)
             {
                 case TokenType.VAR:
                     return ParseVariableDeclaration(tokens);
 
                 case TokenType.FUN:
-                    return ParseFunctionDeclaration(tokens, FunctionKind.FUNCTION);
+                    return ParseFunctionDeclaration(tokens);
+
+                case TokenType.CLASS:
+                    return ParseClassDeclaration(tokens);
 
                 default:
                     this.currentIndex--;
@@ -60,40 +66,94 @@ public partial class LoxParser
     }
 
     /// <summary>
-    /// Parses a variable declaration
+    /// Parses a function declaration
+    /// </summary>
+    /// <param name="tokens">Source tokens span</param>
+    /// <returns>The parsed declaration</returns>
+    private FunctionDeclaration ParseFunctionDeclaration(in ReadOnlySpan<Token> tokens)
+    {
+        (Token identifier, ReadOnlyCollection<Token> parameters, BlockStatement body) = ParseFunctionBody(tokens, FunctionKind.FUNCTION);
+        return new FunctionDeclaration(identifier, parameters, body);
+    }
+
+    /// <summary>
+    /// Parses a method declaration
+    /// </summary>
+    /// <param name="tokens">Source tokens span</param>
+    /// <returns>The parsed declaration</returns>
+    private MethodDeclaration ParseMethodDeclaration(in ReadOnlySpan<Token> tokens)
+    {
+        (Token identifier, ReadOnlyCollection<Token> parameters, BlockStatement body) = ParseFunctionBody(tokens, FunctionKind.METHOD);
+        return new MethodDeclaration(identifier, parameters, body);
+    }
+
+    /// <summary>
+    /// Parses a function's body
     /// </summary>
     /// <param name="tokens">Source tokens span</param>
     /// <param name="kind">Function kind</param>
-    /// <returns>The parsed statement</returns>
-    private FunctionDeclaration ParseFunctionDeclaration(in ReadOnlySpan<Token> tokens, FunctionKind kind)
+    /// <returns>The parsed function body</returns>
+    private (Token, ReadOnlyCollection<Token>, BlockStatement) ParseFunctionBody(in ReadOnlySpan<Token> tokens, in FunctionKind kind)
     {
         string kindName = EnumUtils.ToString(kind).ToLowerInvariant();
         Token identifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, $"Expect {EnumUtils.ToString(kind).ToLowerInvariant()} name.");
         EnsureNextToken(tokens, TokenType.LEFT_PAREN, $"Expect '(' after {kindName} name.");
-        List<Token> parameters;
-        if (CheckCurrentToken(tokens, TokenType.RIGHT_PAREN))
+        ReadOnlyCollection<Token> parameters;
+        if (CheckEOF(tokens) || CheckCurrentToken(tokens, TokenType.RIGHT_PAREN))
         {
-            parameters = [];
+            parameters = new ReadOnlyCollection<Token>(Array.Empty<Token>());
         }
         else
         {
-            parameters = new List<Token>(4);
+            List<Token> parametersTemp = new(4);
             do
             {
-                if (parameters.Count is LoxErrorUtils.MAX_PARAMS)
+                if (parametersTemp.Count is LoxErrorUtils.MAX_PARAMS)
                 {
                     LoxErrorUtils.ReportParseError(CurrentToken(tokens), $"Can't have more than {LoxErrorUtils.MAX_PARAMS - 1} parameters.");
                 }
 
-                parameters.Add(EnsureNextToken(tokens, TokenType.IDENTIFIER, "Expect parameter name."));
+                parametersTemp.Add(EnsureNextToken(tokens, TokenType.IDENTIFIER, "Expect parameter name."));
             }
             while (TryMatchToken(tokens, TokenType.COMMA, out _));
+            parametersTemp.TrimExcess();
+            parameters = parametersTemp.AsReadOnly();
         }
 
         EnsureNextToken(tokens, TokenType.RIGHT_PAREN, "Expect ')' after parameters");
         EnsureNextToken(tokens, TokenType.LEFT_BRACE, $"Expect '{{' before {kindName} body.");
         BlockStatement body = ParseBlockStatement(tokens);
-        return new FunctionDeclaration(identifier, parameters.AsReadOnly(), body);
+        return (identifier, parameters, body);
+    }
+
+    /// <summary>
+    /// Parses a class declaration
+    /// </summary>
+    /// <param name="tokens">Source tokens span</param>
+    /// <returns>The parsed declaration</returns>
+    private ClassDeclaration ParseClassDeclaration(in ReadOnlySpan<Token> tokens)
+    {
+        Token identifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, "Expect class name.");
+        EnsureNextToken(tokens, TokenType.LEFT_BRACE, "Expect '{' before class body.");
+        ReadOnlyCollection<MethodDeclaration> methods;
+        if (CheckEOF(tokens) || CheckCurrentToken(tokens, TokenType.RIGHT_BRACE))
+        {
+            methods = new ReadOnlyCollection<MethodDeclaration>(Array.Empty<MethodDeclaration>());
+        }
+        else
+        {
+            List<MethodDeclaration> methodsTemp = new(4);
+            do
+            {
+                methodsTemp.Add(ParseMethodDeclaration(tokens));
+            }
+            while (!CheckEOF(tokens) && !CheckCurrentToken(tokens, TokenType.RIGHT_BRACE));
+            methodsTemp.TrimExcess();
+            methods = methodsTemp.AsReadOnly();
+        }
+
+        EnsureNextToken(tokens, TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+        return new ClassDeclaration(identifier, methods);
     }
 
     /// <summary>
@@ -103,8 +163,8 @@ public partial class LoxParser
     /// <returns>The parsed statement</returns>
     private LoxStatement ParseStatement(in ReadOnlySpan<Token> tokens)
     {
-        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         Token current = MoveNextToken(tokens);
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (current.Type)
         {
             case TokenType.PRINT:
@@ -256,18 +316,29 @@ public partial class LoxParser
     /// <returns>The parsed statement</returns>
     private BlockStatement ParseBlockStatement(in ReadOnlySpan<Token> tokens)
     {
-        List<LoxStatement> blockStatements = new(4);
-        while (!CheckEOF(tokens) && !CheckCurrentToken(tokens, TokenType.RIGHT_BRACE))
+        ReadOnlyCollection<LoxStatement> blockStatements;
+        if (CheckEOF(tokens) || CheckCurrentToken(tokens, TokenType.RIGHT_BRACE))
         {
-            LoxStatement? statement = ParseDeclaration(tokens);
-            if (statement is not null)
+            blockStatements = new ReadOnlyCollection<LoxStatement>(Array.Empty<LoxStatement>());
+        }
+        else
+        {
+            List<LoxStatement> blockStatementsTemp = new(4);
+            do
             {
-                blockStatements.Add(statement);
+                LoxStatement? statement = ParseDeclaration(tokens);
+                if (statement is not null)
+                {
+                    blockStatementsTemp.Add(statement);
+                }
             }
+            while (!CheckEOF(tokens) && !CheckCurrentToken(tokens, TokenType.RIGHT_BRACE));
+            blockStatementsTemp.TrimExcess();
+            blockStatements = blockStatementsTemp.AsReadOnly();
         }
 
         EnsureNextToken(tokens, TokenType.RIGHT_BRACE, "Expect '}' after block.");
-        return new BlockStatement(blockStatements.AsReadOnly());
+        return new BlockStatement(blockStatements);
     }
 
     /// <summary>

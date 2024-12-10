@@ -20,11 +20,6 @@ public enum FunctionKind
 public abstract class LoxFunction : LoxInvokable
 {
     /// <summary>
-    /// Function identifier
-    /// </summary>
-    public Token Identifier { get; protected init; }
-
-    /// <summary>
     /// Function kind
     /// </summary>
     public FunctionKind Kind { get; protected init; }
@@ -34,11 +29,7 @@ public abstract class LoxFunction : LoxInvokable
     /// </summary>
     /// <param name="identifier">Function identifier</param>
     /// <param name="kind">Function kind</param>
-    protected LoxFunction(Token identifier, FunctionKind kind)
-    {
-        this.Identifier = identifier;
-        this.Kind       = kind;
-    }
+    protected LoxFunction(in Token identifier, FunctionKind kind) : base(identifier) => this.Kind = kind;
 
     /// <summary>
     /// String representation of the function
