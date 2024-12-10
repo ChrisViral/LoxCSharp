@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Lox.Scanning;
 
-namespace Lox.Runtime.Functions;
+namespace Lox.Runtime.Types.Functions;
 
 /// <summary>
 /// Lox function type

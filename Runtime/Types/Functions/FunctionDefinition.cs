@@ -2,7 +2,7 @@
 using Lox.Scanning;
 using Lox.Syntax.Statements.Declarations;
 
-namespace Lox.Runtime.Functions;
+namespace Lox.Runtime.Types.Functions;
 
 /// <summary>
 /// Runtime defined function object
@@ -44,7 +44,7 @@ public sealed class FunctionDefinition : LoxFunction
 
         try
         {
-            interpreter.ExecuteWithEnv(this.declaration.Body.Statements, environment);
+            interpreter.Execute(this.declaration.Body.Statements, environment);
         }
         catch (ReturnInterrupt returnValue)
         {

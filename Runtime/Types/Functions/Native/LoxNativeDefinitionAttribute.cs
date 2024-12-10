@@ -1,12 +1,12 @@
 ﻿using JetBrains.Annotations;
 
-namespace Lox.Runtime.Functions.Native;
+namespace Lox.Runtime.Types.Functions.Native;
 
 /// <summary>
 /// Lox native definition
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false), MeansImplicitUse(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature, ImplicitUseTargetFlags.WithMembers)]
-public class LoxNativeDefinitionAttribute : Attribute
+public sealed class LoxNativeDefinitionAttribute : Attribute
 {
     /// <summary>
     /// Native name

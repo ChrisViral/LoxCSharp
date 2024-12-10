@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using Lox.Runtime;
+using Lox.Runtime.Types;
 using Lox.Utils;
 
 namespace Lox.Scanning;

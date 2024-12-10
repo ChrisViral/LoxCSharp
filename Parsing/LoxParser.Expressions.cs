@@ -8,6 +8,7 @@ namespace Lox.Parsing;
 
 public partial class LoxParser
 {
+    #region Expressions
     /// <summary>
     /// Parses an expression
     /// </summary>
@@ -247,4 +248,5 @@ public partial class LoxParser
                 return null!;
         }
     }
+    #endregion
 }

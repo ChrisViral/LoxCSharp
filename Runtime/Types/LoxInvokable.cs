@@ -1,4 +1,4 @@
-﻿namespace Lox.Runtime;
+﻿namespace Lox.Runtime.Types;
 
 /// <summary>
 /// Lox invokable object

@@ -1,4 +1,5 @@
 ﻿using Lox.Runtime;
+using Lox.Runtime.Types;
 using Lox.Utils;
 
 namespace Lox.Scanning;

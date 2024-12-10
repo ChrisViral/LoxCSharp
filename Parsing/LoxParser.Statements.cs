@@ -1,5 +1,5 @@
 ﻿using Lox.Exceptions;
-using Lox.Runtime.Functions;
+using Lox.Runtime.Types.Functions;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
@@ -10,6 +10,7 @@ namespace Lox.Parsing;
 
 public partial class LoxParser
 {
+    #region Statements
     /// <summary>
     /// Parses a declaration
     /// </summary>
@@ -280,4 +281,5 @@ public partial class LoxParser
         EnsureNextToken(tokens, TokenType.SEMICOLON, "Expect ';' after value.");
         return new ExpressionStatement(expression);
     }
+    #endregion
 }

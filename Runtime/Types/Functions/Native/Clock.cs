@@ -1,4 +1,4 @@
-﻿namespace Lox.Runtime.Functions.Native;
+﻿namespace Lox.Runtime.Types.Functions.Native;
 
 [LoxNativeDefinition("clock")]
 public sealed class Clock : LoxNativeFunction

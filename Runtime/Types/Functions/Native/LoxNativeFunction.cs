@@ -2,7 +2,7 @@
 using Lox.Exceptions;
 using Lox.Scanning;
 
-namespace Lox.Runtime.Functions.Native;
+namespace Lox.Runtime.Types.Functions.Native;
 
 /// <summary>
 /// Native function base class
