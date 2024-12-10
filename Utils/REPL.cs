@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Reflection;
 using Lox.Parsing;
 using Lox.Runtime;
@@ -15,17 +14,6 @@ namespace Lox.Utils;
 /// </summary>
 public sealed class REPL
 {
-    /// <summary>
-    /// REPL operation mode
-    /// </summary>
-    public enum REPLMode
-    {
-        DEFAULT,
-        TOKENIZE,
-        SYNTAX,
-        INTERPRET
-    }
-
     #region Constants
     /// <summary>
     /// Prompt string
@@ -43,11 +31,6 @@ public sealed class REPL
 
     #region Properties
     /// <summary>
-    /// REPL mode
-    /// </summary>
-    public REPLMode Mode { get; }
-
-    /// <summary>
     /// REPL scanner
     /// </summary>
     private LoxScanner Scanner { get; } = new();
@@ -61,11 +44,6 @@ public sealed class REPL
     /// REPL interpreter
     /// </summary>
     private LoxInterpreter Interpreter { get; } = new();
-
-    /// <summary>
-    /// REPL printer
-    /// </summary>
-    private AstPrinter Printer { get; } = new();
     #endregion
 
     #region Constructors
@@ -73,18 +51,6 @@ public sealed class REPL
     /// Creates a new REPL under default mode
     /// </summary>
     public REPL() { }
-
-    /// <summary>
-    /// Creates a new REPL under the mode provided by the argument
-    /// </summary>
-    /// <param name="arg">Mode argument</param>
-    public REPL(string arg) => this.Mode = arg switch
-    {
-        "tokenize" => REPLMode.TOKENIZE,
-        "parse"    => REPLMode.SYNTAX,
-        "evaluate" => REPLMode.INTERPRET,
-        _          => REPLMode.DEFAULT
-    };
     #endregion
 
     #region Methods
@@ -93,7 +59,7 @@ public sealed class REPL
     /// </summary>
     public async Task BeginREPL()
     {
-        LoxErrorUtils.BufferErrors = this.Mode is REPLMode.INTERPRET;
+        LoxErrorUtils.BufferErrors = true;
 
         // Print header
         Version version = Assembly.GetExecutingAssembly().GetName().Version!;
@@ -125,68 +91,10 @@ public sealed class REPL
     }
 
     /// <summary>
-    /// Evaluates a code line on the proper current mode
-    /// </summary>
-    /// <param name="line">Code line</param>
-    /// <returns>The proper evaluate task</returns>
-    /// <exception cref="InvalidEnumArgumentException">If <see cref="Mode"/> is an invalid REPL operation mode</exception>
-    private Task Evaluate(string line)
-    {
-        switch (this.Mode)
-        {
-            case REPLMode.TOKENIZE:
-                return EvaluateTokens(line);
-
-            case REPLMode.SYNTAX:
-                return EvaluateAST(line);
-
-            case REPLMode.INTERPRET:
-                return EvaluateValue(line);
-
-            case REPLMode.DEFAULT:
-                goto case REPLMode.INTERPRET;
-
-            default:
-                throw new InvalidEnumArgumentException(nameof(this.Mode), (int)this.Mode, typeof(REPLMode));
-        }
-    }
-
-    /// <summary>
     /// Evaluates a code line
     /// </summary>
     /// <param name="line">line to evaluate</param>
-    private async Task EvaluateTokens(string line)
-    {
-        this.Scanner.Source = line;
-        foreach (Token token in await this.Scanner.TokenizeAsync())
-        {
-            await Console.Out.WriteLineAsync(token.ToString());
-        }
-    }
-
-    /// <summary>
-    /// Evaluates a code line
-    /// </summary>
-    /// <param name="line">line to evaluate</param>
-    private async Task EvaluateAST(string line)
-    {
-        this.Scanner.Source = line;
-        ReadOnlyCollection<Token> tokens = await this.Scanner.TokenizeAsync();
-        this.Parser.UpdateSourceTokens(tokens);
-
-        ReadOnlyCollection<LoxStatement> program = await this.Parser.ParseAsync();
-
-        foreach (LoxStatement statement in program)
-        {
-            this.Printer.Print(statement);
-        }
-    }
-
-    /// <summary>
-    /// Evaluates a code line
-    /// </summary>
-    /// <param name="line">line to evaluate</param>
-    private async Task EvaluateValue(string line)
+    private async Task Evaluate(string line)
     {
         this.Scanner.Source = line;
         ReadOnlyCollection<Token> tokens = await this.Scanner.TokenizeAsync();

@@ -5,10 +5,10 @@ using Lox.Scanning;
 using Lox.Syntax.Statements;
 using Lox.Utils;
 
-if (args is [] or ["-r", not null])
+if (args is [])
 {
 
-    REPL repl = args.Length is 2 ? new REPL(args[1]) : new REPL();
+    REPL repl = new();
     try
     {
         await repl.BeginREPL();
@@ -18,10 +18,7 @@ if (args is [] or ["-r", not null])
     {
         await Console.Error.WriteLineAsync($"[{e.GetType().Name}]: {e.Message}\n{e.StackTrace}");
         Environment.Exit(70);    // Software error
-        throw;
     }
-
-    return;
 }
 
 if (args is not [{ } fileName])
@@ -31,20 +28,18 @@ if (args is not [{ } fileName])
     return;
 }
 
-FileInfo file   = new(fileName);
+FileInfo file = new(fileName);
 
 if (!file.Exists)
 {
     await Console.Error.WriteLineAsync($"File {file.FullName} does not exist");
     Environment.Exit(66);   // Input error
-    return;
 }
 
 if (file.Extension is not ".lox")
 {
     await Console.Error.WriteLineAsync($"File {file.FullName} is not a recognized Lox file (invalid extension)");
     Environment.Exit(66);   // Input error
-    return;
 }
 
 string source = await file.OpenText().ReadToEndAsync();
@@ -68,7 +63,6 @@ if (LoxErrorUtils.HadParsingError)
 }
 
 await interpreter.InterpretAsync(program);
-
 if (LoxErrorUtils.HadRuntimeError)
 {
     Environment.Exit(70);   // Software error
