@@ -155,7 +155,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     public void VisitIfStatement(IfStatement statement)
     {
         LoxValue condition = Evaluate(statement.Condition);
-        if (IsTruthy(condition))
+        if (condition.IsTruthy)
         {
             Execute(statement.IfBranch);
         }
@@ -168,7 +168,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     /// <inheritdoc />
     public void VisitWhileStatement(WhileStatement statement)
     {
-        while (IsTruthy(Evaluate(statement.Condition)))
+        while (Evaluate(statement.Condition).IsTruthy)
         {
             Execute(statement.BodyStatement);
         }
@@ -198,7 +198,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
                 // With increment
                 if (statement.Increment is not null)
                 {
-                    while (IsTruthy(Evaluate(statement.Condition)))
+                    while (Evaluate(statement.Condition).IsTruthy)
                     {
                         Execute(statement.BodyStatement);
                         Execute(statement.Increment);
@@ -207,7 +207,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
                 // Without increment
                 else
                 {
-                    while (IsTruthy(Evaluate(statement.Condition)))
+                    while (Evaluate(statement.Condition).IsTruthy)
                     {
                         Execute(statement.BodyStatement);
                     }
@@ -309,7 +309,7 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
                 return -number;
 
             case TokenType.BANG:
-                return !IsTruthy(inner);
+                return !inner.IsTruthy;
 
             default:
                 throw new LoxInvalidOperationException("Invalid unary operation", expression.Operator);
@@ -408,11 +408,11 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
         switch (expression.Operator.Type)
         {
             case TokenType.OR:
-                if (IsTruthy(leftValue)) return leftValue;
+                if (leftValue.IsTruthy) return leftValue;
                 break;
 
             case TokenType.AND:
-                if (!IsTruthy(leftValue)) return leftValue;
+                if (!leftValue.IsTruthy) return leftValue;
                 break;
 
             default:
@@ -480,17 +480,5 @@ public sealed class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVis
     {
         return operand.TryGetNumber(out double result) ? result : throw new LoxInvalidOperandException(message, operatorToken);
     }
-
-    /// <summary>
-    /// Checks if an object evaluates to true or false
-    /// </summary>
-    /// <param name="value">Value to evaluate</param>
-    /// <returns><see langword="true"/> if the object is truthy, otherwise <see langword="false"/></returns>
-    private static bool IsTruthy(in LoxValue value) => value.Type switch
-    {
-        LoxValue.LiteralType.BOOLEAN => value.BoolValue,
-        LoxValue.LiteralType.NIL     => false,
-        _                            => true
-    };
     #endregion
 }

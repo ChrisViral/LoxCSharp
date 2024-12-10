@@ -5,4 +5,6 @@
 /// </summary>
 public abstract class LoxObject
 {
+    /// <inheritdoc cref="object.ToString"/>
+    public override string ToString() => "[obj]";
 }

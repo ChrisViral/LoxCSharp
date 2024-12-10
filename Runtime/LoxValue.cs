@@ -128,7 +128,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
         LiteralType.STRING  => this.stringValue,
         LiteralType.NUMBER  => this.numberValue,
         LiteralType.OBJECT  => this.ObjectValue,
-        LiteralType.INVALID    => throw new InvalidOperationException("None literal type is invalid"),
+        LiteralType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
         _                   => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(LiteralType))
     };
 
@@ -141,6 +141,18 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     /// If this is an invalid literal
     /// </summary>
     public bool IsInvalid => this.Type is LiteralType.INVALID;
+
+    /// <summary>
+    /// Checks if this value evaluates to true or false
+    /// </summary>
+    /// <returns><see langword="true"/> if the object is truthy, otherwise <see langword="false"/></returns>
+    public bool IsTruthy => this.Type switch
+    {
+        LiteralType.BOOLEAN => this.BoolValue,
+        LiteralType.NIL     => false,
+        LiteralType.INVALID => throw new InvalidOperationException("Invalid value type is invalid"),
+        _                   => true
+    };
     #endregion
 
     #region Constructors
@@ -290,7 +302,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
         LiteralType.BOOLEAN => this.boolValue ? TrueString : FalseString,
         LiteralType.STRING  => this.stringValue!,
         LiteralType.NUMBER  => this.numberValue.ToString(CultureInfo.InvariantCulture),
-        LiteralType.OBJECT  => this.objectValue!.ToString() ?? string.Empty,
+        LiteralType.OBJECT  => this.objectValue!.ToString(),
         LiteralType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
         _                   => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(LiteralType))
     };
@@ -303,7 +315,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
         LiteralType.STRING  => this.stringValue == other.stringValue,
         LiteralType.NUMBER  => this.numberValue.Equals(other.numberValue),
         LiteralType.OBJECT  => ReferenceEquals(this.objectValue, other.objectValue),
-        LiteralType.INVALID    => throw new InvalidOperationException("None literal type is invalid"),
+        LiteralType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
         _                   => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(LiteralType)),
     };
 
@@ -321,7 +333,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
         LiteralType.STRING  => this.stringValue!.GetHashCode(),
         LiteralType.NUMBER  => this.numberValue.GetHashCode(),
         LiteralType.OBJECT  => this.objectValue!.GetHashCode(),
-        LiteralType.INVALID    => throw new InvalidOperationException("None literal type is invalid"),
+        LiteralType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
         _                   => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(LiteralType)),
     };
     #endregion
