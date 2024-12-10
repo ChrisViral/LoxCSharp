@@ -5,14 +5,11 @@ namespace Lox.Runtime.Types;
 /// <summary>
 /// Lox custom class object
 /// </summary>
-/// <param name="identifier">Object identifier</param>
-public abstract class LoxObject(in Token identifier)
+public abstract class LoxObject
 {
     /// <summary>
-    /// Object identifier
+    /// Lox object representation
     /// </summary>
-    public Token Identifier { get; protected init; } = identifier;
-
-    /// <inheritdoc cref="object.ToString"/>
+    /// <returns>The representation of this Lox object</returns>
     public override string ToString() => "[obj]";
 }

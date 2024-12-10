@@ -6,7 +6,4 @@ namespace Lox.Runtime.Types.Classes;
 /// Lox class definition
 /// </summary>
 /// <param name="identifier">Object identifier</param>
-public class ClassDefinition(in Token identifier) : LoxClass(identifier)
-{
-    
-}
+public class ClassDefinition(in Token identifier) : LoxClass(identifier);
