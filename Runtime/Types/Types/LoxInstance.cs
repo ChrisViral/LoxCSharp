@@ -1,4 +1,5 @@
 ﻿using Lox.Exceptions.Runtime;
+using Lox.Runtime.Types.Functions;
 using Lox.Scanning;
 
 namespace Lox.Runtime.Types.Types;
@@ -32,8 +33,10 @@ public sealed class LoxInstance(LoxType type) : LoxObject
     /// <exception cref="LoxRuntimeException">If the property was not found</exception>
     public LoxValue GetProperty(in Token identifier)
     {
-        if (!this.fields.TryGetValue(identifier.Lexeme, out LoxValue value)) throw new LoxRuntimeException($"Undefined property '{identifier.Lexeme}'.");
-        return value;
+        if (this.fields.TryGetValue(identifier.Lexeme, out LoxValue value)) return value;
+        if (this.Type.TryGetMethod(identifier, out FunctionDefinition? method)) return method;
+
+        throw new LoxRuntimeException($"Undefined property '{identifier.Lexeme}'.");
     }
 
     /// <summary>

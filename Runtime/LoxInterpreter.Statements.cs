@@ -171,7 +171,14 @@ public sealed partial class LoxInterpreter
     public void VisitClassDeclaration(ClassDeclaration declaration)
     {
         this.CurrentEnvironment.DefineVariable(declaration.Identifier);
-        TypeDefinition typeDefinition = new(declaration.Identifier);
+
+        Dictionary<string, FunctionDefinition> methods = new(declaration.Methods.Count, StringComparer.Ordinal);
+        foreach (MethodDeclaration methodDeclaration in declaration.Methods)
+        {
+            methods[methodDeclaration.Identifier.Lexeme] = new FunctionDefinition(methodDeclaration, this.CurrentEnvironment.Capture());
+        }
+
+        TypeDefinition typeDefinition = new(declaration.Identifier, methods);
         this.CurrentEnvironment.SetVariable(declaration.Identifier, typeDefinition);
     }
     #endregion

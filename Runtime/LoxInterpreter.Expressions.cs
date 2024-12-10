@@ -25,6 +25,7 @@ public sealed partial class LoxInterpreter
     {
         LoxValue inner = Evaluate(expression.InnerExpression);
 
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (expression.Operator.Type)
         {
             case TokenType.MINUS:
@@ -189,11 +190,10 @@ public sealed partial class LoxInterpreter
     {
         // Check that the target is callable
         LoxValue value = Evaluate(expression.Target);
-        if (value.Type is not LoxValue.LiteralType.OBJECT
-         || value.ObjectValue is not LoxInvokable target) throw new LoxInvalidOperationException("Can only call functions and classes", expression.Terminator);
+        if (!value.TryGetObject(out LoxInvokable? target)) throw new LoxInvalidOperationException("Can only call functions and classes", expression.Terminator);
 
         // Check that the arity matches
-        if (target.Arity != expression.Arguments.Count) throw new LoxInvalidOperationException($"Expected {target.Arity} arguments but got {expression.Arguments.Count}.");
+        if (target!.Arity != expression.Arguments.Count) throw new LoxInvalidOperationException($"Expected {target.Arity} arguments but got {expression.Arguments.Count}.");
 
         LoxValue[] parameters;
         if (expression.Arguments.Count is 0)

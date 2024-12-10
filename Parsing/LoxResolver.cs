@@ -280,7 +280,14 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     }
 
     /// <inheritdoc />
-    public void VisitClassDeclaration(ClassDeclaration declaration) => DeclareVariable(declaration.Identifier, State.DEFINED);
+    public void VisitClassDeclaration(ClassDeclaration declaration)
+    {
+        DeclareVariable(declaration.Identifier, State.DEFINED);
+        foreach (MethodDeclaration method in declaration.Methods)
+        {
+            ResolveFunction(method, FunctionKind.METHOD);
+        }
+    }
     #endregion
 
     #region Expression visitor
