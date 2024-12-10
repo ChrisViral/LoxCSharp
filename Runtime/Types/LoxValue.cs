@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using JetBrains.Annotations;
 using Lox.Exceptions;
@@ -210,7 +211,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     /// </summary>
     /// <param name="output">Output value parameter</param>
     /// <returns><see langword="true"/> if this value is a <see cref="string"/>, otherwise <see langword="false"/></returns>
-    public bool TryGetString(out string? output)
+    public bool TryGetString([MaybeNullWhen(false)] out string output)
     {
         if (this.Type is LiteralType.STRING)
         {
@@ -244,11 +245,29 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     /// </summary>
     /// <param name="output">Output value parameter</param>
     /// <returns><see langword="true"/> if this value is a <see cref="LoxObject"/>, otherwise <see langword="false"/></returns>
-    public bool TryGetObject(out LoxObject? output)
+    public bool TryGetObject([MaybeNullWhen(false)] out LoxObject output)
     {
         if (this.Type is LiteralType.OBJECT)
         {
-            output = this.objectValue;
+            output = this.objectValue!;
+            return true;
+        }
+
+        output = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Tries to get this value as a typed LoxObject
+    /// </summary>
+    /// <param name="output">Output value parameter</param>
+    /// <typeparam name="T">Lox object type</typeparam>
+    /// <returns><see langword="true"/> if this value is a <see cref="LoxObject"/>, otherwise <see langword="false"/></returns>
+    public bool TryGetObject<T>([MaybeNullWhen(false)] out T output) where T : LoxObject?
+    {
+        if (this.Type is LiteralType.OBJECT && this.objectValue is T value)
+        {
+            output = value;
             return true;
         }
 

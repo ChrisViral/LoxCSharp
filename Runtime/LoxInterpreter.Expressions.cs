@@ -167,9 +167,20 @@ public sealed partial class LoxInterpreter
     public LoxValue VisitAccessExpression(AccessExpression expression)
     {
         LoxValue target = Evaluate(expression.Target);
-        if (target.Type is not LoxValue.LiteralType.OBJECT || target.ObjectValue is not LoxInstance instance) throw new LoxRuntimeException("Only instances have properties.", expression.Identifier);
+        if (!target.TryGetObject(out LoxInstance? instance)) throw new LoxRuntimeException("Only instances have properties.", expression.Identifier);
 
-        return instance.GetProperty(expression.Identifier);
+        return instance!.GetProperty(expression.Identifier);
+    }
+
+    /// <inheritdoc />
+    public LoxValue VisitSetExpression(SetExpression expression)
+    {
+        LoxValue target = Evaluate(expression.Target);
+        if (!target.TryGetObject(out LoxInstance? instance)) throw new LoxRuntimeException("Only instances have properties.", expression.Identifier);
+
+        LoxValue value = Evaluate(expression.Value);
+        instance!.SetProperty(expression.Identifier, value);
+        return value;
     }
 
     /// <inheritdoc />

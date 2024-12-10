@@ -36,6 +36,13 @@ public sealed class LoxInstance(LoxType type) : LoxObject
         return value;
     }
 
+    /// <summary>
+    /// Sets the property of the given identifier on this instance
+    /// </summary>
+    /// <param name="identifier">Property identifier</param>
+    /// <param name="value">Value to set</param>
+    public void SetProperty(in Token identifier, in LoxValue value) => this.fields[identifier.Lexeme] = value;
+
     /// <inheritdoc />
     public override string ToString() => $"[instance {this.Type.Identifier.Lexeme}]";
     #endregion

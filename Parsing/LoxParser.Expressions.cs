@@ -52,12 +52,18 @@ public partial class LoxParser
         if (TryMatchToken(tokens, TokenType.EQUAL, out Token equals))
         {
             LoxExpression value = ParseAssignmentExpression(tokens);
-            if (expression is VariableExpression variable)
+            switch (expression)
             {
-                return new AssignmentExpression(variable.Identifier, value);
-            }
+                case VariableExpression variable:
+                    return new AssignmentExpression(variable.Identifier, value);
 
-            LoxErrorUtils.ReportParseError(equals, "Invalid assignment target.");
+                case AccessExpression access:
+                    return new SetExpression(access.Target, access.Identifier, value);
+
+                default:
+                    LoxErrorUtils.ReportParseError(equals, "Invalid assignment target.");
+                    break;
+            }
         }
         return expression;
     }

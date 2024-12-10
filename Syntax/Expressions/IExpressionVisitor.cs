@@ -55,6 +55,13 @@ public interface IExpressionVisitor
     void VisitAccessExpression(AccessExpression expression);
 
     /// <summary>
+    /// Handles <see cref="SetExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    /// <returns>The return value for the given expression</returns>
+    void VisitSetExpression(SetExpression expression);
+
+    /// <summary>
     /// Handles <see cref="InvokeExpression"/> visits
     /// </summary>
     /// <param name="expression">Expression visited</param>
@@ -122,6 +129,13 @@ public interface IExpressionVisitor<out T>
     /// <param name="expression">Expression visited</param>
     /// <returns>The return value for the given expression</returns>
     T VisitAccessExpression(AccessExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="SetExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    /// <returns>The return value for the given expression</returns>
+    T VisitSetExpression(SetExpression expression);
 
     /// <summary>
     /// Handles <see cref="InvokeExpression"/> visits

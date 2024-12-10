@@ -38,7 +38,10 @@ public class AstPrinter : IExpressionVisitor<string>
     public string VisitAssignmentExpression(AssignmentExpression expression) => $"(assign {expression.Identifier.Lexeme} {expression.Value.Accept(this)})";
 
     /// <inheritdoc />
-    public string VisitAccessExpression(AccessExpression expression) => $"(access {expression.Target.Accept(this)} {expression.Identifier.Lexeme})";
+    public string VisitAccessExpression(AccessExpression expression) => $"(access {expression.Target.Accept(this)}.{expression.Identifier.Lexeme})";
+
+    /// <inheritdoc />
+    public string VisitSetExpression(SetExpression expression) => $"(set {expression.Target.Accept(this)}.{expression.Identifier.Lexeme} {expression.Value.Accept(this)})";
 
     /// <inheritdoc />
     public string VisitInvokeExpression(InvokeExpression expression)
