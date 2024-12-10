@@ -8,7 +8,7 @@ namespace Lox.Syntax.Expressions;
 /// <param name="LeftExpression">Left expression operand</param>
 /// <param name="Operator">Expression operator</param>
 /// <param name="RightExpression">Right expression operand</param>
-public sealed record LogicalExpression(LoxExpression LeftExpression, Token Operator, LoxExpression RightExpression) : BinaryExpression(LeftExpression, Operator, RightExpression)
+public sealed record LogicalExpression(LoxExpression LeftExpression, in Token Operator, LoxExpression RightExpression) : BinaryExpression(LeftExpression, Operator, RightExpression)
 {
     /// <inheritdoc />
     public override void Accept(IExpressionVisitor visitor) => visitor.VisitLogicalExpression(this);

@@ -252,6 +252,9 @@ public partial class LoxParser
                 if (currentToken.Literal.IsInvalid) ProduceException(currentToken, $"Literal token has no value ({currentToken})");
                 return new LiteralExpression(currentToken.Literal);
 
+            case TokenType.THIS:
+                return new ThisExpression(currentToken);
+
             case TokenType.IDENTIFIER:
                 return new VariableExpression(currentToken);
 

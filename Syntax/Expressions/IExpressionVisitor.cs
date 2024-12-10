@@ -12,6 +12,12 @@ public interface IExpressionVisitor
     void VisitLiteralExpression(LiteralExpression expression);
 
     /// <summary>
+    /// Handles <see cref="ThisExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitThisExpression(ThisExpression expression);
+
+    /// <summary>
     /// Handles <see cref="VariableExpression"/> visits
     /// </summary>
     /// <param name="expression">Expression visited</param>
@@ -80,6 +86,12 @@ public interface IExpressionVisitor<out T>
     /// <param name="expression">Expression visited</param>
     /// <returns>The return value for the given expression</returns>
     T VisitLiteralExpression(LiteralExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="ThisExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    T VisitThisExpression(ThisExpression expression);
 
     /// <summary>
     /// Handles <see cref="VariableExpression"/> visits

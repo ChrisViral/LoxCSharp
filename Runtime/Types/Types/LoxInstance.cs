@@ -34,7 +34,11 @@ public sealed class LoxInstance(LoxType type) : LoxObject
     public LoxValue GetProperty(in Token identifier)
     {
         if (this.fields.TryGetValue(identifier.Lexeme, out LoxValue value)) return value;
-        if (this.Type.TryGetMethod(identifier, out FunctionDefinition? method)) return method;
+
+        if (this.Type.TryGetMethod(identifier, out FunctionDefinition? method))
+        {
+            return method.Bind(this);
+        }
 
         throw new LoxRuntimeException($"Undefined property '{identifier.Lexeme}'.");
     }

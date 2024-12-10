@@ -12,6 +12,7 @@ public enum FunctionKind
     NONE,
     FUNCTION,
     METHOD,
+    CONSTRUCTOR,
     NATIVE
 }
 
@@ -57,11 +58,12 @@ public abstract class LoxFunction : LoxObject, IInvokable
     {
         string kind = this.Kind switch
         {
-            FunctionKind.FUNCTION => "fn",
-            FunctionKind.METHOD   => "mthd",
-            FunctionKind.NATIVE   => "fn-native",
-            FunctionKind.NONE     => throw new LoxRuntimeException("Invalid function type"),
-            _                     => throw new InvalidEnumArgumentException(nameof(this.Kind), (int)this.Kind, typeof(FunctionKind))
+            FunctionKind.FUNCTION    => "fn",
+            FunctionKind.METHOD      => "mthd",
+            FunctionKind.CONSTRUCTOR => "ctor",
+            FunctionKind.NATIVE      => "fn-native",
+            FunctionKind.NONE        => throw new LoxRuntimeException("Invalid function type"),
+            _                        => throw new InvalidEnumArgumentException(nameof(this.Kind), (int)this.Kind, typeof(FunctionKind))
         };
         return $"<{kind} {this.Identifier.Lexeme}>";
     }

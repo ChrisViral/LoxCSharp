@@ -13,6 +13,9 @@ public sealed partial class LoxInterpreter
     public LoxValue VisitLiteralExpression(LiteralExpression expression) => expression.Value;
 
     /// <inheritdoc />
+    public LoxValue VisitThisExpression(ThisExpression expression) => ResolveVariable(expression.Keyword, expression);
+
+    /// <inheritdoc />
     public LoxValue VisitVariableExpression(VariableExpression expression) => ResolveVariable(expression.Identifier, expression);
 
     /// <inheritdoc />

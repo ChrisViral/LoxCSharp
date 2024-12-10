@@ -20,6 +20,9 @@ public class AstPrinter : IExpressionVisitor<string>
     public string VisitLiteralExpression(LiteralExpression expression) => expression.Value.ASTString();
 
     /// <inheritdoc />
+    public string VisitThisExpression(ThisExpression expression) => "(this)";
+
+    /// <inheritdoc />
     public string VisitVariableExpression(VariableExpression expression) => expression.Identifier.Lexeme;
 
     /// <inheritdoc />

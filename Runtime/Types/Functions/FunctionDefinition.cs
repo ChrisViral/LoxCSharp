@@ -1,4 +1,5 @@
 ﻿using Lox.Interrupts;
+using Lox.Runtime.Types.Types;
 using Lox.Scanning;
 using Lox.Syntax.Statements.Declarations;
 
@@ -19,6 +20,11 @@ public sealed class FunctionDefinition : LoxFunction
     private readonly FunctionDeclaration declaration;
 
     /// <summary>
+    /// If this is a constructor function
+    /// </summary>
+    public bool IsConstructor => this.Kind is FunctionKind.CONSTRUCTOR;
+
+    /// <summary>
     /// Creates a new function from the specified declaration
     /// </summary>
     /// <param name="declaration">Function declaration to define</param>
@@ -26,9 +32,9 @@ public sealed class FunctionDefinition : LoxFunction
     /// <param name="kind">The function kind</param>
     public FunctionDefinition(FunctionDeclaration declaration, LoxEnvironment closure, FunctionKind kind) : base(declaration.Identifier, kind)
     {
-        this.closure     = closure;
-        this.declaration = declaration;
-        this.Arity       = this.declaration.Parameters.Count;
+        this.closure       = closure;
+        this.declaration   = declaration;
+        this.Arity         = this.declaration.Parameters.Count;
     }
 
     /// <inheritdoc />
@@ -49,13 +55,25 @@ public sealed class FunctionDefinition : LoxFunction
         }
         catch (ReturnInterrupt returnValue)
         {
-            return returnValue.Value;
+            return this.IsConstructor ? this.closure.GetVariableAt(Token.This, 0) : returnValue.Value;
         }
         finally
         {
             environment.PopScope();
         }
 
-        return LoxValue.Nil;
+        return this.IsConstructor ? this.closure.GetVariableAt(Token.This, 0) : LoxValue.Nil;
+    }
+
+    /// <summary>
+    /// Binds this function to a given object instance
+    /// </summary>
+    /// <param name="instance">Instance to bind to</param>
+    /// <returns>The bound function</returns>
+    public LoxFunction Bind(LoxInstance instance)
+    {
+        LoxEnvironment binding = this.closure.Capture();
+        binding.DefineVariable(Token.This, instance);
+        return new FunctionDefinition(this.declaration, binding, this.Kind);
     }
 }

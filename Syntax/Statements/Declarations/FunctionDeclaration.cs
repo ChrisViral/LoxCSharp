@@ -9,7 +9,7 @@ namespace Lox.Syntax.Statements.Declarations;
 /// <param name="Identifier">Function identifier</param>
 /// <param name="Parameters">Function parameters</param>
 /// <param name="Body">Function block body</param>
-public record FunctionDeclaration(Token Identifier, ReadOnlyCollection<Token> Parameters, BlockStatement Body) : LoxDeclaration(Identifier)
+public record FunctionDeclaration(in Token Identifier, ReadOnlyCollection<Token> Parameters, BlockStatement Body) : LoxDeclaration(Identifier)
 {
     /// <inheritdoc />
     public override void Accept(IStatementVisitor visitor) => visitor.VisitFunctionDeclaration(this);

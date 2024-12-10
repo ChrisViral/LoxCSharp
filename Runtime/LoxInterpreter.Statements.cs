@@ -175,7 +175,8 @@ public sealed partial class LoxInterpreter
         Dictionary<string, FunctionDefinition> methods = new(declaration.Methods.Count, StringComparer.Ordinal);
         foreach (MethodDeclaration methodDeclaration in declaration.Methods)
         {
-            methods[methodDeclaration.Identifier.Lexeme] = new FunctionDefinition(methodDeclaration, this.CurrentEnvironment.Capture(), FunctionKind.METHOD);
+            FunctionKind kind = methodDeclaration.Identifier.Lexeme is LoxType.CONSTRUCTOR ? FunctionKind.CONSTRUCTOR : FunctionKind.METHOD;
+            methods[methodDeclaration.Identifier.Lexeme] = new FunctionDefinition(methodDeclaration, this.CurrentEnvironment.Capture(), kind);
         }
 
         TypeDefinition typeDefinition = new(declaration.Identifier, methods);

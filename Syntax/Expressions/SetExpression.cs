@@ -8,7 +8,7 @@ namespace Lox.Syntax.Expressions;
 /// <param name="Target">Access target</param>
 /// <param name="Identifier">Access identifier</param>
 /// <param name="Value">Value to set</param>
-public sealed record SetExpression(LoxExpression Target, Token Identifier, LoxExpression Value) : LoxExpression
+public sealed record SetExpression(LoxExpression Target, in Token Identifier, LoxExpression Value) : LoxExpression
 {
     /// <inheritdoc />
     public override void Accept(IExpressionVisitor visitor) => visitor.VisitSetExpression(this);

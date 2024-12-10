@@ -8,7 +8,7 @@ namespace Lox.Syntax.Statements.Declarations;
 /// </summary>
 /// <param name="Identifier">Variable identifier</param>
 /// <param name="Initializer">Variable initializing expression</param>
-public sealed record VariableDeclaration(Token Identifier, LoxExpression? Initializer) : LoxDeclaration(Identifier)
+public sealed record VariableDeclaration(in Token Identifier, LoxExpression? Initializer) : LoxDeclaration(Identifier)
 {
     /// <inheritdoc />
     public override void Accept(IStatementVisitor visitor) => visitor.VisitVariableDeclaration(this);

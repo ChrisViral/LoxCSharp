@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Lox.Runtime;
 using Lox.Runtime.Types.Functions;
+using Lox.Runtime.Types.Types;
 using Lox.Scanning;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
@@ -57,6 +58,10 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// Current resolver function kind
     /// </summary>
     private FunctionKind currentFunctionKind;
+    /// <summary>
+    /// Current resolver type kind
+    /// </summary>
+    private TypeKind currentTypeKind;
     #endregion
 
     #region Resolver
@@ -192,6 +197,11 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
 
         if (statement.Value is not null)
         {
+            if (this.currentFunctionKind is FunctionKind.CONSTRUCTOR)
+            {
+                LoxErrorUtils.ReportParseError(statement.Keyword, "Can't return a value from an initializer.");
+            }
+
             Resolve(statement.Value);
         }
     }
@@ -282,17 +292,40 @@ public sealed class LoxResolver(LoxInterpreter interpreter) : IExpressionVisitor
     /// <inheritdoc />
     public void VisitClassDeclaration(ClassDeclaration declaration)
     {
+        TypeKind enclosingKind = this.currentTypeKind;
+        this.currentTypeKind = TypeKind.CLASS;
+
         DeclareVariable(declaration.Identifier, State.DEFINED);
+
+        OpenScope();
+        DeclareVariable(Token.This, State.DEFINED);
+
         foreach (MethodDeclaration method in declaration.Methods)
         {
-            ResolveFunction(method, FunctionKind.METHOD);
+            FunctionKind kind = method.Identifier.Lexeme == LoxType.CONSTRUCTOR ? FunctionKind.CONSTRUCTOR : FunctionKind.METHOD;
+            ResolveFunction(method, kind);
         }
+
+        CloseScope();
+        this.currentTypeKind = enclosingKind;
     }
     #endregion
 
     #region Expression visitor
     /// <inheritdoc />
     public void VisitLiteralExpression(LiteralExpression expression) { }
+
+    /// <inheritdoc />
+    public void VisitThisExpression(ThisExpression expression)
+    {
+        if (this.currentTypeKind is TypeKind.NONE)
+        {
+            LoxErrorUtils.ReportParseError(expression.Keyword, "Can't use 'this' outside of a class.");
+            return;
+        }
+
+        ResolveLocal(expression, expression.Keyword);
+    }
 
     /// <inheritdoc />
     public void VisitVariableExpression(VariableExpression expression)

@@ -6,4 +6,4 @@ namespace Lox.Syntax.Statements.Declarations;
 /// Lox declaration statement
 /// </summary>
 /// <param name="Identifier">Variable identifier</param>
-public abstract record LoxDeclaration(Token Identifier) : LoxStatement;
+public abstract record LoxDeclaration(in Token Identifier) : LoxStatement;

@@ -7,7 +7,7 @@ namespace Lox.Syntax.Expressions;
 /// </summary>
 /// <param name="Identifier">Variable identifier</param>
 /// <param name="Value">Value to assign</param>
-public sealed record AssignmentExpression(Token Identifier, LoxExpression Value) : LoxExpression
+public sealed record AssignmentExpression(in Token Identifier, LoxExpression Value) : LoxExpression
 {
     /// <inheritdoc />
     public override void Accept(IExpressionVisitor visitor) => visitor.VisitAssignmentExpression(this);

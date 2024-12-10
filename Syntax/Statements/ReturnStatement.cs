@@ -8,7 +8,7 @@ namespace Lox.Syntax.Statements;
 /// </summary>
 /// <param name="Keyword">Return keyword</param>
 /// <param name="Value">Expression to print</param>
-public sealed record ReturnStatement(Token Keyword, LoxExpression? Value) : LoxStatement
+public sealed record ReturnStatement(in Token Keyword, LoxExpression? Value) : LoxStatement
 {
     /// <inheritdoc />
     public override void Accept(IStatementVisitor visitor) => visitor.VisitReturnStatement(this);

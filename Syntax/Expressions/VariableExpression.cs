@@ -6,7 +6,7 @@ namespace Lox.Syntax.Expressions;
 /// Variable expression
 /// </summary>
 /// <param name="Identifier">Variable identifier</param>
-public sealed record VariableExpression(Token Identifier) : LoxExpression
+public sealed record VariableExpression(in Token Identifier) : LoxExpression
 {
     /// <inheritdoc />
     public override void Accept(IExpressionVisitor visitor) => visitor.VisitVariableExpression(this);
