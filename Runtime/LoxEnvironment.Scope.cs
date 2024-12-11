@@ -41,7 +41,7 @@ public partial class LoxEnvironment
         {
             get => this.values.TryGetValue(identifier.Lexeme, out LoxValue value)
                        ? value
-                       : throw new LoxRuntimeException($"Undefined variable'{identifier.Lexeme}'.", identifier);
+                       : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);
             set => this.values[identifier.Lexeme] = this.values.ContainsKey(identifier.Lexeme)
                                                         ? value
                                                         : throw new LoxRuntimeException($"Undefined variable '{identifier.Lexeme}'.", identifier);

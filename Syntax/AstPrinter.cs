@@ -23,6 +23,9 @@ public class AstPrinter : IExpressionVisitor<string>
     public string VisitThisExpression(ThisExpression expression) => "(this)";
 
     /// <inheritdoc />
+    public string VisitSuperExpression(SuperExpression expression) => $"(super {expression.MethodIdentifier.Lexeme})";
+
+    /// <inheritdoc />
     public string VisitVariableExpression(VariableExpression expression) => expression.Identifier.Lexeme;
 
     /// <inheritdoc />

@@ -73,6 +73,7 @@ public sealed class FunctionDefinition : LoxFunction
     public LoxFunction Bind(LoxInstance instance)
     {
         LoxEnvironment binding = this.closure.Capture();
+        binding.PushScope();
         binding.DefineVariable(Token.This, instance);
         return new FunctionDefinition(this.declaration, binding, this.Kind);
     }

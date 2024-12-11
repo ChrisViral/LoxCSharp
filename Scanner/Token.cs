@@ -17,6 +17,11 @@ public readonly record struct Token(TokenType Type, string Lexeme, LoxValue Lite
     /// <see langword="this"/> token
     /// </summary>
     public static Token This { get; } = new(TokenType.THIS, -1);
+
+    /// <summary>
+    /// Super token
+    /// </summary>
+    public static Token Super { get; } = new(TokenType.SUPER, -1);
     #endregion
 
     #region Properties

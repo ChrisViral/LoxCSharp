@@ -369,6 +369,12 @@ public class LoxFormatter : IExpressionVisitor, IStatementVisitor
     public void VisitThisExpression(ThisExpression expression) => this.codeBuilder.Append("this");
 
     /// <inheritdoc />
+    public void VisitSuperExpression(SuperExpression expression)
+    {
+        this.codeBuilder.Append("super.").Append(expression.MethodIdentifier.Lexeme);
+    }
+
+    /// <inheritdoc />
     public void VisitVariableExpression(VariableExpression expression)
     {
         this.codeBuilder.Append(expression.Identifier.Lexeme);

@@ -23,6 +23,9 @@ public sealed partial class LoxResolver
     }
 
     /// <inheritdoc />
+    public void VisitSuperExpression(SuperExpression expression) => ResolveLocal(expression, expression.Keyword);
+
+    /// <inheritdoc />
     public void VisitVariableExpression(VariableExpression expression)
     {
         if (this.scopes.TryPeek(out Scope? scope)

@@ -1,5 +1,6 @@
 ﻿using Lox.Exceptions.Runtime;
 using Lox.Runtime;
+using Lox.Runtime.Functions;
 using Lox.Runtime.Types;
 using Lox.Scanner;
 using Lox.Syntax.Expressions;
@@ -14,6 +15,22 @@ public sealed partial class LoxInterpreter
 
     /// <inheritdoc />
     public LoxValue VisitThisExpression(ThisExpression expression) => ResolveVariable(expression.Keyword, expression);
+
+    /// <inheritdoc />
+    public LoxValue VisitSuperExpression(SuperExpression expression)
+    {
+        Index superIndex = this.locals[expression];
+        LoxValue superclassValue = this.CurrentEnvironment.GetVariableAt(Token.Super, superIndex);
+        if (!superclassValue.TryGetObject(out LoxType? superclass)) throw new LoxRuntimeException("Super value must be a type.", expression.Keyword);
+
+        Index thisIndex = superIndex.IsFromEnd ? new Index(superIndex.Value - 1, true) : new Index(superIndex.Value + 1);
+        LoxValue instanceValue = this.CurrentEnvironment.GetVariableAt(Token.This, thisIndex);
+        if (!instanceValue.TryGetObject(out LoxInstance? instance)) throw new LoxRuntimeException("This value must be an instance.", expression.Keyword);
+
+        if (!superclass!.TryGetMethod(expression.MethodIdentifier, out FunctionDefinition? method)) throw new LoxRuntimeException($"Undefined property '{expression.MethodIdentifier.Lexeme}'.", expression.MethodIdentifier);
+
+        return method.Bind(instance!);
+    }
 
     /// <inheritdoc />
     public LoxValue VisitVariableExpression(VariableExpression expression) => ResolveVariable(expression.Identifier, expression);

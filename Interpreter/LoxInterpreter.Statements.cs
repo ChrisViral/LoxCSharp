@@ -4,6 +4,7 @@ using Lox.Interrupts;
 using Lox.Runtime;
 using Lox.Runtime.Functions;
 using Lox.Runtime.Types;
+using Lox.Scanner;
 using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 
@@ -183,6 +184,12 @@ public sealed partial class LoxInterpreter
 
         this.CurrentEnvironment.DefineVariable(declaration.Identifier);
 
+        if (superclass is not null)
+        {
+            this.CurrentEnvironment.PushScope();
+            this.CurrentEnvironment.DefineVariable(Token.Super, superclass);
+        }
+
         Dictionary<string, FunctionDefinition> methods = new(declaration.Methods.Count, StringComparer.Ordinal);
         foreach (MethodDeclaration methodDeclaration in declaration.Methods)
         {
@@ -191,6 +198,12 @@ public sealed partial class LoxInterpreter
         }
 
         TypeDefinition typeDefinition = new(declaration.Identifier, superclass, methods);
+
+        if (superclass is not null)
+        {
+            this.CurrentEnvironment.PopScope();
+        }
+
         this.CurrentEnvironment.SetVariable(declaration.Identifier, typeDefinition);
     }
     #endregion

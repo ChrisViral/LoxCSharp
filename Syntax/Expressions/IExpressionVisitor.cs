@@ -18,6 +18,12 @@ public interface IExpressionVisitor
     void VisitThisExpression(ThisExpression expression);
 
     /// <summary>
+    /// Handles <see cref="SuperExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    void VisitSuperExpression(SuperExpression expression);
+
+    /// <summary>
     /// Handles <see cref="VariableExpression"/> visits
     /// </summary>
     /// <param name="expression">Expression visited</param>
@@ -92,6 +98,12 @@ public interface IExpressionVisitor<out T>
     /// </summary>
     /// <param name="expression">Expression visited</param>
     T VisitThisExpression(ThisExpression expression);
+
+    /// <summary>
+    /// Handles <see cref="SuperExpression"/> visits
+    /// </summary>
+    /// <param name="expression">Expression visited</param>
+    T VisitSuperExpression(SuperExpression expression);
 
     /// <summary>
     /// Handles <see cref="VariableExpression"/> visits

@@ -136,6 +136,9 @@ public sealed partial class LoxResolver
             }
 
             Resolve(declaration.Superclass);
+
+            OpenScope();
+            DeclareVariable(Token.Super, State.DEFINED);
         }
 
         OpenScope();
@@ -148,6 +151,12 @@ public sealed partial class LoxResolver
         }
 
         CloseScope();
+
+        if (declaration.Superclass is not null)
+        {
+            CloseScope();
+        }
+
         this.currentTypeKind = enclosingKind;
     }
     #endregion

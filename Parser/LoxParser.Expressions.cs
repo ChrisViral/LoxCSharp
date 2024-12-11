@@ -255,6 +255,11 @@ public partial class LoxParser
             case TokenType.THIS:
                 return new ThisExpression(currentToken);
 
+            case TokenType.SUPER:
+                EnsureNextToken(tokens, TokenType.DOT, "Expect '.' after 'super'.");
+                Token methodIdentifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, "Expect superclass method name.");
+                return new SuperExpression(currentToken, methodIdentifier);
+
             case TokenType.IDENTIFIER:
                 return new VariableExpression(currentToken);
 
