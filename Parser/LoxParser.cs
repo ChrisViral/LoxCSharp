@@ -6,7 +6,7 @@ using Lox.Scanner;
 using Lox.Syntax.Statements;
 using Lox.Utils;
 
-namespace Lox.Parser;
+namespace Lox;
 
 /// <summary>
 /// Lox source file parser

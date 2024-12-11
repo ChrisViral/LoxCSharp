@@ -7,7 +7,7 @@ using Lox.Runtime.Types;
 using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 
-namespace Lox.Interpreter;
+namespace Lox;
 
 public sealed partial class LoxInterpreter
 {

@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Lox.Interpreter;
 using Lox.Runtime.Functions;
 using Lox.Runtime.Types;
 using Lox.Scanner;
@@ -8,7 +7,7 @@ using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 using Lox.Utils;
 
-namespace Lox.Resolver;
+namespace Lox;
 
 /// <summary>
 /// Lox resolver

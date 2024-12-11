@@ -1,5 +1,4 @@
-﻿using Lox.Interpreter;
-using Lox.Interrupts;
+﻿using Lox.Interrupts;
 using Lox.Runtime.Types;
 using Lox.Scanner;
 using Lox.Syntax.Statements.Declarations;

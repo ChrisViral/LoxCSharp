@@ -1,6 +1,4 @@
-﻿using Lox.Interpreter;
-
-namespace Lox.Runtime;
+﻿namespace Lox.Runtime;
 
 /// <summary>
 /// Lox invokable interface

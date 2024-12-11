@@ -4,7 +4,7 @@ using Lox.Runtime.Types;
 using Lox.Scanner;
 using Lox.Syntax.Expressions;
 
-namespace Lox.Interpreter;
+namespace Lox;
 
 public sealed partial class LoxInterpreter
 {

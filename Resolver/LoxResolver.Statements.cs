@@ -5,7 +5,7 @@ using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 using Lox.Utils;
 
-namespace Lox.Resolver;
+namespace Lox;
 
 public sealed partial class LoxResolver
 {

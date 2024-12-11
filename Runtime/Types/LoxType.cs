@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Lox.Exceptions.Runtime;
-using Lox.Interpreter;
 using Lox.Runtime.Functions;
 using Lox.Scanner;
 

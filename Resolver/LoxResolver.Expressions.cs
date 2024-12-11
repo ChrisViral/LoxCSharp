@@ -2,7 +2,7 @@
 using Lox.Syntax.Expressions;
 using Lox.Utils;
 
-namespace Lox.Resolver;
+namespace Lox;
 
 public sealed partial class LoxResolver
 {

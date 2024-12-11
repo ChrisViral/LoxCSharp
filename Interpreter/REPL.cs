@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reflection;
-using Lox.Parser;
 using Lox.Scanner;
 using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
 using Lox.Utils;
 
-namespace Lox.Interpreter;
+namespace Lox;
 
 /// <summary>
 /// Lox REPL helper

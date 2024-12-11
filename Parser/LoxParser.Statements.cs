@@ -7,7 +7,7 @@ using Lox.Syntax.Statements;
 using Lox.Syntax.Statements.Declarations;
 using Lox.Utils;
 
-namespace Lox.Parser;
+namespace Lox;
 
 public partial class LoxParser
 {

@@ -5,7 +5,7 @@ using Lox.Syntax.Expressions;
 using Lox.Syntax.Statements;
 using Lox.Utils;
 
-namespace Lox.Interpreter;
+namespace Lox;
 
 /// <summary>
 /// Lox program interpreter
