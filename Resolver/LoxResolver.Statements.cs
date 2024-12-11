@@ -128,6 +128,16 @@ public sealed partial class LoxResolver
 
         DeclareVariable(declaration.Identifier, State.DEFINED);
 
+        if (declaration.Superclass is not null)
+        {
+            if (declaration.Identifier.Lexeme == declaration.Superclass.Identifier.Lexeme)
+            {
+                LoxErrorUtils.ReportParseError(declaration.Superclass.Identifier, "A class can't inherit from itself.");
+            }
+
+            Resolve(declaration.Superclass);
+        }
+
         OpenScope();
         DeclareVariable(Token.This, State.DEFINED);
 

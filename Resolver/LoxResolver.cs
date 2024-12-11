@@ -108,7 +108,7 @@ public sealed partial class LoxResolver(LoxInterpreter interpreter) : IExpressio
         Scope popped = this.scopes.Pop();
         foreach ((Token identifier, _, int usages) in popped.Values)
         {
-            if (usages is 0)
+            if (identifier.Type is not TokenType.THIS && usages is 0)
             {
                 LoxErrorUtils.ReportParseWarning(identifier, $"Unused variable '{identifier.Lexeme}'.");
             }

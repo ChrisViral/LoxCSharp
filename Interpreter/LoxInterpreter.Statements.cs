@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Lox.Exceptions.Runtime;
 using Lox.Interrupts;
 using Lox.Runtime;
 using Lox.Runtime.Functions;
@@ -170,6 +171,16 @@ public sealed partial class LoxInterpreter
     /// <inheritdoc />
     public void VisitClassDeclaration(ClassDeclaration declaration)
     {
+        LoxType? superclass = null;
+        if (declaration.Superclass is not null)
+        {
+            LoxValue superclassValue = Evaluate(declaration.Superclass);
+            if (!superclassValue.TryGetObject<LoxType>(out superclass))
+            {
+                throw new LoxRuntimeException("Superclass must be a class.", declaration.Superclass.Identifier);
+            }
+        }
+
         this.CurrentEnvironment.DefineVariable(declaration.Identifier);
 
         Dictionary<string, FunctionDefinition> methods = new(declaration.Methods.Count, StringComparer.Ordinal);
@@ -179,7 +190,7 @@ public sealed partial class LoxInterpreter
             methods[methodDeclaration.Identifier.Lexeme] = new FunctionDefinition(methodDeclaration, this.CurrentEnvironment.Capture(), kind);
         }
 
-        TypeDefinition typeDefinition = new(declaration.Identifier, methods);
+        TypeDefinition typeDefinition = new(declaration.Identifier, superclass, methods);
         this.CurrentEnvironment.SetVariable(declaration.Identifier, typeDefinition);
     }
     #endregion

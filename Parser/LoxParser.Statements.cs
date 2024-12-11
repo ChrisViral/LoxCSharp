@@ -133,6 +133,14 @@ public partial class LoxParser
     private ClassDeclaration ParseClassDeclaration(in ReadOnlySpan<Token> tokens)
     {
         Token identifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, "Expect class name.");
+
+        VariableExpression? superclass = null;
+        if (TryMatchToken(tokens, TokenType.LESS, out _))
+        {
+            Token superclassIdentifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, "Expect superclass name.");
+            superclass = new VariableExpression(superclassIdentifier);
+        }
+
         EnsureNextToken(tokens, TokenType.LEFT_BRACE, "Expect '{' before class body.");
         ReadOnlyCollection<MethodDeclaration> methods;
         if (CheckEOF(tokens) || CheckCurrentToken(tokens, TokenType.RIGHT_BRACE))
@@ -152,7 +160,7 @@ public partial class LoxParser
         }
 
         EnsureNextToken(tokens, TokenType.RIGHT_BRACE, "Expect '}' after class body.");
-        return new ClassDeclaration(identifier, methods);
+        return new ClassDeclaration(identifier, superclass, methods);
     }
 
     /// <summary>

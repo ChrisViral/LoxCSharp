@@ -35,18 +35,27 @@ public abstract class LoxType : LoxObject, IInvokable
     protected readonly Dictionary<string, FunctionDefinition> methods;
     #endregion
 
+    #region Properties
+    /// <summary>
+    /// Superclass of this type
+    /// </summary>
+    public LoxType? Superclass { get; protected init; }
+    #endregion
+
     #region Constructors
     /// <summary>
     /// Lox type object
     /// </summary>
     /// <param name="identifier">Type identifier</param>
+    /// <param name="superclass">Superclass of this type</param>
     /// <param name="methods">Type methods</param>
     /// <param name="kind">Type kind</param>
-    protected LoxType(in Token identifier, Dictionary<string, FunctionDefinition> methods, TypeKind kind)
+    protected LoxType(in Token identifier, LoxType? superclass, Dictionary<string, FunctionDefinition> methods, TypeKind kind)
     {
+        this.Identifier = identifier;
+        this.Superclass = superclass;
         this.methods    = methods;
         this.Kind       = kind;
-        this.Identifier = identifier;
         if (this.methods.TryGetValue(CONSTRUCTOR, out FunctionDefinition? constructor))
         {
             this.Arity = constructor.Arity;
@@ -76,7 +85,8 @@ public abstract class LoxType : LoxObject, IInvokable
     /// <param name="identifier">Method identifier</param>
     /// <param name="method">Method definition, if found</param>
     /// <returns><see langword="true"/> if the method was found, otherwise <see langword="false"/></returns>
-    public virtual bool TryGetMethod(in Token identifier, [MaybeNullWhen(false)] out FunctionDefinition method) => this.methods.TryGetValue(identifier.Lexeme, out method);
+    public virtual bool TryGetMethod(in Token identifier, [MaybeNullWhen(false)] out FunctionDefinition method) => this.methods.TryGetValue(identifier.Lexeme, out method)
+                                                                                                                || (this.Superclass?.TryGetMethod(identifier, out method) ?? false);
 
     /// <inheritdoc />
     public virtual LoxValue Invoke(LoxInterpreter interpreter, in ReadOnlySpan<LoxValue> arguments)
