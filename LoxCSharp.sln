@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lox.Interpreter", "Lox.Inte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lox.Common", "Lox.Common\Lox.Common.csproj", "{3BD80877-16EF-47D4-8221-DC0EE2EA687C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lox.VM", "Lox.VM\Lox.VM.csproj", "{8C4F4EA9-8F30-4B15-9FB9-B426D4C5F067}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{3BD80877-16EF-47D4-8221-DC0EE2EA687C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BD80877-16EF-47D4-8221-DC0EE2EA687C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BD80877-16EF-47D4-8221-DC0EE2EA687C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C4F4EA9-8F30-4B15-9FB9-B426D4C5F067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C4F4EA9-8F30-4B15-9FB9-B426D4C5F067}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C4F4EA9-8F30-4B15-9FB9-B426D4C5F067}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C4F4EA9-8F30-4B15-9FB9-B426D4C5F067}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
