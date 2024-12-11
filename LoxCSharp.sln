@@ -5,6 +5,8 @@ VisualStudioVersion = 25.0.1700.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lox.Interpreter", "Lox.Interpreter\Lox.Interpreter.csproj", "{08AEDCCA-10D2-4981-A45C-00034A41A88A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lox.Common", "Lox.Common\Lox.Common.csproj", "{3BD80877-16EF-47D4-8221-DC0EE2EA687C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{08AEDCCA-10D2-4981-A45C-00034A41A88A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08AEDCCA-10D2-4981-A45C-00034A41A88A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08AEDCCA-10D2-4981-A45C-00034A41A88A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BD80877-16EF-47D4-8221-DC0EE2EA687C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BD80877-16EF-47D4-8221-DC0EE2EA687C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BD80877-16EF-47D4-8221-DC0EE2EA687C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BD80877-16EF-47D4-8221-DC0EE2EA687C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

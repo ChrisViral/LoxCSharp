@@ -16,4 +16,8 @@
     <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Lox.Common\Lox.Common.csproj" />
+  </ItemGroup>
+
 </Project>
