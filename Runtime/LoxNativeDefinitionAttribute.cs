@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Lox.Runtime.Functions.Native;
+namespace Lox.Runtime;
 
 /// <summary>
 /// Lox native definition

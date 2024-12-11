@@ -13,6 +13,7 @@ public enum TypeKind
 {
     NONE,
     CLASS,
+    SUBCLASS
 }
 
 /// <summary>

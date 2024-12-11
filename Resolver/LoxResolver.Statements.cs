@@ -130,6 +130,7 @@ public sealed partial class LoxResolver
 
         if (declaration.Superclass is not null)
         {
+            this.currentTypeKind = TypeKind.SUBCLASS;
             if (declaration.Identifier.Lexeme == declaration.Superclass.Identifier.Lexeme)
             {
                 LoxErrorUtils.ReportParseError(declaration.Superclass.Identifier, "A class can't inherit from itself.");

@@ -23,7 +23,22 @@ public sealed partial class LoxResolver
     }
 
     /// <inheritdoc />
-    public void VisitSuperExpression(SuperExpression expression) => ResolveLocal(expression, expression.Keyword);
+    public void VisitSuperExpression(SuperExpression expression)
+    {
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+        switch (this.currentTypeKind)
+        {
+            case TypeKind.NONE:
+                LoxErrorUtils.ReportParseError(expression.Keyword, "Can't use 'super' outside of a class.");
+                break;
+
+            case TypeKind.CLASS:
+                LoxErrorUtils.ReportParseError(expression.Keyword, "Can't use 'super' in a class with no superclass.");
+                break;
+        }
+
+        ResolveLocal(expression, expression.Keyword);
+    }
 
     /// <inheritdoc />
     public void VisitVariableExpression(VariableExpression expression)
