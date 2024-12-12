@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace Lox.VM;
+namespace Lox.VM.Bytecode;
 
 public partial class LoxChunk
 {
@@ -19,11 +19,18 @@ public partial class LoxChunk
         #endregion
 
         #region Properties
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the current bytecode data
+        /// </summary>
         public (byte bytecode, int offset, int line) Current => (chunk.code[this.currentIndex], this.currentIndex, this.currentLine);
 
+        /// <summary>
+        /// Gets the current instruction from the bytecode
+        /// </summary>
+        public (Opcode instruction, int offset, int line) CurrentInstruction => ((Opcode)chunk.code[this.currentIndex], this.currentIndex, this.currentLine);
+
         /// <inheritdoc />
-        object? IEnumerator.Current => this.Current;
+        object IEnumerator.Current => this.Current;
         #endregion
 
         #region Methods
@@ -44,6 +51,16 @@ public partial class LoxChunk
             this.lineRepeat  = this.currentLine;
             this.currentLine = chunk.lines[this.lineIndex++];
             return true;
+        }
+
+        /// <summary>
+        /// Get the next byte from the bytecode
+        /// </summary>
+        /// <returns>Next byte in the bytecode</returns>
+        public byte NextByte()
+        {
+            MoveNext();
+            return chunk.code[this.currentIndex];
         }
 
         /// <inheritdoc />

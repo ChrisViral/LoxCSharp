@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Lox.VM;
+namespace Lox.VM.Runtime;
 
 public readonly struct LoxValue(in double value)
 {

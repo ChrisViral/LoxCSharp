@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Lox.Common.Utils;
+using Lox.VM.Bytecode;
 
 namespace Lox.VM.Utils;
 
@@ -31,7 +32,6 @@ public static class BytecodeUtils
             previousLine = currentLine;
             PrintInstruction(chunk, ref enumerator, newLine);
         }
-
         Console.Write(BytecodePrinter.ToString());
         BytecodePrinter.Clear();
     }
@@ -44,8 +44,7 @@ public static class BytecodeUtils
     /// <param name="newLine">If the instruction is on a new line or not</param>
     private static void PrintInstruction(LoxChunk chunk, ref LoxChunk.BytecodeEnumerator enumerator, bool newLine)
     {
-        (byte bytecode, int offset, int line) = enumerator.Current;
-        Opcode instruction = (Opcode)bytecode;
+        (Opcode instruction, int offset, int line) = enumerator.CurrentInstruction;
         if (newLine)
         {
             BytecodePrinter.Append($"{offset:D4} {line,4} ");
@@ -57,6 +56,7 @@ public static class BytecodeUtils
 
         switch (instruction)
         {
+            case Opcode.OP_NOP:
             case Opcode.OP_RETURN:
                 PrintSimpleInstruction(instruction);
                 break;
@@ -88,8 +88,7 @@ public static class BytecodeUtils
     /// <param name="enumerator">Current bytecode enumerator</param>
     private static void PrintConstantInstruction(LoxChunk chunk, ref LoxChunk.BytecodeEnumerator enumerator)
     {
-        enumerator.MoveNext();
-        byte index = enumerator.Current.bytecode;
+        int index = enumerator.NextByte();
         BytecodePrinter.AppendLine($"{EnumUtils.ToString(Opcode.OP_CONSTANT),-16} {index:D4} '{chunk.GetConstant(index)}'");
     }
 
@@ -100,12 +99,10 @@ public static class BytecodeUtils
     /// <param name="enumerator">Current bytecode enumerator</param>
     private static void PrintLongConstantInstruction(LoxChunk chunk, ref LoxChunk.BytecodeEnumerator enumerator)
     {
-        enumerator.MoveNext();
-        int index  = enumerator.Current.bytecode << 16;
-        enumerator.MoveNext();
-        index |= enumerator.Current.bytecode << 8;
-        enumerator.MoveNext();
-        index |= enumerator.Current.bytecode;
+        byte a = enumerator.NextByte();
+        byte b = enumerator.NextByte();
+        byte c = enumerator.NextByte();
+        int index = BitConverter.ToInt32([a, b, c, 0]);
         BytecodePrinter.AppendLine($"{EnumUtils.ToString(Opcode.OP_CONSTANT_LONG),-16} {index:D4} '{chunk.GetConstant(index)}'");
     }
     #endregion

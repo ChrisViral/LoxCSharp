@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using Lox.VM.Runtime;
 
-namespace Lox.VM;
+namespace Lox.VM.Bytecode;
 
 /// <summary>
 /// Lox bytecode chunk
@@ -12,23 +13,36 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
 {
     #region Fields
     private int version;
-    private readonly List<byte> code = [];
+    private readonly List<byte> code       = [];
     private readonly List<LoxValue> values = [];
-    private readonly List<int> lines = [];
+    private readonly List<int> lines       = [];
     #endregion
 
     #region Properties
-    /// <inheritdoc cref="IList{T}.Count" />
+    /// <inheritdoc cref="List{T}.Count" />
     public int Count => this.code.Count;
     #endregion
 
     #region Indexer
-    /// <inheritdoc cref="IList{T}.this" />
+    /// <inheritdoc cref="List{T}.this[int]" />
     public byte this[int index]
     {
         get => this.code[index];
         set => this.code[index] = value;
     }
+
+    /// <inheritdoc cref="List{T}.this" />
+    public byte this[in Index index]
+    {
+        get => this.code[index];
+        set => this.code[index] = value;
+    }
+
+    /// <summary>
+    /// Gets a readonly span over a specified range of the bytecode
+    /// </summary>
+    /// <param name="range">Range to get</param>
+    public ReadOnlySpan<byte> this[in Range range] => CollectionsMarshal.AsSpan(this.code)[range];
     #endregion
 
     #region Methods
@@ -58,16 +72,15 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
 
         if (index > byte.MaxValue)
         {
-            this.code.Add((byte)Opcode.OP_CONSTANT_LONG);
-            this.code.Add((byte)((index & 0xFF0000) >> 16));
-            this.code.Add((byte)((index & 0x00FF00) >> 8));
-            this.code.Add((byte)(index & 0x0000FF));
+            Span<byte> bytes = stackalloc byte[5];
+            bytes[0] = (byte)Opcode.OP_CONSTANT_LONG;
+            BitConverter.TryWriteBytes(bytes[1..], index);
+            this.code.AddRange(bytes[..4]);
             AddLine(line, 4);
         }
         else
         {
-            this.code.Add((byte)Opcode.OP_CONSTANT);
-            this.code.Add((byte)index);
+            this.code.AddRange((byte)Opcode.OP_CONSTANT, (byte)index);
             AddLine(line, 2);
         }
 
@@ -86,7 +99,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="line">Line to add</param>
     /// <param name="repeats">How many time the line appears</param>
-    private void AddLine(in int line, int repeats = 1)
+    private void AddLine(in int line, in int repeats = 1)
     {
         // No lines stored
         if (this.lines.Count is 0)
@@ -173,6 +186,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// <inheritdoc cref="List{T}.Clear" />
     public void Clear()
     {
+        this.version = 0;
         this.code.Clear();
         this.values.Clear();
         this.lines.Clear();

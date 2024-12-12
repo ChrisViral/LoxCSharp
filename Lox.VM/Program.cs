@@ -1,4 +1,6 @@
 ﻿using Lox.VM;
+using Lox.VM.Bytecode;
+using Lox.VM.Runtime;
 using Lox.VM.Utils;
 
 LoxChunk chunk = new();
