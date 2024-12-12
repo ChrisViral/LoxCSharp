@@ -4,10 +4,8 @@ using Lox.VM.Utils;
 
 Console.WriteLine("Hello, World!");
 
-Chunk test = [];
+LoxChunk chunk = new();
 
-int constant = test.AddConstant(new LoxValue(1.2d));
-test.Add((byte)Opcode.OP_CONSTANT);
-test.Add((byte)constant);
-test.Add((byte)Opcode.OP_RETURN);
-BytecodeUtils.PrintChunk(test, "test chunk");
+chunk.AddConstant(new LoxValue(1.2d));
+chunk.AddOpcode(Opcode.OP_RETURN);
+BytecodeUtils.PrintChunk(chunk, "test chunk");

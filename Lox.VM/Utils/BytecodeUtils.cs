@@ -9,7 +9,7 @@ public static class BytecodeUtils
     /// </summary>
     /// <param name="chunk">Chunk to print</param>
     /// <param name="name">Chunk name</param>
-    public static void PrintChunk(Chunk chunk, string name)
+    public static void PrintChunk(LoxChunk chunk, string name)
     {
         Console.WriteLine($"== {name} ==");
         for (int offset = 0; offset < chunk.Count; )
@@ -23,7 +23,7 @@ public static class BytecodeUtils
     /// </summary>
     /// <param name="chunk">Code chunk</param>
     /// <param name="offset">Current offset</param>
-    private static void PrintInstruction(Chunk chunk, ref int offset)
+    private static void PrintInstruction(LoxChunk chunk, ref int offset)
     {
         Console.Write($"{offset:D4}\t");
         Opcode instruction = (Opcode)chunk[offset];
@@ -60,7 +60,7 @@ public static class BytecodeUtils
     /// </summary>
     /// <param name="chunk">Current chunk</param>
     /// <param name="offset">Current offset</param>
-    private static void PrintConstantInstruction(Chunk chunk, ref int offset)
+    private static void PrintConstantInstruction(LoxChunk chunk, ref int offset)
     {
         byte index = chunk[++offset];
         Console.Write($"{EnumUtils.ToString(Opcode.OP_CONSTANT),-16}{index:D4} ");
