@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Lox.VM.Bytecode;
 using Lox.VM.Exceptions;
@@ -22,10 +23,11 @@ public enum InterpretResult
 /// </summary>
 /// <param name="chunk">Lox code chunk to interpret</param>
 [PublicAPI]
-public class VirtualMachine(LoxChunk chunk)
+public partial class VirtualMachine(LoxChunk chunk)
 {
     private unsafe byte* bytecode;
     private unsafe byte* instructionPointer;
+    private Stack stack;
 
     /// <summary>
     /// If the VM is currently running
@@ -44,6 +46,7 @@ public class VirtualMachine(LoxChunk chunk)
         this.IsRunning = true;
         ReadOnlySpan<byte> bytecodeSpan = chunk.AsSpan();
         IntPtr handle = Marshal.AllocHGlobal(bytecodeSpan.Length);
+        this.stack = new Stack();
         try
         {
             this.bytecode           = (byte*)handle.ToPointer();
@@ -58,6 +61,7 @@ public class VirtualMachine(LoxChunk chunk)
         finally
         {
             Marshal.FreeHGlobal(handle);
+            this.stack.Dispose();
             this.bytecode           = null;
             this.instructionPointer = null;
             this.IsRunning          = false;
@@ -69,12 +73,17 @@ public class VirtualMachine(LoxChunk chunk)
     /// </summary>
     /// <returns></returns>
     /// <exception cref="LoxUnknownOpcodeException">When an unknown opcode is encountered</exception>
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private InterpretResult Run()
     {
         while (true)
         {
             #if DEBUG_TRACE
-            unsafe { BytecodeUtils.PrintInstruction(chunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode)); }
+            unsafe
+            {
+                BytecodeUtils.PrintInstruction(chunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode));
+                this.stack.PrintStack();
+            }
             #endif
 
             Opcode instruction = (Opcode)ReadByte();
@@ -84,14 +93,15 @@ public class VirtualMachine(LoxChunk chunk)
                     break;
 
                 case Opcode.CONSTANT:
-                    PrintValue(ReadConstant());
+                    this.stack.Push(ReadConstant());
                     break;
 
                 case Opcode.CONSTANT_LONG:
-                    PrintValue(ReadConstant(true));
+                    this.stack.Push(ReadLongConstant());
                     break;
 
                 case Opcode.RETURN:
+                    PrintValue(this.stack.Pop());
                     return InterpretResult.SUCCESS;
 
                 default:
@@ -104,28 +114,27 @@ public class VirtualMachine(LoxChunk chunk)
     /// Reads the next bytecode
     /// </summary>
     /// <returns>Next bytecode value</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe byte ReadByte() => *this.instructionPointer++;
 
     /// <summary>
     /// Reads the next constant in the bytecode
     /// </summary>
-    /// <param name="isLong">If the constant is stored with 24bits instead of 8</param>
     /// <returns>Stored constant value</returns>
-    private LoxValue ReadConstant(in bool isLong = false)
-    {
-        int index;
-        if (isLong)
-        {
-            byte a = ReadByte();
-            byte b = ReadByte();
-            byte c = ReadByte();
-            index = BitConverter.ToInt32([a, b, c, 0]);
-        }
-        else
-        {
-            index = ReadByte();
-        }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private LoxValue ReadConstant() => chunk.GetConstant(ReadByte());
 
+    /// <summary>
+    /// Reads the next 24bit constant in the bytecode
+    /// </summary>
+    /// <returns>Stored constant value</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private LoxValue ReadLongConstant()
+    {
+        byte a = ReadByte();
+        byte b = ReadByte();
+        byte c = ReadByte();
+        int index = BitConverter.ToInt32([a, b, c, 0]);
         return chunk.GetConstant(index);
     }
 
@@ -133,5 +142,6 @@ public class VirtualMachine(LoxChunk chunk)
     /// Prints the given value
     /// </summary>
     /// <param name="value">Value to print</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void PrintValue(in LoxValue value) => Console.WriteLine(value.ToString());
 }
