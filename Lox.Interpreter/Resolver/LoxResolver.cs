@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Lox.Common;
 using Lox.Interpreter.Runtime.Functions;
 using Lox.Interpreter.Runtime.Types;
 using Lox.Interpreter.Scanner;

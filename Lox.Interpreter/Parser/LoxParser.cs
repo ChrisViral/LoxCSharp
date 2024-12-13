@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Lox.Common;
 using Lox.Interpreter.Exceptions;
 using Lox.Interpreter.Scanner;
 using Lox.Interpreter.Syntax.Statements;

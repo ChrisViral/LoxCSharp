@@ -1,4 +1,5 @@
-﻿using Lox.Common.Utils;
+﻿using Lox.Common;
+using Lox.Common.Utils;
 using Lox.Interpreter.Runtime;
 using Lox.Interpreter.Utils;
 

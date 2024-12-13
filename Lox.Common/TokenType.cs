@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using JetBrains.Annotations;
-using Lox.Interpreter.Runtime;
+using Lox.Common.Utils;
 
-namespace Lox.Interpreter.Scanner;
+namespace Lox.Common;
 
 /// <summary>
 /// Lox tokens
@@ -117,9 +117,9 @@ public static class TokenTypeExtensions
         TokenType.GREATER_EQUAL => ">=",
         TokenType.LESS          => "<",
         TokenType.LESS_EQUAL    => "<=",
-        TokenType.NIL           => LoxValue.NilString,
-        TokenType.TRUE          => LoxValue.TrueString,
-        TokenType.FALSE         => LoxValue.FalseString,
+        TokenType.NIL           => LoxUtils.NilString,
+        TokenType.TRUE          => LoxUtils.TrueString,
+        TokenType.FALSE         => LoxUtils.FalseString,
         TokenType.NUMBER        => throw new InvalidOperationException("Number tokens do not have a static Lexeme"),
         TokenType.STRING        => throw new InvalidOperationException("String tokens do not have a static Lexeme"),
         TokenType.IDENTIFIER    => throw new InvalidOperationException("Identifier tokens do not have a static Lexeme"),

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Lox.Common;
 using Lox.Common.Utils;
 using Lox.Interpreter.Exceptions;
 using Lox.Interpreter.Runtime.Functions;

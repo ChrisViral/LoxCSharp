@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Lox.Common;
 using Lox.Interpreter.Exceptions;
 using Lox.Interpreter.Scanner;
 

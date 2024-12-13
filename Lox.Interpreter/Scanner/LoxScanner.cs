@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using Lox.Common;
 using Lox.Common.Utils;
 using Lox.Interpreter.Runtime;
 using Lox.Interpreter.Utils;

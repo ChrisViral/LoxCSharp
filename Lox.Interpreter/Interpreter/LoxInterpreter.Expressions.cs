@@ -1,4 +1,5 @@
-﻿using Lox.Interpreter.Exceptions.Runtime;
+﻿using Lox.Common;
+using Lox.Interpreter.Exceptions.Runtime;
 using Lox.Interpreter.Runtime;
 using Lox.Interpreter.Runtime.Functions;
 using Lox.Interpreter.Runtime.Types;
