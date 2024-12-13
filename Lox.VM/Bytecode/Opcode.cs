@@ -2,8 +2,8 @@
 
 public enum Opcode : byte
 {
-    OP_NOP,
-    OP_CONSTANT,
-    OP_CONSTANT_LONG,
-    OP_RETURN,
+    NOP,
+    CONSTANT,
+    CONSTANT_LONG,
+    RETURN,
 }

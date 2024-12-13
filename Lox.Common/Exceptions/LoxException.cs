@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Lox.Interpreter.Exceptions;
+namespace Lox.Common.Exceptions;
 
 /// <summary>
 /// Lox exceptions base class

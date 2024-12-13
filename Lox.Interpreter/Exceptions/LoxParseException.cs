@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Lox.Common.Exceptions;
 
 namespace Lox.Interpreter.Exceptions;
 

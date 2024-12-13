@@ -10,6 +10,8 @@
     <FileVersion>0.13.4.0</FileVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>13</LangVersion>
+    <Configurations>Debug;Release;Debug Trace</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

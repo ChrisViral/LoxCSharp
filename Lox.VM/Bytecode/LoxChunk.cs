@@ -11,6 +11,13 @@ namespace Lox.VM.Bytecode;
 [PublicAPI]
 public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
 {
+    #region Constants
+    /// <summary>
+    /// Maximum constant index value (24bits)
+    /// </summary>
+    private const int MAX_CONSTANT = 0xFFFFFF;
+    #endregion
+
     #region Fields
     private int version;
     private readonly List<byte> code       = [];
@@ -47,6 +54,11 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
 
     #region Methods
     /// <summary>
+    /// Span of the bytecode
+    /// </summary>
+    public ReadOnlySpan<byte> AsSpan() => CollectionsMarshal.AsSpan(this.code);
+
+    /// <summary>
     /// Adds the given opcode to the chunk
     /// </summary>
     /// <param name="opcode">Opcode to add</param>
@@ -72,15 +84,17 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
 
         if (index > byte.MaxValue)
         {
+            if (index > MAX_CONSTANT) throw new InvalidOperationException("Max constant capacity reached");
+
             Span<byte> bytes = stackalloc byte[5];
-            bytes[0] = (byte)Opcode.OP_CONSTANT_LONG;
+            bytes[0] = (byte)Opcode.CONSTANT_LONG;
             BitConverter.TryWriteBytes(bytes[1..], index);
             this.code.AddRange(bytes[..4]);
             AddLine(line, 4);
         }
         else
         {
-            this.code.AddRange((byte)Opcode.OP_CONSTANT, (byte)index);
+            this.code.AddRange((byte)Opcode.CONSTANT, (byte)index);
             AddLine(line, 2);
         }
 
@@ -99,8 +113,11 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="line">Line to add</param>
     /// <param name="repeats">How many time the line appears</param>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="line"/> is smaller than zero</exception>
     private void AddLine(in int line, in int repeats = 1)
     {
+        if (line < 0) throw new ArgumentOutOfRangeException(nameof(line), line, "Line number cannot be negative");
+
         // No lines stored
         if (this.lines.Count is 0)
         {
@@ -139,7 +156,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
         // Get encoding value
         ref int currentEncoding = ref linesSpan[^2];
         // Value before is not an encoding value
-        if (currentEncoding > 0)
+        if (currentEncoding >= 0)
         {
             lastLine = -repeats - 1;
             this.lines.Add(line);
@@ -191,6 +208,12 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
         this.values.Clear();
         this.lines.Clear();
     }
+
+    /// <summary>
+    /// Grabs an array of the bytecode
+    /// </summary>
+    /// <returns>Bytecode array</returns>
+    public byte[] ToBytecodeArray() => this.code.ToArray();
 
     /// <inheritdoc cref="List{T}.GetEnumerator" />
     public List<byte>.Enumerator GetEnumerator() => this.code.GetEnumerator();

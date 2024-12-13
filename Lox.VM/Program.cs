@@ -1,13 +1,13 @@
 ﻿using Lox.VM;
 using Lox.VM.Bytecode;
 using Lox.VM.Runtime;
-using Lox.VM.Utils;
 
 LoxChunk chunk = new();
 
-for (int i = 0; i < 260; i++)
-{
-    chunk.AddConstant(new LoxValue(i), i);
-}
+chunk.AddConstant(new LoxValue(1.2), 1);
+chunk.AddOpcode(Opcode.RETURN, 2);
 
-BytecodeUtils.PrintChunk(chunk, "test");
+VirtualMachine virtualMachine = new(chunk);
+InterpretResult result = virtualMachine.Interpret();
+
+Environment.Exit((int)result);
