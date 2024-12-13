@@ -3,4 +3,11 @@ using Lox.VM.Scanner;
 
 namespace Lox.VM;
 
-public class REPL : LoxREPL<Token, LoxScanner, LoxInterpreter>;
+public sealed class REPL : LoxREPL<Token, LoxScanner, LoxInterpreter>
+{
+    /// <inheritdoc />
+    protected override void Evaluate(string line)
+    {
+
+    }
+}

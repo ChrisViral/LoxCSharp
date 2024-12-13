@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release;Debug Trace</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <AssemblyName>LoxCommon</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

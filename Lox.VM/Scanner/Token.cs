@@ -38,4 +38,14 @@ public readonly record struct Token(TokenType Type, string Lexeme, int Line)
     /// <inheritdoc />
     public override string ToString() => $"{EnumUtils.ToString(this.Type)} {this.Lexeme} {this.Line}";
     #endregion
+
+    #region Static methods
+    /// <summary>
+    /// Makes a new error token
+    /// </summary>
+    /// <param name="message">Error message</param>
+    /// <param name="line">Token line</param>
+    /// <returns>The created error token</returns>
+    public static Token MakeErrorToken(string message, in int line) => new(TokenType.ERROR, message, line);
+    #endregion
 }

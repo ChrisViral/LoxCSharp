@@ -27,7 +27,7 @@ public partial class VirtualMachine(LoxChunk chunk)
 {
     private unsafe byte* bytecode;
     private unsafe byte* instructionPointer;
-    private Stack? stack;
+    private Stack stack = null!;
 
     /// <summary>
     /// If the VM is currently running
@@ -62,7 +62,7 @@ public partial class VirtualMachine(LoxChunk chunk)
         {
             Marshal.FreeHGlobal(handle);
             this.stack.Dispose();
-            this.stack              = null;
+            this.stack              = null!;
             this.bytecode           = null;
             this.instructionPointer = null;
             this.IsRunning          = false;

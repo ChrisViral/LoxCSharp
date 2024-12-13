@@ -11,6 +11,8 @@
         <Deterministic>false</Deterministic>
         <Configurations>Debug;Release;Debug Trace</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <AssemblyName>LoxVM</AssemblyName>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug Trace' ">

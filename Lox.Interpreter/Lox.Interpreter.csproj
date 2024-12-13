@@ -12,6 +12,7 @@
     <LangVersion>13</LangVersion>
     <Configurations>Debug;Release;Debug Trace</Configurations>
     <Platforms>AnyCPU</Platforms>
+    <AssemblyName>LoxInterpreter</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -38,10 +38,29 @@ if (file.Extension is not ".lox")
     Environment.Exit(66);   // Input error
 }
 
-string source = await file.OpenText().ReadToEndAsync();
+string source;
+try
+{
+    source = await file.OpenText().ReadToEndAsync();
+}
+catch (Exception e)
+{
+    Console.Error.WriteLine($"Could not read file {file.FullName}.");
+    Console.Error.WriteLine(e);
+    Environment.Exit(74); // IO Error
+    return;
+}
 
 LoxScanner scanner = new();
-IEnumerable<Token> tokens = scanner.Tokenize(source);
+using (scanner.OpenPinScope(source))
+{
+    while (scanner.ScanNextToken(out Token token))
+    {
+        Console.WriteLine(token);
+    }
+}
 
-LoxInterpreter interpreter = new();
-interpreter.Interpret(tokens);
+// LoxInterpreter interpreter = new();
+// interpreter.Interpret(scanner);
+
+// Environment.Exit((int)interpreter.Result);

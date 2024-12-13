@@ -78,7 +78,10 @@ public enum TokenType
     CLASS = 1120,                   // class
 
     // End of File
-    EOF = -1                        // EOF
+    EOF = -1,                       // EOF
+
+    // Error token
+    ERROR = int.MaxValue
 }
 
 /// <summary>
@@ -108,7 +111,7 @@ public static class TokenTypeExtensions
         TokenType.PLUS          => "+",
         TokenType.SLASH         => "/",
         TokenType.STAR          => "*",
-        TokenType.EQUALITY      => throw new InvalidOperationException("The Equality Offset constant is not a valid token type and has no lexeme"),
+        TokenType.EQUALITY      => throw new InvalidOperationException("The equality offset constant is not a valid token type and has no lexeme"),
         TokenType.BANG          => "!",
         TokenType.BANG_EQUAL    => "!=",
         TokenType.EQUAL         => "=",
@@ -120,15 +123,15 @@ public static class TokenTypeExtensions
         TokenType.NIL           => LoxUtils.NilString,
         TokenType.TRUE          => LoxUtils.TrueString,
         TokenType.FALSE         => LoxUtils.FalseString,
-        TokenType.NUMBER        => throw new InvalidOperationException("Number tokens do not have a static Lexeme"),
-        TokenType.STRING        => throw new InvalidOperationException("String tokens do not have a static Lexeme"),
-        TokenType.IDENTIFIER    => throw new InvalidOperationException("Identifier tokens do not have a static Lexeme"),
+        TokenType.NUMBER        => throw new InvalidOperationException("Number tokens do not have a static lexeme"),
+        TokenType.STRING        => throw new InvalidOperationException("String tokens do not have a static lexeme"),
+        TokenType.IDENTIFIER    => throw new InvalidOperationException("Identifier tokens do not have a static lexeme"),
         TokenType.AND           => "and",
         TokenType.OR            => "or",
         TokenType.ELSE          => "else",
         TokenType.THIS          => "this",
         TokenType.SUPER         => "super",
-        TokenType.STATEMENTS    => throw new InvalidOperationException("The Statements constant is not a valid token type and has no lexeme"),
+        TokenType.STATEMENTS    => throw new InvalidOperationException("The statements constant is not a valid token type and has no lexeme"),
         TokenType.IF            => "if",
         TokenType.FOR           => "for",
         TokenType.WHILE         => "while",
@@ -138,6 +141,7 @@ public static class TokenTypeExtensions
         TokenType.PRINT         => "print",
         TokenType.CLASS         => "class",
         TokenType.EOF           => string.Empty,
+        TokenType.ERROR         => throw new InvalidOperationException("Error token needs to generate it's own error lexeme"),
         TokenType.NONE          => string.Empty,
         _                       => throw new InvalidEnumArgumentException(nameof(tokenType), (int)tokenType, typeof(TokenType))
     };
