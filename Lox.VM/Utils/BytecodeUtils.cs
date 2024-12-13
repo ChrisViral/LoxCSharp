@@ -44,26 +44,31 @@ public static class BytecodeUtils
     /// <param name="offset">Current instruction offset</param>
     public static unsafe void PrintInstruction(LoxChunk chunk, in byte* instructionPointer, in int offset)
     {
-        Opcode instruction = (Opcode)(*instructionPointer);
+        LoxOpcode instruction = (LoxOpcode)(*instructionPointer);
         int line = chunk.GetLine(offset);
         BytecodePrinter.Append($"{offset:D4} {line,4} ");
         switch (instruction)
         {
-            case Opcode.NOP:
-            case Opcode.RETURN:
+            case LoxOpcode.NOP:
+            case LoxOpcode.NEGATE:
+            case LoxOpcode.ADD:
+            case LoxOpcode.SUBTRACT:
+            case LoxOpcode.MULTIPLY:
+            case LoxOpcode.DIVIDE:
+            case LoxOpcode.RETURN:
                 PrintSimpleInstruction(instruction);
                 break;
 
-            case Opcode.CONSTANT:
-                PrintConstantInstruction(chunk, Opcode.CONSTANT, *(instructionPointer + 1));
+            case LoxOpcode.CONSTANT:
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT, *(instructionPointer + 1));
                 break;
 
-            case Opcode.CONSTANT_LONG:
+            case LoxOpcode.CONSTANT_LONG:
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
                 byte c = *(instructionPointer + 3);
                 int index = BitConverter.ToInt32([a, b, c, 0]);
-                PrintConstantInstruction(chunk, Opcode.CONSTANT_LONG, index);
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_LONG, index);
                 break;
 
             default:
@@ -84,7 +89,7 @@ public static class BytecodeUtils
     /// <param name="newLine">If the instruction is on a new line or not</param>
     private static void PrintInstruction(LoxChunk chunk, ref LoxChunk.BytecodeEnumerator enumerator, bool newLine)
     {
-        (Opcode instruction, int offset, int line) = enumerator.CurrentInstruction;
+        (LoxOpcode instruction, int offset, int line) = enumerator.CurrentInstruction;
         if (newLine)
         {
             BytecodePrinter.Append($"{offset:D4} {line,4} ");
@@ -96,21 +101,26 @@ public static class BytecodeUtils
 
         switch (instruction)
         {
-            case Opcode.NOP:
-            case Opcode.RETURN:
+            case LoxOpcode.NOP:
+            case LoxOpcode.NEGATE:
+            case LoxOpcode.ADD:
+            case LoxOpcode.SUBTRACT:
+            case LoxOpcode.MULTIPLY:
+            case LoxOpcode.DIVIDE:
+            case LoxOpcode.RETURN:
                 PrintSimpleInstruction(instruction);
                 break;
 
-            case Opcode.CONSTANT:
-                PrintConstantInstruction(chunk, Opcode.CONSTANT, enumerator.NextByte());
+            case LoxOpcode.CONSTANT:
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT, enumerator.NextByte());
                 break;
 
-            case Opcode.CONSTANT_LONG:
+            case LoxOpcode.CONSTANT_LONG:
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
                 byte c = enumerator.NextByte();
                 int index = BitConverter.ToInt32([a, b, c, 0]);
-                PrintConstantInstruction(chunk, Opcode.CONSTANT_LONG, index);
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_LONG, index);
                 break;
 
             default:
@@ -123,7 +133,7 @@ public static class BytecodeUtils
     /// Prints the contents of a simple instruction
     /// </summary>
     /// <param name="instruction">Instruction to print</param>
-    private static void PrintSimpleInstruction(Opcode instruction) => BytecodePrinter.AppendLine(EnumUtils.ToString(instruction));
+    private static void PrintSimpleInstruction(LoxOpcode instruction) => BytecodePrinter.AppendLine(EnumUtils.ToString(instruction));
 
     /// <summary>
     /// Prints the contents of a constant instruction
@@ -131,7 +141,7 @@ public static class BytecodeUtils
     /// <param name="chunk">Current chunk</param>
     /// <param name="opcode">Constant opcode</param>
     /// <param name="index">Constant index</param>
-    private static void PrintConstantInstruction(LoxChunk chunk, Opcode opcode, in int index)
+    private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, in int index)
     {
         BytecodePrinter.AppendLine($"{EnumUtils.ToString(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
     }

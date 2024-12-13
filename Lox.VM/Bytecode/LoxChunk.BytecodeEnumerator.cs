@@ -27,7 +27,7 @@ public partial class LoxChunk
         /// <summary>
         /// Gets the current instruction from the bytecode
         /// </summary>
-        public (Opcode instruction, int offset, int line) CurrentInstruction => ((Opcode)chunk.code[this.currentIndex], this.currentIndex, this.currentLine);
+        public (LoxOpcode instruction, int offset, int line) CurrentInstruction => ((LoxOpcode)chunk.code[this.currentIndex], this.currentIndex, this.currentLine);
 
         /// <inheritdoc />
         object IEnumerator.Current => this.Current;

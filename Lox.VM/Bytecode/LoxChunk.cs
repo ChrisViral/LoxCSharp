@@ -63,7 +63,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="opcode">Opcode to add</param>
     /// <param name="line">Line for this opcode</param>
-    public void AddOpcode(in Opcode opcode, in int line)
+    public void AddOpcode(in LoxOpcode opcode, in int line)
     {
         this.version++;
         this.code.Add((byte)opcode);
@@ -87,14 +87,14 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
             if (index > MAX_CONSTANT) throw new InvalidOperationException("Max constant capacity reached");
 
             Span<byte> bytes = stackalloc byte[5];
-            bytes[0] = (byte)Opcode.CONSTANT_LONG;
+            bytes[0] = (byte)LoxOpcode.CONSTANT_LONG;
             BitConverter.TryWriteBytes(bytes[1..], index);
             this.code.AddRange(bytes[..4]);
             AddLine(line, 4);
         }
         else
         {
-            this.code.AddRange((byte)Opcode.CONSTANT, (byte)index);
+            this.code.AddRange((byte)LoxOpcode.CONSTANT, (byte)index);
             AddLine(line, 2);
         }
 

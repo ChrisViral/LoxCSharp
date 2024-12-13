@@ -27,7 +27,7 @@ public partial class VirtualMachine(LoxChunk chunk)
 {
     private unsafe byte* bytecode;
     private unsafe byte* instructionPointer;
-    private Stack stack;
+    private Stack? stack;
 
     /// <summary>
     /// If the VM is currently running
@@ -62,6 +62,7 @@ public partial class VirtualMachine(LoxChunk chunk)
         {
             Marshal.FreeHGlobal(handle);
             this.stack.Dispose();
+            this.stack              = null;
             this.bytecode           = null;
             this.instructionPointer = null;
             this.IsRunning          = false;
@@ -81,28 +82,47 @@ public partial class VirtualMachine(LoxChunk chunk)
             #if DEBUG_TRACE
             unsafe
             {
-                BytecodeUtils.PrintInstruction(chunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode));
                 this.stack.PrintStack();
+                BytecodeUtils.PrintInstruction(chunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode));
             }
             #endif
 
-            Opcode instruction = (Opcode)ReadByte();
+            LoxOpcode instruction = (LoxOpcode)ReadByte();
             switch (instruction)
             {
-                case Opcode.NOP:
+                case LoxOpcode.NOP:
                     break;
 
-                case Opcode.CONSTANT:
-                    this.stack.Push(ReadConstant());
+                // Constants
+                case LoxOpcode.CONSTANT:
+                    ReadConstant();
+                    break;
+                case LoxOpcode.CONSTANT_LONG:
+                    ReadLongConstant();
                     break;
 
-                case Opcode.CONSTANT_LONG:
-                    this.stack.Push(ReadLongConstant());
+                // Unary operations
+                case LoxOpcode.NEGATE:
+                    Negate();
                     break;
 
-                case Opcode.RETURN:
-                    PrintValue(this.stack.Pop());
-                    return InterpretResult.SUCCESS;
+                // Binary operations
+                case LoxOpcode.ADD:
+                    Add();
+                    break;
+                case LoxOpcode.SUBTRACT:
+                    Subtract();
+                    break;
+                case LoxOpcode.MULTIPLY:
+                    Multiply();
+                    break;
+                case LoxOpcode.DIVIDE:
+                    Divide();
+                    break;
+
+                // Control flow
+                case LoxOpcode.RETURN:
+                    return Return();
 
                 default:
                     throw new LoxUnknownOpcodeException($"Unknown instruction {(byte)instruction}");
@@ -116,27 +136,6 @@ public partial class VirtualMachine(LoxChunk chunk)
     /// <returns>Next bytecode value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe byte ReadByte() => *this.instructionPointer++;
-
-    /// <summary>
-    /// Reads the next constant in the bytecode
-    /// </summary>
-    /// <returns>Stored constant value</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private LoxValue ReadConstant() => chunk.GetConstant(ReadByte());
-
-    /// <summary>
-    /// Reads the next 24bit constant in the bytecode
-    /// </summary>
-    /// <returns>Stored constant value</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private LoxValue ReadLongConstant()
-    {
-        byte a = ReadByte();
-        byte b = ReadByte();
-        byte c = ReadByte();
-        int index = BitConverter.ToInt32([a, b, c, 0]);
-        return chunk.GetConstant(index);
-    }
 
     /// <summary>
     /// Prints the given value
