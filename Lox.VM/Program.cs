@@ -1,18 +1,47 @@
 ﻿using Lox.VM;
-using Lox.VM.Bytecode;
-using Lox.VM.Runtime;
+using Lox.VM.Scanner;
 
-LoxChunk chunk = new();
+if (args is [])
+{
 
-chunk.AddConstant(1.2d, 123);
-chunk.AddConstant(3.4d, 123);
-chunk.AddOpcode(LoxOpcode.ADD, 123);
-chunk.AddConstant(5.6d, 123);
-chunk.AddOpcode(LoxOpcode.DIVIDE, 123);
-chunk.AddOpcode(LoxOpcode.NEGATE, 123);
-chunk.AddOpcode(LoxOpcode.RETURN, 123);
+    REPL repl = new();
+    try
+    {
+        await repl.BeginREPL();
+        Environment.Exit(0);
+    }
+    catch (Exception e)
+    {
+        Console.Error.WriteLine($"[{e.GetType().Name}]: {e.Message}\n{e.StackTrace}");
+        Environment.Exit(70);    // Software error
+    }
+}
 
-VirtualMachine virtualMachine = new(chunk);
-InterpretResult result = virtualMachine.Interpret();
+if (args is not [{ } fileName])
+{
+    Console.Error.WriteLine("Usage: LoxVM <filename>");
+    Environment.Exit(64);   // Usage error
+    return;
+}
 
-Environment.Exit((int)result);
+FileInfo file = new(fileName);
+
+if (!file.Exists)
+{
+    Console.Error.WriteLine($"File {file.FullName} does not exist");
+    Environment.Exit(66);   // Input error
+}
+
+if (file.Extension is not ".lox")
+{
+    Console.Error.WriteLine($"File {file.FullName} is not a recognized Lox file (invalid extension)");
+    Environment.Exit(66);   // Input error
+}
+
+string source = await file.OpenText().ReadToEndAsync();
+
+LoxScanner scanner = new();
+IEnumerable<Token> tokens = scanner.Tokenize(source);
+
+LoxInterpreter interpreter = new();
+interpreter.Interpret(tokens);

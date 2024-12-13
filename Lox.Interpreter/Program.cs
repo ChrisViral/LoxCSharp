@@ -46,16 +46,15 @@ LoxScanner scanner = new(source);
 
 ReadOnlyCollection<Token> tokens = await scanner.TokenizeAsync();
 
-LoxParser parser = new(tokens);
-ReadOnlyCollection<LoxStatement> program = await parser.ParseAsync();
+LoxInterpreter interpreter = new();
+interpreter.Parser.UpdateSourceTokens(tokens);
+ReadOnlyCollection<LoxStatement> program = await interpreter.Parser.ParseAsync();
 if (LoxErrorUtils.HadParsingError)
 {
     Environment.Exit(65);   // Data error
 }
 
-LoxInterpreter interpreter = new();
-LoxResolver resolver = new(interpreter);
-await resolver.ResolveAsync(program);
+await interpreter.Resolver.ResolveAsync(program);
 if (LoxErrorUtils.HadParsingError)
 {
     Environment.Exit(65);   // Data error

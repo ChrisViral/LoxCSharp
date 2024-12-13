@@ -8,11 +8,6 @@ namespace Lox.Interpreter.Utils;
 public static class LoxErrorUtils
 {
     /// <summary>
-    /// Error buffer
-    /// </summary>
-    private static readonly Queue<string> ErrorBuffer = [];
-
-    /// <summary>
     /// Maximum amount of parameters allowed for function invokes
     /// </summary>
     public const int MAX_PARAMS = byte.MaxValue + 1;
@@ -26,47 +21,6 @@ public static class LoxErrorUtils
     /// If the interpreter has encountered an error while running the Lox script
     /// </summary>
     public static bool HadRuntimeError { get; internal set; }
-
-    /// <summary>
-    /// If error messages should be buffered or flushed automatically
-    /// </summary>
-    public static bool BufferErrors { get; internal set; }
-
-    /// <summary>
-    /// Clears the error buffer
-    /// </summary>
-    public static void ClearBuffer() => ErrorBuffer.Clear();
-
-    /// <summary>
-    /// Flushes and prints the error buffer
-    /// </summary>
-    public static void FlushBuffer()
-    {
-        while (ErrorBuffer.TryDequeue(out string? message))
-        {
-            Console.Error.WriteLine(message);
-        }
-    }
-
-    /// <summary>
-    /// Swaps the contents of the error buffer with another
-    /// </summary>
-    /// <param name="otherBuffer">Buffer to swap contents with</param>
-    public static void SwapBuffers(Queue<string> otherBuffer)
-    {
-        int originalErrorCount = ErrorBuffer.Count;
-        int originalOtherCount = otherBuffer.Count;
-
-        for (int i = 0; i < originalErrorCount; i++)
-        {
-            otherBuffer.Enqueue(ErrorBuffer.Dequeue());
-        }
-
-        for (int i = 0; i < originalOtherCount; i++)
-        {
-            ErrorBuffer.Enqueue(otherBuffer.Dequeue());
-        }
-    }
 
     /// <summary>
     /// Reports an error at the specified line
@@ -104,31 +58,14 @@ public static class LoxErrorUtils
     private static void ReportErrorInternal(string message)
     {
         HadParsingError = true;
-        if (BufferErrors)
-        {
-            ErrorBuffer.Enqueue(message);
-        }
-        else
-        {
-            Console.Error.WriteLine(message);
-        }
+        Console.Error.WriteLine(message);
     }
 
     /// <summary>
     /// Prints out an warning message
     /// </summary>
     /// <param name="message">Warning message</param>
-    private static void ReportWarningInternal(string message)
-    {
-        if (BufferErrors)
-        {
-            ErrorBuffer.Enqueue(message);
-        }
-        else
-        {
-            Console.Error.WriteLine(message);
-        }
-    }
+    private static void ReportWarningInternal(string message) => Console.Error.WriteLine(message);
 
     /// <summary>
     /// Reports a specified <see cref="LoxRuntimeException"/>
@@ -138,13 +75,6 @@ public static class LoxErrorUtils
     {
         HadRuntimeError = true;
         string message = $"{exception.Message}\n[line {exception.Token.Line}]";
-        if (BufferErrors)
-        {
-            ErrorBuffer.Enqueue(message);
-        }
-        else
-        {
-            Console.Error.WriteLine(message);
-        }
+        Console.Error.WriteLine(message);
     }
 }

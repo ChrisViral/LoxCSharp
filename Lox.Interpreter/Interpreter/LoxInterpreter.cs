@@ -1,4 +1,6 @@
-﻿using Lox.Interpreter.Exceptions.Runtime;
+﻿using System.Collections.ObjectModel;
+using Lox.Common;
+using Lox.Interpreter.Exceptions.Runtime;
 using Lox.Interpreter.Runtime;
 using Lox.Interpreter.Scanner;
 using Lox.Interpreter.Syntax.Expressions;
@@ -10,7 +12,7 @@ namespace Lox.Interpreter;
 /// <summary>
 /// Lox program interpreter
 /// </summary>
-public sealed partial class LoxInterpreter : IExpressionVisitor<LoxValue>, IStatementVisitor
+public sealed partial class LoxInterpreter : ILoxInterpreter<Token>, IExpressionVisitor<LoxValue>, IStatementVisitor
 {
     #region Fields
     /// <summary>
@@ -21,23 +23,57 @@ public sealed partial class LoxInterpreter : IExpressionVisitor<LoxValue>, IStat
 
     #region Properties
     /// <summary>
+    /// Lox parser
+    /// </summary>
+    public LoxParser Parser { get; } = new();
+    /// <summary>
+    /// Lox resolver
+    /// </summary>
+    public LoxResolver Resolver { get; }
+    /// <summary>
     /// Runtime environment
     /// </summary>
     private LoxEnvironment CurrentEnvironment { get; set; } = new();
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Creates a new Lox interpreter
+    /// </summary>
+    public LoxInterpreter() => this.Resolver = new LoxResolver(this);
     #endregion
 
     #region Interpreter
     /// <summary>
     /// Interprets and prints a given Lox program
     /// </summary>
-    /// <param name="program">Statement list to interpret</param>
-    public async Task InterpretAsync(IReadOnlyCollection<LoxStatement> program) => await Task.Run(() => Interpret(program));
+    /// <param name="tokens">Tokens</param>
+    public async Task InterpretAsync(IEnumerable<Token> tokens) => await Task.Run(() => Interpret(tokens));
+
+    /// <inheritdoc />
+    public void Interpret(IEnumerable<Token> tokens)
+    {
+        this.Parser.UpdateSourceTokens(tokens);
+        ReadOnlyCollection<LoxStatement> program = this.Parser.Parse();
+        if (LoxErrorUtils.HadParsingError) return;
+
+        this.Resolver.Resolve(program);
+        if (LoxErrorUtils.HadParsingError) return;
+
+        Interpret(program);
+    }
 
     /// <summary>
     /// Interprets and prints a given Lox program
     /// </summary>
-    /// <param name="program">Statement list to interpret</param>
-    public void Interpret(IReadOnlyCollection<LoxStatement> program)
+    /// <param name="program">Program statements</param>
+    public async Task InterpretAsync(ReadOnlyCollection<LoxStatement> program) => await Task.Run(() => Interpret(program));
+
+    /// <summary>
+    /// Interprets and prints a given Lox program
+    /// </summary>
+    /// <param name="program">Program statements</param>
+    public void Interpret(ReadOnlyCollection<LoxStatement> program)
     {
         try
         {

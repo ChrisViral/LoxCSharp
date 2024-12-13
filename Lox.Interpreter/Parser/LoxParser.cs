@@ -89,9 +89,21 @@ public sealed partial class LoxParser
     /// Updates the source tokens for the current parser
     /// </summary>
     /// <param name="newSourceTokens">New source tokens</param>
-    public void UpdateSourceTokens(IReadOnlyCollection<Token> newSourceTokens)
+    public void UpdateSourceTokens(IEnumerable<Token> newSourceTokens)
     {
-        this.sourceTokens = newSourceTokens.Count > 0 ? newSourceTokens.ToArray() : EmptySourceTokens;
+        if (newSourceTokens.TryGetNonEnumeratedCount(out int count))
+        {
+            this.sourceTokens = count > 0 ? newSourceTokens.ToArray() : EmptySourceTokens;
+        }
+        else
+        {
+            this.sourceTokens = newSourceTokens.ToArray();
+            if (this.sourceTokens.Length == 0)
+            {
+                this.sourceTokens = EmptySourceTokens;
+            }
+        }
+
         this.currentIndex = 0;
         this.IsParsed     = this.sourceTokens.Length is 1;
         this.statements   = new List<LoxStatement>(!this.IsParsed ? 100 : 0);

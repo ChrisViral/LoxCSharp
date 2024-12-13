@@ -10,7 +10,7 @@ namespace Lox.Interpreter.Scanner;
 /// <summary>
 /// Lox source file scanner
 /// </summary>
-public sealed class LoxScanner
+public sealed class LoxScanner : ILoxScanner<Token>
 {
     #region Fields
     /// <summary>
@@ -101,6 +101,13 @@ public sealed class LoxScanner
         this.tokensBuffer.Add(new Token(TokenType.EOF, this.currentLine));
         this.IsTokenized = true;
         return this.Tokens;
+    }
+
+    /// <inheritdoc />
+    IEnumerable<Token> ILoxScanner<Token>.Tokenize(string sourceString)
+    {
+        this.Source = sourceString;
+        return Tokenize();
     }
 
     /// <summary>
