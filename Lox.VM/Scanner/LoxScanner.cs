@@ -18,6 +18,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     private unsafe char* tokenStart;
     private unsafe char* currentChar;
     private int currentLine;
+    private bool returnedEof;
     #endregion
 
     #region Properties
@@ -51,7 +52,20 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <summary>
     /// If the scanner has reached the end of the source code
     /// </summary>
-    private unsafe bool IsEOF => *this.currentChar == char.MinValue;
+    private unsafe bool IsEOF
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => *this.currentChar == char.MinValue;
+    }
+
+    /// <summary>
+    /// If the scanner has reached the end of the source code
+    /// </summary>
+    private unsafe int CurrentTokenLength
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => (int)(this.currentChar - this.tokenStart);
+    }
     #endregion
 
     #region Constructors
@@ -96,9 +110,10 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
         if (!this.IsScanning) return;
 
         this.sourceHandle.Free();
-        this.tokenStart = null;
+        this.tokenStart  = null;
         this.currentChar = null;
         this.currentLine = 0;
+        this.returnedEof = false;
         this.IsScanning  = false;
     }
 
@@ -107,28 +122,9 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// </summary>
     /// <param name="source">Source code to pin, otherwise defaults to <see cref="SourceCode"/></param>
     /// <returns>A disposable scope object which ensures the pin is successfully released</returns>
+    /// <exception cref="ObjectDisposedException">If this scanner has been disposed</exception>
+    /// <exception cref="InvalidOperationException">If the scanner is already scanning a source string</exception>
     public PinScope OpenPinScope(string? source = null) => new(this, source ?? this.sourceCode);
-
-    /// <summary>
-    /// Tries to scan the next token in the source
-    /// </summary>
-    /// <param name="token">Scanned token</param>
-    /// <returns><see langword="true"/> if a new token was found, otherwise <see langword="false"/> when reaching the end of the file</returns>
-    /// <exception cref="InvalidOperationException">If the scanner doesn't have the source code pinned for scanning</exception>
-    public bool ScanNextToken(out Token token)
-    {
-        ThrowIfScanningState(!this.IsScanning, "Cannot run the scanner without first pinning the source");
-
-        if (this.IsEOF)
-        {
-            token = new Token(TokenType.EOF, this.currentLine);
-            return false;
-        }
-
-        ResetStart();
-        token = ScanToken();
-        return this.IsEOF;
-    }
 
     /// <summary>
     /// Gets an enumerator over this scanner<br/>
@@ -159,10 +155,11 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     }
 
     /// <summary>
-    /// Checks if the next character in the source matches the given char
+    /// Checks if the next character in the source matches the given char, and consumes it if it is
     /// </summary>
     /// <param name="toMatch">Character to match</param>
     /// <returns><see langword="true"/> if the next source char matches <paramref name="toMatch"/>, otherwise <see langword="false"/></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe bool MatchNext(in char toMatch)
     {
         if (this.IsEOF || *this.currentChar != toMatch) return false;
@@ -175,11 +172,25 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// Consumes characters in the source until the specified terminator is found, or the source is fully consumed
     /// </summary>
     /// <param name="terminator">Terminator character to stop on</param>
-    private unsafe void ConsumeUntil(in char terminator)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ConsumeUntil(in char terminator)
     {
-        while (!this.IsEOF && *this.currentChar != terminator)
+        for (char current = NextChar(); !this.IsEOF && current != terminator; current = NextChar());
+    }
+
+    /// <summary>
+    /// Consumes characters in the source until the specified terminator is found, or the source is fully consumed, and counts newlines in between
+    /// </summary>
+    /// <param name="terminator">Terminator character to stop on</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ConsumeUntilAndCountLines(in char terminator)
+    {
+        for (char current = NextChar(); !this.IsEOF && current != terminator; current = NextChar())
         {
-            this.currentChar++;
+            if (current is '\n')
+            {
+                this.currentLine++;
+            }
         }
     }
 
@@ -187,8 +198,27 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// Returns the next character in the source and increments the current index
     /// </summary>
     /// <returns>The next source character</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining), MustUseReturnValue("Use Next if not consuming the character")]
     private unsafe char NextChar() => *this.currentChar++;
+
+    /// <summary>
+    /// Increments the current index
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void Next() => this.currentChar++;
+
+    /// <summary>
+    /// Returns the previous character in the source and decrements the current index
+    /// </summary>
+    /// <returns>The previous source character</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining), MustUseReturnValue("Use Rewind if not consuming the character")]
+    private unsafe char RewindChar() => *--this.currentChar;
+
+    /// <summary>
+    /// Decrements the current index
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void Rewind() => this.currentChar--;
 
     /// <summary>
     /// Peeks at the current character in the source without incrementing the current index
@@ -206,10 +236,31 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     private unsafe char PeekChar(in int peekDistance = 1) => *(this.currentChar + peekDistance);
 
     /// <summary>
+    /// Increments the index by a certain amount and returns the character at that given position
+    /// </summary>
+    /// <param name="skipDistance">Skip-ahead distance</param>
+    /// <returns>The source code character at the given distance ahead of the current index, or <c>\0</c> if the peek index is outside of the source code bounds</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe char SkipChar(in int skipDistance = 1) => *(this.currentChar += skipDistance);
+
+    /// <summary>
     /// Resets the token start to the current character
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void ResetStart() => this.tokenStart = this.currentChar;
+
+    /// <summary>
+    /// Resets the token start to the previous character
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void ResetStartToPrevious() => this.tokenStart = this.currentChar - 1;
+
+    /// <summary>
+    /// Makes a new string for the current token's lexeme
+    /// </summary>
+    /// <returns>Current token lexeme</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe string GetCurrentLexeme() => new(this.tokenStart, 0, this.CurrentTokenLength);
     #endregion
 
     #region Static methods
