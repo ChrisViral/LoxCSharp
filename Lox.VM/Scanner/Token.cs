@@ -1,6 +1,6 @@
-﻿using JetBrains.Annotations;
+﻿using FastEnumUtility;
+using JetBrains.Annotations;
 using Lox.Common;
-using Lox.Common.Utils;
 
 namespace Lox.VM.Scanner;
 
@@ -31,12 +31,12 @@ public readonly record struct Token(TokenType Type, string Lexeme, int Line)
     /// </summary>
     /// <param name="type">Token type</param>
     /// <param name="line">Token line</param>
-    public Token(in TokenType type, in int line) : this(type, type.GetStaticLexeme(), line) { }
+    public Token(in TokenType type, in int line) : this(type, type.GetEnumMemberValue()!, line) { }
     #endregion
 
     #region Methods
     /// <inheritdoc />
-    public override string ToString() => $"{EnumUtils.ToString(this.Type)} {this.Lexeme} {this.Line}";
+    public override string ToString() => $"{FastEnum.ToString<TokenType, TokenTypeBooster>(this.Type)} {this.Lexeme} {this.Line}";
     #endregion
 
     #region Static methods

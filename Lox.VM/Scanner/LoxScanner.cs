@@ -10,7 +10,6 @@ namespace Lox.VM.Scanner;
 /// <summary>
 /// Lox scanner
 /// </summary>
-[PublicAPI]
 public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>, IDisposable
 {
     #region Fields
@@ -22,12 +21,13 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     #endregion
 
     #region Properties
-    private string sourceCode = string.Empty;
+    private string sourceCode;
     /// <summary>
     /// Scanner's current source code
     /// </summary>
     /// <exception cref="ObjectDisposedException">If this scanner has been disposed</exception>
     /// <exception cref="InvalidOperationException">If the scanner is already scanning a source string</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="value"/> is <see langword="null"/></exception>
     public string SourceCode
     {
         get => this.sourceCode;
@@ -35,14 +35,14 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
         {
             ObjectDisposedException.ThrowIf(this.IsDisposed, this);
             ThrowIfScanningState(this.IsScanning);
-            this.sourceCode = value;
+            this.sourceCode = value ?? throw new ArgumentNullException(nameof(value), "Source code cannot be null");
         }
     }
 
     /// <summary>
     /// If the scanner is currently mid-scan
     /// </summary>
-    public bool IsScanning { get; private set; }
+    public bool IsScanning => this.sourceHandle.IsAllocated;
 
     /// <summary>
     /// If this scanner has been disposed
@@ -70,7 +70,19 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
 
     #region Constructors
     /// <summary>
-    /// Scanner destructor, ensures that the source code is unpinned
+    /// Creates a new scanner without any source code specified
+    /// </summary>
+    public LoxScanner() : this(string.Empty) { }
+
+    /// <summary>
+    /// Creates a new scanner with the specified source code
+    /// </summary>
+    /// <param name="source">Source code</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="source"/> is <see langword="null"/></exception>
+    public LoxScanner(string source) => this.sourceCode = source ?? throw new ArgumentNullException(nameof(source), "Source code cannot be null");
+
+    /// <summary>
+    /// Scanner finalizer, ensures that the source code is unpinned
     /// </summary>
     ~LoxScanner() => FreeSource();
     #endregion
@@ -94,10 +106,10 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
         }
 
         this.sourceHandle = GCHandle.Alloc(this.sourceCode, GCHandleType.Pinned);
-        this.tokenStart  = (char*)this.sourceHandle.AddrOfPinnedObject().ToPointer();
+        this.tokenStart   = (char*)this.sourceHandle.AddrOfPinnedObject().ToPointer();
         this.currentChar  = this.tokenStart;
         this.currentLine  = 1;
-        this.IsScanning   = true;
+        this.returnedEof  = false;
     }
 
     /// <summary>
@@ -112,9 +124,6 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
         this.sourceHandle.Free();
         this.tokenStart  = null;
         this.currentChar = null;
-        this.currentLine = 0;
-        this.returnedEof = false;
-        this.IsScanning  = false;
     }
 
     /// <summary>
@@ -179,40 +188,11 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     }
 
     /// <summary>
-    /// Consumes characters in the source until the specified terminator is found, or the source is fully consumed, and counts newlines in between
-    /// </summary>
-    /// <param name="terminator">Terminator character to stop on</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ConsumeUntilAndCountLines(in char terminator)
-    {
-        for (char current = NextChar(); !this.IsEOF && current != terminator; current = NextChar())
-        {
-            if (current is '\n')
-            {
-                this.currentLine++;
-            }
-        }
-    }
-
-    /// <summary>
     /// Returns the next character in the source and increments the current index
     /// </summary>
     /// <returns>The next source character</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining), MustUseReturnValue("Use Next if not consuming the character")]
     private unsafe char NextChar() => *this.currentChar++;
-
-    /// <summary>
-    /// Increments the current index
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe void Next() => this.currentChar++;
-
-    /// <summary>
-    /// Returns the previous character in the source and decrements the current index
-    /// </summary>
-    /// <returns>The previous source character</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), MustUseReturnValue("Use Rewind if not consuming the character")]
-    private unsafe char RewindChar() => *--this.currentChar;
 
     /// <summary>
     /// Decrements the current index
@@ -303,12 +283,13 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <returns>The current scanner</returns>
     /// <exception cref="ObjectDisposedException">If this scanner has been disposed</exception>
     /// <exception cref="InvalidOperationException">If the scanner is already scanning a source string</exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="source"/> is <see langword="null"/></exception>
     IEnumerable<Token> ILoxScanner<Token>.Tokenize(string source)
     {
         ObjectDisposedException.ThrowIf(this.IsDisposed, this);
         ThrowIfScanningState(this.IsScanning);
 
-        this.sourceCode = source;
+        this.sourceCode = source ?? throw new ArgumentNullException(nameof(source), "Source code cannot be null");
         return this;
     }
 

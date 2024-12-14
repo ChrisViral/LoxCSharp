@@ -20,6 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="FastEnum" Version="2.0.3" />
       <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
     </ItemGroup>
 

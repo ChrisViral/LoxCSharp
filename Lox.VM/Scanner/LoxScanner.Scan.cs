@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
+using FastEnumUtility;
 using Lox.Common;
-using Lox.Common.Utils;
 
 namespace Lox.VM.Scanner;
 
@@ -51,7 +51,7 @@ public sealed partial class LoxScanner
         // Check if the token is implicitly defined
         TokenType castedType = (TokenType)current;
         // ReSharper disable once InvertIf
-        if (EnumUtils.IsDefined(castedType))
+        if (FastEnum.IsDefined<TokenType, TokenTypeBooster>(castedType))
         {
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             // ReSharper disable once ConvertSwitchStatementToSwitchExpression

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using FastEnumUtility;
 using Lox.Interpreter.Exceptions.Runtime;
 using Lox.Interpreter.Scanner;
 
@@ -15,6 +16,9 @@ public enum FunctionKind
     CONSTRUCTOR,
     NATIVE
 }
+
+[FastEnum<FunctionKind>]
+internal sealed partial class FunctionKindBooster;
 
 /// <summary>
 /// Lox function object

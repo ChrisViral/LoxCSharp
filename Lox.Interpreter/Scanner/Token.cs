@@ -1,5 +1,5 @@
-﻿using Lox.Common;
-using Lox.Common.Utils;
+﻿using FastEnumUtility;
+using Lox.Common;
 using Lox.Interpreter.Runtime;
 
 namespace Lox.Interpreter.Scanner;
@@ -45,7 +45,7 @@ public readonly record struct Token(TokenType Type, string Lexeme, LoxValue Lite
     /// <param name="line">Token source line</param>
     public Token(TokenType type, int line)
         : this(type,
-               type.GetStaticLexeme(),
+               type.GetEnumMemberValue()!,
                type switch
                {
                    TokenType.NIL   => LoxValue.Nil,
@@ -58,6 +58,6 @@ public readonly record struct Token(TokenType Type, string Lexeme, LoxValue Lite
 
     #region Methods
     /// <inheritdoc cref="object.ToString" />
-    public override string ToString() => $"{EnumUtils.ToString(this.Type)} {this.Lexeme} {this.Literal.TokenString()}";
+    public override string ToString() => $"{FastEnum.ToString<TokenType, TokenTypeBooster>(this.Type)} {this.Lexeme} {this.Literal.TokenString()}";
     #endregion
 }

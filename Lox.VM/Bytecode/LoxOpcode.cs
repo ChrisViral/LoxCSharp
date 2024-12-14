@@ -1,4 +1,6 @@
-﻿namespace Lox.VM.Bytecode;
+﻿using FastEnumUtility;
+
+namespace Lox.VM.Bytecode;
 
 public enum LoxOpcode : byte
 {
@@ -21,3 +23,6 @@ public enum LoxOpcode : byte
     // Control flow
     RETURN,
 }
+
+[FastEnum<LoxOpcode>]
+internal sealed partial class LoxOpcodeBooster;

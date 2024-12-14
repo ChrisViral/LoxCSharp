@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using FastEnumUtility;
 using Lox.Common;
-using Lox.Common.Utils;
 using Lox.Interpreter.Exceptions;
 using Lox.Interpreter.Runtime.Functions;
 using Lox.Interpreter.Scanner;
@@ -96,8 +96,8 @@ public partial class LoxParser
     /// <returns>The parsed function body</returns>
     private (Token, ReadOnlyCollection<Token>, BlockStatement) ParseFunctionBody(in ReadOnlySpan<Token> tokens, in FunctionKind kind)
     {
-        string kindName = EnumUtils.ToString(kind).ToLowerInvariant();
-        Token identifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, $"Expect {EnumUtils.ToString(kind).ToLowerInvariant()} name.");
+        string kindName = FastEnum.ToString<FunctionKind, FunctionKindBooster>(kind).ToLowerInvariant();
+        Token identifier = EnsureNextToken(tokens, TokenType.IDENTIFIER, $"Expect {kindName} name.");
         EnsureNextToken(tokens, TokenType.LEFT_PAREN, $"Expect '(' after {kindName} name.");
         ReadOnlyCollection<Token> parameters;
         if (CheckEOF(tokens) || CheckCurrentToken(tokens, TokenType.RIGHT_PAREN))

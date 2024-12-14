@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Runtime.Serialization;
+using FastEnumUtility;
 using JetBrains.Annotations;
 using Lox.Common.Utils;
 
@@ -11,139 +12,115 @@ namespace Lox.Common;
 public enum TokenType
 {
     // Undefined/Invalid
+    [EnumMember(Value = "")]
     NONE = 0,                       // Invalid token
 
     // Matched tokens
+    [EnumMember(Value = "(")]
     LEFT_PAREN  = '(',              // (
+    [EnumMember(Value = ")")]
     RIGHT_PAREN = ')',              // )
+    [EnumMember(Value = "{")]
     LEFT_BRACE  = '{',              // {
+    [EnumMember(Value = "}")]
     RIGHT_BRACE = '}',              // }
 
     // Delimiters
+    [EnumMember(Value = ",")]
     COMMA     = ',',                // ,
+    [EnumMember(Value = ".")]
     DOT       = '.',                // .
+    [EnumMember(Value = ";")]
     SEMICOLON = ';',                // ;
 
     // Mathematical operation symbols
+    [EnumMember(Value = "+")]
     PLUS  = '+',                    // +
+    [EnumMember(Value = "-")]
     MINUS = '-',                    // -
+    [EnumMember(Value = "*")]
     STAR  = '*',                    // *
+    [EnumMember(Value = "/")]
     SLASH = '/',                    // /
 
     // Equality operator offset
     EQUALITY   = 500,
 
     // Equality operation symbols
+    [EnumMember(Value = "!")]
     BANG          = '!',            // !
+    [EnumMember(Value = "!=")]
     BANG_EQUAL    = '!' + EQUALITY, // !=
+    [EnumMember(Value = "=")]
     EQUAL         = '=',            // =
+    [EnumMember(Value = "==")]
     EQUAL_EQUAL   = '=' + EQUALITY, // ==
+    [EnumMember(Value = ">")]
     GREATER       = '>',            // >
+    [EnumMember(Value = ">=")]
     GREATER_EQUAL = '>' + EQUALITY, // >=
+    [EnumMember(Value = "<")]
     LESS          = '<',            // <
+    [EnumMember(Value = "<=")]
     LESS_EQUAL    = '<' + EQUALITY, // <=
 
     // Literals
+    [EnumMember(Value = LoxUtils.NilString)]
     NIL        = 1000,              // nil
+    [EnumMember(Value = LoxUtils.TrueString)]
     TRUE       = 1001,              // true
+    [EnumMember(Value = LoxUtils.FalseString)]
     FALSE      = 1002,              // false
     NUMBER     = 1003,              // 123
     STRING     = 1004,              // "foo"
     IDENTIFIER = 1005,              // bar
 
     // Conditional keywords
+    [EnumMember(Value = "and")]
     AND  = 1010,                    // and
+    [EnumMember(Value = "or")]
     OR   = 1011,                    // or
+    [EnumMember(Value = "else")]
     ELSE = 1013,                    // else
 
     // OOP keywords
+    [EnumMember(Value = "this")]
     THIS  = 1020,                   // this
+    [EnumMember(Value = "super")]
     SUPER = 1021,                   // super
 
     // Statement keywords marker
-    STATEMENTS = 1100,
+    STATEMENTS = IF - 1,
 
     // Branching keywords
-    IF    = 1101,                   // if
-    FOR   = 1102,                   // for
-    WHILE = 1103,                   // while
+    [EnumMember(Value = "if")]
+    IF    = 1100,                   // if
+    [EnumMember(Value = "for")]
+    FOR   = 1101,                   // for
+    [EnumMember(Value = "while")]
+    WHILE = 1102,                   // while
 
     // Functional keywords
+    [EnumMember(Value = "var")]
     VAR    = 1110,                  // var
+    [EnumMember(Value = "for")]
     FUN    = 1111,                  // fun
+    [EnumMember(Value = "return")]
     RETURN = 1112,                  // return
+    [EnumMember(Value = "print")]
     PRINT  = 1113,                  // print
 
     // Object keywords
+    [EnumMember(Value = "class")]
     CLASS = 1120,                   // class
 
     // End of File
+    [EnumMember(Value = "")]
     EOF = -1,                       // EOF
 
     // Error token
-    ERROR = int.MaxValue
+    ERROR = int.MaxValue            // Error
 }
 
-/// <summary>
-/// <see cref="TokenType"/> utility and extensions
-/// </summary>
-[PublicAPI]
-public static class TokenTypeExtensions
-{
-    #region Extensions
-    /// <summary>
-    /// Gets the associated static Lexeme for the given <see cref="TokenType"/>
-    /// </summary>
-    /// <param name="tokenType">Token type to get the Lexeme for</param>
-    /// <returns>The associated static lexeme for this <see cref="TokenType"/></returns>
-    /// <exception cref="InvalidOperationException">If the token type does not have a static lexeme defined</exception>
-    /// <exception cref="InvalidEnumArgumentException">For invalid values of <paramref name="tokenType"/></exception>
-    public static string GetStaticLexeme(this TokenType tokenType) => tokenType switch
-    {
-        TokenType.LEFT_PAREN    => "(",
-        TokenType.RIGHT_PAREN   => ")",
-        TokenType.LEFT_BRACE    => "{",
-        TokenType.RIGHT_BRACE   => "}",
-        TokenType.COMMA         => ",",
-        TokenType.DOT           => ".",
-        TokenType.SEMICOLON     => ";",
-        TokenType.MINUS         => "-",
-        TokenType.PLUS          => "+",
-        TokenType.SLASH         => "/",
-        TokenType.STAR          => "*",
-        TokenType.EQUALITY      => throw new InvalidOperationException("The equality offset constant is not a valid token type and has no lexeme"),
-        TokenType.BANG          => "!",
-        TokenType.BANG_EQUAL    => "!=",
-        TokenType.EQUAL         => "=",
-        TokenType.EQUAL_EQUAL   => "==",
-        TokenType.GREATER       => ">",
-        TokenType.GREATER_EQUAL => ">=",
-        TokenType.LESS          => "<",
-        TokenType.LESS_EQUAL    => "<=",
-        TokenType.NIL           => LoxUtils.NilString,
-        TokenType.TRUE          => LoxUtils.TrueString,
-        TokenType.FALSE         => LoxUtils.FalseString,
-        TokenType.NUMBER        => throw new InvalidOperationException("Number tokens do not have a static lexeme"),
-        TokenType.STRING        => throw new InvalidOperationException("String tokens do not have a static lexeme"),
-        TokenType.IDENTIFIER    => throw new InvalidOperationException("Identifier tokens do not have a static lexeme"),
-        TokenType.AND           => "and",
-        TokenType.OR            => "or",
-        TokenType.ELSE          => "else",
-        TokenType.THIS          => "this",
-        TokenType.SUPER         => "super",
-        TokenType.STATEMENTS    => throw new InvalidOperationException("The statements constant is not a valid token type and has no lexeme"),
-        TokenType.IF            => "if",
-        TokenType.FOR           => "for",
-        TokenType.WHILE         => "while",
-        TokenType.VAR           => "var",
-        TokenType.FUN           => "fun",
-        TokenType.RETURN        => "return",
-        TokenType.PRINT         => "print",
-        TokenType.CLASS         => "class",
-        TokenType.EOF           => string.Empty,
-        TokenType.ERROR         => throw new InvalidOperationException("Error token needs to generate it's own error lexeme"),
-        TokenType.NONE          => string.Empty,
-        _                       => throw new InvalidEnumArgumentException(nameof(tokenType), (int)tokenType, typeof(TokenType))
-    };
-    #endregion
-}
+[FastEnum<TokenType>, PublicAPI]
+public sealed partial class TokenTypeBooster;

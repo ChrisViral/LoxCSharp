@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using FastEnumUtility;
 using Lox.Common;
-using Lox.Common.Utils;
 using Lox.Interpreter.Runtime;
 using Lox.Interpreter.Utils;
 
@@ -122,7 +122,7 @@ public sealed class LoxScanner : ILoxScanner<Token>
             // Check if the token is implicitly defined
             char currentChar = NextChar(sourceSpan);
             TokenType castedType = (TokenType)currentChar;
-            if (EnumUtils.IsDefined(castedType))
+            if (FastEnum.IsDefined<TokenType, TokenTypeBooster>(castedType))
             {
                 // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (castedType)

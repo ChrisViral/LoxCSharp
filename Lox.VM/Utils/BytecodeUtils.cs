@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Lox.Common.Utils;
+using FastEnumUtility;
 using Lox.VM.Bytecode;
 
 namespace Lox.VM.Utils;
@@ -133,7 +133,7 @@ public static class BytecodeUtils
     /// Prints the contents of a simple instruction
     /// </summary>
     /// <param name="instruction">Instruction to print</param>
-    private static void PrintSimpleInstruction(LoxOpcode instruction) => BytecodePrinter.AppendLine(EnumUtils.ToString(instruction));
+    private static void PrintSimpleInstruction(LoxOpcode instruction) => BytecodePrinter.AppendLine(FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(instruction));
 
     /// <summary>
     /// Prints the contents of a constant instruction
@@ -143,7 +143,7 @@ public static class BytecodeUtils
     /// <param name="index">Constant index</param>
     private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, in int index)
     {
-        BytecodePrinter.AppendLine($"{EnumUtils.ToString(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
+        BytecodePrinter.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
     }
     #endregion
 }
