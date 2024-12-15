@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using FastEnumUtility;
 using Lox.Common;
+using Lox.Common.Exceptions;
 using Lox.VM.Bytecode;
 using Lox.VM.Exceptions;
 using Lox.VM.Runtime;

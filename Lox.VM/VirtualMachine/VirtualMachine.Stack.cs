@@ -81,6 +81,64 @@ public partial class VirtualMachine
         }
 
         /// <summary>
+        /// Tries to pop a boolean from the stack
+        /// </summary>
+        /// <param name="number">Popped boolean, if valid</param>
+        /// <returns><see langword="true"/> if a boolean was successfully popped, otherwise <see langword="false"/></returns>
+        public bool TryPopBool(out bool number)
+        {
+            LoxValue* currentTop = this.top - 1;
+            LoxValue value = *currentTop;
+            if (value.TryGetBool(out number))
+            {
+                this.top = currentTop;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to pop a number from the stack
+        /// </summary>
+        /// <param name="number">Popped number, if valid</param>
+        /// <returns><see langword="true"/> if a number was successfully popped, otherwise <see langword="false"/></returns>
+        public bool TryPopNumber(out double number)
+        {
+            LoxValue* currentTop = this.top - 1;
+            LoxValue value = *currentTop;
+            if (value.TryGetNumber(out number))
+            {
+                this.top = currentTop;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to pop two operand numbers from the stack
+        /// </summary>
+        /// <param name="a">LHS operand</param>
+        /// <param name="b">RHS operand</param>
+        /// <returns><see langword="true"/> if the numbers were successfully popped, otherwise <see langword="false"/></returns>
+        public bool TryPopNumbers(out double a, out double b)
+        {
+            if ((*(this.top - 1)).TryGetNumber(out a))
+            {
+                LoxValue* aRef = this.top - 2;
+                if ((*aRef).TryGetNumber(out b))
+                {
+                    this.top = aRef;
+                    return true;
+                }
+                return false;
+            }
+            b = 0d;
+            return false;
+        }
+
+        /// <summary>
         /// Returns a the top value of the stack
         /// </summary>
         /// <returns>Top value of the stack</returns>

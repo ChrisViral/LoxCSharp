@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Lox.Common;
+using Lox.VM.Bytecode;
 
 namespace Lox.VM.Compiler;
 
@@ -79,9 +80,9 @@ public partial class LoxCompiler
             Rules[(int)TokenType.LESS]          = new ParseRule(null,     null,   Precedence.NONE);
             Rules[(int)TokenType.LESS_EQUAL]    = new ParseRule(null,     null,   Precedence.NONE);
             // Literals
-            Rules[(int)TokenType.NIL]           = new ParseRule(null,     null,   Precedence.NONE);
-            Rules[(int)TokenType.TRUE]          = new ParseRule(null,     null,   Precedence.NONE);
-            Rules[(int)TokenType.FALSE]         = new ParseRule(null,     null,   Precedence.NONE);
+            Rules[(int)TokenType.NIL]           = new ParseRule(Nil,      null,   Precedence.NONE);
+            Rules[(int)TokenType.TRUE]          = new ParseRule(True,     null,   Precedence.NONE);
+            Rules[(int)TokenType.FALSE]         = new ParseRule(False,    null,   Precedence.NONE);
             Rules[(int)TokenType.NUMBER]        = new ParseRule(Number,   null,   Precedence.NONE);
             Rules[(int)TokenType.STRING]        = new ParseRule(null,     null,   Precedence.NONE);
             Rules[(int)TokenType.IDENTIFIER]    = new ParseRule(null,     null,   Precedence.NONE);
@@ -119,17 +120,54 @@ public partial class LoxCompiler
         #endregion
 
         #region Parse functions
+        /// <summary>
+        /// Grouping parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Grouping(LoxCompiler compiler) => compiler.ParseGrouping();
 
+        /// <summary>
+        /// Binary operation parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Binary(LoxCompiler compiler) => compiler.ParseBinary();
 
+        /// <summary>
+        /// Unary operation parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Unary(LoxCompiler compiler) => compiler.ParseUnary();
 
+        /// <summary>
+        /// Number parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Number(LoxCompiler compiler) => compiler.ParseNumber();
+
+        /// <summary>
+        /// Nil parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Nil(LoxCompiler compiler) => compiler.EmitOpcode(LoxOpcode.NIL);
+
+        /// <summary>
+        /// True parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void True(LoxCompiler compiler) => compiler.EmitOpcode(LoxOpcode.TRUE);
+
+        /// <summary>
+        /// False parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void False(LoxCompiler compiler) => compiler.EmitOpcode(LoxOpcode.FALSE);
         #endregion
     }
 }

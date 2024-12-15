@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using JetBrains.Annotations;
+using Lox.Common.Exceptions;
 using Lox.Interpreter.Exceptions;
 
 namespace Lox.Interpreter.Runtime;

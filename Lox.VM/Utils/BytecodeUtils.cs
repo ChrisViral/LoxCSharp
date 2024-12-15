@@ -50,6 +50,9 @@ public static class BytecodeUtils
         switch (instruction)
         {
             case LoxOpcode.NOP:
+            case LoxOpcode.NIL:
+            case LoxOpcode.TRUE:
+            case LoxOpcode.FALSE:
             case LoxOpcode.NEGATE:
             case LoxOpcode.ADD:
             case LoxOpcode.SUBTRACT:
@@ -113,6 +116,9 @@ public static class BytecodeUtils
         switch (instruction)
         {
             case LoxOpcode.NOP:
+            case LoxOpcode.NIL:
+            case LoxOpcode.TRUE:
+            case LoxOpcode.FALSE:
             case LoxOpcode.NEGATE:
             case LoxOpcode.ADD:
             case LoxOpcode.SUBTRACT:

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using FastEnumUtility;
 using Lox.Common;
+using Lox.Common.Exceptions;
 using Lox.Interpreter.Exceptions;
 using Lox.Interpreter.Runtime.Functions;
 using Lox.Interpreter.Scanner;

@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
-using Lox.Common.Exceptions;
 
-namespace Lox.Interpreter.Exceptions;
+namespace Lox.Common.Exceptions;
 
 /// <summary>
 /// Invalid literal type exception

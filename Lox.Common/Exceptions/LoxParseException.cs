@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
-using Lox.Common.Exceptions;
 
-namespace Lox.VM.Exceptions;
+namespace Lox.Common.Exceptions;
 
 /// <summary>
 /// Lox parser exception

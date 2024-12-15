@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Lox.VM.Bytecode;
 using Lox.VM.Exceptions;
+using Lox.VM.Exceptions.Runtime;
 using Lox.VM.Runtime;
 
 namespace Lox.VM;
@@ -34,6 +35,24 @@ public partial class VirtualMachine
     public bool IsRunning { get; private set; }
 
     /// <summary>
+    /// Gets the current instruction index
+    /// </summary>
+    private unsafe int CurrentIndex
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => (int)(this.instructionPointer - this.bytecode) - 1;
+    }
+
+    /// <summary>
+    /// Gets the current instruction line
+    /// </summary>
+    private int CurrentLine
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => this.currentChunk.GetLine(this.CurrentIndex);
+    }
+
+    /// <summary>
     /// Starts this Lox VM interpreter
     /// </summary>
     /// <returns>Completion status of the interpreter</returns>
@@ -57,6 +76,11 @@ public partial class VirtualMachine
             }
 
             return Run();
+        }
+        catch (LoxRuntimeException e)
+        {
+            Console.Error.WriteLine($"[line {e.Line}] {e.Message}");
+            return InterpretResult.RUNTIME_ERROR;
         }
         finally
         {
@@ -103,6 +127,17 @@ public partial class VirtualMachine
                     break;
                 case LoxOpcode.CONSTANT_24:
                     ReadConstant24();
+                    break;
+
+                // Literals
+                case LoxOpcode.NIL:
+                    this.stack.Push(LoxValue.Nil);
+                    break;
+                case LoxOpcode.TRUE:
+                    this.stack.Push(LoxValue.True);
+                    break;
+                case LoxOpcode.FALSE:
+                    this.stack.Push(LoxValue.False);
                     break;
 
                 // Unary operations

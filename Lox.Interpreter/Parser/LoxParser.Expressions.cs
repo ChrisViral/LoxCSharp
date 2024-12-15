@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Lox.Common;
+using Lox.Common.Exceptions;
 using Lox.Interpreter.Exceptions;
 using Lox.Interpreter.Scanner;
 using Lox.Interpreter.Syntax.Expressions;

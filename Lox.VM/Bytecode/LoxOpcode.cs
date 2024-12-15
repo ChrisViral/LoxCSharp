@@ -13,6 +13,11 @@ public enum LoxOpcode : byte
     CONSTANT_16,
     CONSTANT_24,
 
+    // Literals
+    NIL,
+    TRUE,
+    FALSE,
+
     // Unary operations
     NEGATE,
 

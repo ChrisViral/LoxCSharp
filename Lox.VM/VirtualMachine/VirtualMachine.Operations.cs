@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Lox.VM.Exceptions.Runtime;
 using Lox.VM.Runtime;
 
 namespace Lox.VM;
@@ -47,7 +48,10 @@ public partial class VirtualMachine
     private unsafe void Negate()
     {
         LoxValue* top = this.stack.GetTop();
-        *top = -(*top).value;
+        LoxValue topValue = *top;
+        if (!topValue.TryGetNumber(out double number)) throw new LoxRuntimeException("Negation operand must be a number.", this.CurrentLine);
+
+        *top = -number;
     }
 
     /// <summary>
@@ -57,9 +61,8 @@ public partial class VirtualMachine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Add()
     {
-        LoxValue b = this.stack.Pop();
-        LoxValue a = this.stack.Pop();
-        this.stack.Push(a.value + b.value);
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a + b);
     }
 
     /// <summary>
@@ -69,9 +72,8 @@ public partial class VirtualMachine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Subtract()
     {
-        LoxValue b = this.stack.Pop();
-        LoxValue a = this.stack.Pop();
-        this.stack.Push(a.value - b.value);
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a - b);
     }
 
     /// <summary>
@@ -81,9 +83,8 @@ public partial class VirtualMachine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Multiply()
     {
-        LoxValue b = this.stack.Pop();
-        LoxValue a = this.stack.Pop();
-        this.stack.Push(a.value * b.value);
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a * b);
     }
 
     /// <summary>
@@ -93,9 +94,8 @@ public partial class VirtualMachine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Divide()
     {
-        LoxValue b = this.stack.Pop();
-        LoxValue a = this.stack.Pop();
-        this.stack.Push(a.value / b.value);
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a / b);
     }
 
     /// <summary>

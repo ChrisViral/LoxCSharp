@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Lox.Common;
+using Lox.Common.Exceptions;
 using Lox.VM.Bytecode;
 using Lox.VM.Exceptions;
 using Lox.VM.Scanner;
