@@ -63,9 +63,6 @@ public sealed partial class LoxScanner
                 case TokenType.LESS:
                     return new Token(MatchNext('=') ? castedType + (int)TokenType.EQUALITY : castedType, this.currentLine);
 
-                case TokenType.MINUS:
-                    return MatchDigit() ? TokenizeNumber() : new Token(TokenType.MINUS, this.currentLine);
-
                 default:
                     return new Token(castedType, this.currentLine);
             }

@@ -178,19 +178,6 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     }
 
     /// <summary>
-    /// Checks if the next character in the source matches the given char, and consumes it if it is
-    /// </summary>
-    /// <returns><see langword="true"/> if the next source char matches <paramref name="toMatch"/>, otherwise <see langword="false"/></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe bool MatchDigit()
-    {
-        if (this.IsEOF || !char.IsAsciiDigit(*this.currentChar)) return false;
-
-        this.currentChar++;
-        return true;
-    }
-
-    /// <summary>
     /// Consumes characters in the source until the specified terminator is found, or the source is fully consumed
     /// </summary>
     /// <param name="terminator">Terminator character to stop on</param>

@@ -13,7 +13,7 @@ public partial class LoxCompiler
     /// <summary>
     /// Lox operator precendence
     /// </summary>
-    private enum Precedence : byte
+    private enum Precedence
     {
         NONE,       // Undefined
         ASSIGNMENT, // =
@@ -28,9 +28,17 @@ public partial class LoxCompiler
         PRIMARY     // Literals & Identifiers
     }
 
-    private void ParseExpression() => ParsePrecedence(Precedence.ASSIGNMENT);
+    /// <summary>
+    /// Parses an expression
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ParseExpression() => ParseWithPrecedence(Precedence.ASSIGNMENT);
 
-    private void ParsePrecedence(Precedence precedence)
+    /// <summary>
+    /// Parses the next expression of the given or lower precedence
+    /// </summary>
+    /// <param name="precedence">Expression precedence to parse</param>
+    private void ParseWithPrecedence(Precedence precedence)
     {
         MoveNextToken();
         ParseFunc? prefix = Table.GetRule(this.previousToken.Type).prefix;
@@ -48,16 +56,23 @@ public partial class LoxCompiler
         }
     }
 
+    /// <summary>
+    /// Parses a grouping expression
+    /// </summary>
     private void ParseGrouping()
     {
         ParseExpression();
         EnsureNextToken(TokenType.RIGHT_PAREN, "Closing parentheses expected.");
     }
 
+    /// <summary>
+    /// Parses a binary expression
+    /// </summary>
+    /// <exception cref="LoxParseException"></exception>
     private void ParseBinary()
     {
         Token operatorToken = this.previousToken;
-        ParsePrecedence(Table.GetRule(operatorToken.Type).precedence + 1);
+        ParseWithPrecedence(Table.GetRule(operatorToken.Type).precedence + 1);
 
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (operatorToken.Type)
@@ -80,10 +95,21 @@ public partial class LoxCompiler
         }
     }
 
+    /// <summary>
+    /// Parses a unary expression
+    /// </summary>
+    /// <exception cref="LoxParseException"></exception>
     private void ParseUnary()
     {
         Token operatorToken = this.previousToken;
-        ParsePrecedence(Precedence.UNARY);
+        if (operatorToken.Type is TokenType.MINUS && this.currentToken.Type is TokenType.NUMBER)
+        {
+            MoveNextToken();
+            ParseNumber(true);
+            return;
+        }
+
+        ParseWithPrecedence(Precedence.UNARY);
 
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (operatorToken.Type)
@@ -97,9 +123,14 @@ public partial class LoxCompiler
         }
     }
 
-    private void ParseNumber()
+    /// <summary>
+    /// Parses a number literal expression
+    /// </summary>
+    /// <param name="negate">If the number should be negated</param>
+    private void ParseNumber(bool negate = false)
     {
-        if (!EmitConstant(double.Parse(this.previousToken.Lexeme)))
+        double value = double.Parse(this.previousToken.Lexeme);
+        if (!EmitConstant(negate ? -value : value))
         {
             ReportCompileError(this.currentToken, $"Constant limit ({LoxChunk.MAX_CONSTANT}) exceeded.");
         }
