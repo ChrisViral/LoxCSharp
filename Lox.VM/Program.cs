@@ -1,5 +1,4 @@
 ﻿using Lox.VM;
-using Lox.VM.Scanner;
 
 if (args is [])
 {
@@ -7,7 +6,7 @@ if (args is [])
     REPL repl = new();
     try
     {
-        await repl.BeginREPL();
+        repl.BeginREPL();
         Environment.Exit(0);
     }
     catch (Exception e)
@@ -41,7 +40,7 @@ if (file.Extension is not ".lox")
 string source;
 try
 {
-    source = await file.OpenText().ReadToEndAsync();
+    source = file.OpenText().ReadToEnd();
 }
 catch (Exception e)
 {
@@ -51,16 +50,6 @@ catch (Exception e)
     return;
 }
 
-LoxScanner scanner = new();
-using (scanner.OpenPinScope(source))
-{
-    while (scanner.ScanNextToken(out Token token))
-    {
-        Console.WriteLine(token);
-    }
-}
-
-// LoxInterpreter interpreter = new();
-// interpreter.Interpret(scanner);
-
-// Environment.Exit((int)interpreter.Result);
+using LoxInterpreter interpreter = new();
+interpreter.Interpret(source);
+Environment.Exit((int)interpreter.Result);

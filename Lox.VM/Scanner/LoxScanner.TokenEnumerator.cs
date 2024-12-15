@@ -28,6 +28,7 @@ public partial class LoxScanner
         public bool MoveNext() => scanner.ScanNextToken(out this.current);
 
         /// <inheritdoc />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() => scanner.FreeSource();
 
         /// <inheritdoc />

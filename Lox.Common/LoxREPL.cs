@@ -39,7 +39,7 @@ public class LoxREPL<TToken, TScanner, TInterpreter>
     /// <summary>
     /// Enters a REPL cycle
     /// </summary>
-    public virtual async Task BeginREPL()
+    public virtual async Task BeginREPLAsync()
     {
         // Print header
         Version version = Assembly.GetExecutingAssembly().GetName().Version!;
@@ -64,6 +64,37 @@ public class LoxREPL<TToken, TScanner, TInterpreter>
             // Get next line
             await Console.Out.WriteAsync(PROMPT);
             line = await Console.In.ReadLineAsync();
+        }
+    }
+
+    /// <summary>
+    /// Enters a REPL cycle
+    /// </summary>
+    public virtual void BeginREPL()
+    {
+        // Print header
+        Version version = Assembly.GetExecutingAssembly().GetName().Version!;
+        Console.WriteLine("Lox v" + version);
+
+        // Begin prompt
+        Console.Write(PROMPT);
+        string? line = Console.ReadLine();
+        while (line is not null and not EXIT)
+        {
+            try
+            {
+                Evaluate(line);
+            }
+            catch
+            {
+                // Ignored
+            }
+
+            AfterEvaluate();
+
+            // Get next line
+            Console.Write(PROMPT);
+            line = Console.ReadLine();
         }
     }
 

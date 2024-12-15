@@ -15,7 +15,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// <summary>
     /// Maximum constant index value (24bits)
     /// </summary>
-    private const int MAX_CONSTANT = 0xFFFFFF;
+    public const int MAX_CONSTANT = 0xFFFFFF;
     #endregion
 
     #region Fields
@@ -39,7 +39,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     }
 
     /// <inheritdoc cref="List{T}.this" />
-    public byte this[in Index index]
+    public byte this[Index index]
     {
         get => this.code[index];
         set => this.code[index] = value;
@@ -49,7 +49,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// Gets a readonly span over a specified range of the bytecode
     /// </summary>
     /// <param name="range">Range to get</param>
-    public ReadOnlySpan<byte> this[in Range range] => CollectionsMarshal.AsSpan(this.code)[range];
+    public ReadOnlySpan<byte> this[Range range] => CollectionsMarshal.AsSpan(this.code)[range];
     #endregion
 
     #region Methods
@@ -63,7 +63,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="opcode">Opcode to add</param>
     /// <param name="line">Line for this opcode</param>
-    public void AddOpcode(in LoxOpcode opcode, in int line)
+    public void AddOpcode(LoxOpcode opcode, int line)
     {
         this.version++;
         this.code.Add((byte)opcode);
@@ -75,30 +75,41 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="value">Constant to add</param>
     /// <param name="line">Line for this constant</param>
-    /// <returns>The index at which the constant was added</returns>
-    public int AddConstant(in LoxValue value, in int line)
+    /// <returns><see langword="true"/> if the constant was successfully added, otherwise <see langword="false"/> if the constant limit has been reached</returns>
+    public bool AddConstant(in LoxValue value, int line)
     {
-        this.version++;
         int index = this.values.Count;
+        if (index > MAX_CONSTANT) return false;
+
+        this.version++;
         this.values.Add(value);
-
-        if (index > byte.MaxValue)
+        switch (index)
         {
-            if (index > MAX_CONSTANT) throw new InvalidOperationException("Max constant capacity reached");
+            case <= byte.MaxValue:
+                this.code.AddRange((byte)LoxOpcode.CONSTANT_8, (byte)index);
+                AddLine(line, 2);
+                break;
 
-            Span<byte> bytes = stackalloc byte[5];
-            bytes[0] = (byte)LoxOpcode.CONSTANT_LONG;
-            BitConverter.TryWriteBytes(bytes[1..], index);
-            this.code.AddRange(bytes[..4]);
-            AddLine(line, 4);
-        }
-        else
-        {
-            this.code.AddRange((byte)LoxOpcode.CONSTANT, (byte)index);
-            AddLine(line, 2);
+            case <= ushort.MaxValue:
+            {
+                Span<byte> bytes = stackalloc byte[sizeof(ushort)];
+                BitConverter.TryWriteBytes(bytes, (ushort)index);
+                this.code.AddRange((byte)LoxOpcode.CONSTANT_16, bytes[0], bytes[1]);
+                AddLine(line, 3);
+                break;
+            }
+
+            case <= MAX_CONSTANT:
+            {
+                Span<byte> bytes = stackalloc byte[sizeof(int)];
+                BitConverter.TryWriteBytes(bytes, index);
+                this.code.AddRange((byte)LoxOpcode.CONSTANT_24, bytes[0], bytes[1], bytes[2]);
+                AddLine(line, 4);
+                break;
+            }
         }
 
-        return index;
+        return true;
     }
 
     /// <summary>
@@ -106,7 +117,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="index">Constant index to get</param>
     /// <returns>The constants value</returns>
-    public LoxValue GetConstant(in int index) => this.values[index];
+    public LoxValue GetConstant(int index) => this.values[index];
 
     /// <summary>
     /// Adds a given line entry
@@ -114,7 +125,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// <param name="line">Line to add</param>
     /// <param name="repeats">How many time the line appears</param>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="line"/> is smaller than zero</exception>
-    private void AddLine(in int line, in int repeats = 1)
+    private void AddLine(int line, int repeats = 1)
     {
         if (line < 0) throw new ArgumentOutOfRangeException(nameof(line), line, "Line number cannot be negative");
 
@@ -198,7 +209,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="index">Bytecode index</param>
     /// <returns>A tuple containing the bytecode and line for the given index</returns>
-    public (byte bytecode, int line) GetBytecodeInfo(in int index) => (this.code[index], GetLine(index));
+    public (byte bytecode, int line) GetBytecodeInfo(int index) => (this.code[index], GetLine(index));
 
     /// <inheritdoc cref="List{T}.Clear" />
     public void Clear()

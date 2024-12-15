@@ -6,17 +6,17 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <AssemblyVersion>0.15.1.*</AssemblyVersion>
-        <FileVersion>0.15.1.0</FileVersion>
+        <AssemblyVersion>0.17.7.*</AssemblyVersion>
+        <FileVersion>0.17.7.0</FileVersion>
         <Deterministic>false</Deterministic>
-        <Configurations>Debug;Release;Debug Trace</Configurations>
+        <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
         <AssemblyName>LoxVM</AssemblyName>
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug Trace' ">
-      <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DefineConstants>TRACE;DEBUG_TRACE;DEBUG_PRINT</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

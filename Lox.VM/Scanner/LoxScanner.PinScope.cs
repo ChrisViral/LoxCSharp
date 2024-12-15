@@ -1,4 +1,6 @@
-﻿namespace Lox.VM.Scanner;
+﻿using System.Runtime.CompilerServices;
+
+namespace Lox.VM.Scanner;
 
 public partial class LoxScanner
 {
@@ -26,6 +28,7 @@ public partial class LoxScanner
         /// <summary>
         /// Unpins the source without disposing the scanner
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() => this.scanner.FreeSource();
         #endregion
     }

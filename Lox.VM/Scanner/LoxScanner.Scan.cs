@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using FastEnumUtility;
+﻿using FastEnumUtility;
 using Lox.Common;
 
 namespace Lox.VM.Scanner;
@@ -64,6 +63,9 @@ public sealed partial class LoxScanner
                 case TokenType.LESS:
                     return new Token(MatchNext('=') ? castedType + (int)TokenType.EQUALITY : castedType, this.currentLine);
 
+                case TokenType.MINUS:
+                    return MatchDigit() ? TokenizeNumber() : new Token(TokenType.MINUS, this.currentLine);
+
                 default:
                     return new Token(castedType, this.currentLine);
             }
@@ -74,7 +76,7 @@ public sealed partial class LoxScanner
             '"'                                    => TokenizeString(),
             char _ when char.IsAsciiDigit(current) => TokenizeNumber(),
             char _ when IsWordChar(current)        => TokenizeIdentifier(),
-            _                                      => Token.MakeErrorToken($"Unexpected character {current}.", this.currentLine)
+            _                                      => Token.MakeError($"Unexpected character {current}.", this.currentLine)
         };
     }
 
@@ -128,7 +130,7 @@ public sealed partial class LoxScanner
                     break;
 
                 case char.MinValue:
-                    return Token.MakeErrorToken("Unterminated string.", this.currentLine);
+                    return Token.MakeError("Unterminated string.", this.currentLine);
             }
         }
 
@@ -174,7 +176,7 @@ public sealed partial class LoxScanner
     /// <returns>Current token identifier type</returns>
     private unsafe TokenType GetIdentifierType()
     {
-        // There are no keywords of less than 2 characters, or seven or more characters
+        // There are no keywords of less than two characters, or seven or more characters
         if (this.CurrentTokenLength is < 2 or > 7) return TokenType.IDENTIFIER;
 
         char* keywordStart = this.tokenStart;
@@ -217,14 +219,10 @@ public sealed partial class LoxScanner
     /// <param name="keywordTest">Keyword test character</param>
     /// <param name="type">Keyword type</param>
     /// <returns><paramref name="type"/> if the given keyword matched the test character, otherwise <see cref="TokenType.IDENTIFIER"/></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe TokenType ValidateKeyword(in char* keywordRestStart, in char keywordTest, in TokenType type)
+    private unsafe TokenType ValidateKeyword(char* keywordRestStart, char keywordTest, TokenType type)
     {
         // ReSharper disable once ArrangeMethodOrOperatorBody
-        return this.currentChar - keywordRestStart is 1L
-            && *keywordRestStart == keywordTest
-                   ? type
-                   : TokenType.IDENTIFIER;
+        return (this.currentChar - keywordRestStart) is 1L && *keywordRestStart == keywordTest ? type : TokenType.IDENTIFIER;
     }
 
     /// <summary>
@@ -234,8 +232,7 @@ public sealed partial class LoxScanner
     /// <param name="keywordTest">Keyword test span</param>
     /// <param name="type">Keyword type</param>
     /// <returns><paramref name="type"/> if the given keyword matched the test span, otherwise <see cref="TokenType.IDENTIFIER"/></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe TokenType ValidateKeyword(in char* keywordRestStart, in ReadOnlySpan<char> keywordTest, in TokenType type)
+    private unsafe TokenType ValidateKeyword(char* keywordRestStart, ReadOnlySpan<char> keywordTest, TokenType type)
     {
         int length = keywordTest.Length;
         if (length != (int)(this.currentChar - keywordRestStart)) return TokenType.IDENTIFIER;

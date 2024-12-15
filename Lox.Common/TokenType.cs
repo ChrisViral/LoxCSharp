@@ -9,117 +9,117 @@ namespace Lox.Common;
 /// Lox tokens
 /// </summary>
 [PublicAPI]
-public enum TokenType
+public enum TokenType : byte
 {
     // Undefined/Invalid
     [EnumMember(Value = "")]
-    NONE = 0,                       // Invalid token
+    NONE  = 0,                      // Invalid token
 
-    // Matched tokens
+    // End of File
+    [EnumMember(Value = "")]
+    EOF   = 4,                      // EOF
+
+    // Groupings
     [EnumMember(Value = "(")]
-    LEFT_PAREN  = '(',              // (
+    LEFT_PAREN  = (byte)'(',        // (
     [EnumMember(Value = ")")]
-    RIGHT_PAREN = ')',              // )
+    RIGHT_PAREN = (byte)')',        // )
     [EnumMember(Value = "{")]
-    LEFT_BRACE  = '{',              // {
+    LEFT_BRACE  = (byte)'{',        // {
     [EnumMember(Value = "}")]
-    RIGHT_BRACE = '}',              // }
+    RIGHT_BRACE = (byte)'}',        // }
 
     // Delimiters
     [EnumMember(Value = ",")]
-    COMMA     = ',',                // ,
+    COMMA     = (byte)',',          // ,
     [EnumMember(Value = ".")]
-    DOT       = '.',                // .
+    DOT       = (byte)'.',          // .
     [EnumMember(Value = ";")]
-    SEMICOLON = ';',                // ;
+    SEMICOLON = (byte)';',          // ;
 
     // Mathematical operation symbols
     [EnumMember(Value = "+")]
-    PLUS  = '+',                    // +
+    PLUS  = (byte)'+',              // +
     [EnumMember(Value = "-")]
-    MINUS = '-',                    // -
+    MINUS = (byte)'-',              // -
     [EnumMember(Value = "*")]
-    STAR  = '*',                    // *
+    STAR  = (byte)'*',              // *
     [EnumMember(Value = "/")]
-    SLASH = '/',                    // /
+    SLASH = (byte)'/',              // /
 
     // Equality operator offset
-    EQUALITY   = 500,
+    EQUALITY   = 100,
 
     // Equality operation symbols
     [EnumMember(Value = "!")]
-    BANG          = '!',            // !
+    BANG          = (byte)'!',      // !
     [EnumMember(Value = "!=")]
     BANG_EQUAL    = '!' + EQUALITY, // !=
     [EnumMember(Value = "=")]
-    EQUAL         = '=',            // =
+    EQUAL         = (byte)'=',      // =
     [EnumMember(Value = "==")]
     EQUAL_EQUAL   = '=' + EQUALITY, // ==
     [EnumMember(Value = ">")]
-    GREATER       = '>',            // >
+    GREATER       = (byte)'>',      // >
     [EnumMember(Value = ">=")]
     GREATER_EQUAL = '>' + EQUALITY, // >=
     [EnumMember(Value = "<")]
-    LESS          = '<',            // <
+    LESS          = (byte)'<',      // <
     [EnumMember(Value = "<=")]
     LESS_EQUAL    = '<' + EQUALITY, // <=
 
     // Literals
     [EnumMember(Value = LoxUtils.NilString)]
-    NIL        = 1000,              // nil
+    NIL        = 200,               // nil
     [EnumMember(Value = LoxUtils.TrueString)]
-    TRUE       = 1001,              // true
+    TRUE       = 201,               // true
     [EnumMember(Value = LoxUtils.FalseString)]
-    FALSE      = 1002,              // false
-    NUMBER     = 1003,              // 123
-    STRING     = 1004,              // "foo"
-    IDENTIFIER = 1005,              // bar
+    FALSE      = 202,               // false
+    NUMBER     = 203,               // 123
+    STRING     = 204,               // "foo"
+    IDENTIFIER = 205,               // bar
 
     // Conditional keywords
     [EnumMember(Value = "and")]
-    AND  = 1010,                    // and
+    AND  = 210,                     // and
     [EnumMember(Value = "or")]
-    OR   = 1011,                    // or
+    OR   = 211,                     // or
     [EnumMember(Value = "else")]
-    ELSE = 1013,                    // else
+    ELSE = 213,                     // else
 
     // OOP keywords
     [EnumMember(Value = "this")]
-    THIS  = 1020,                   // this
+    THIS  = 220,                    // this
     [EnumMember(Value = "super")]
-    SUPER = 1021,                   // super
+    SUPER = 221,                    // super
 
     // Statement keywords marker
     STATEMENTS = IF - 1,
 
     // Branching keywords
     [EnumMember(Value = "if")]
-    IF    = 1100,                   // if
+    IF    = 230,                    // if
     [EnumMember(Value = "for")]
-    FOR   = 1101,                   // for
+    FOR   = 231,                    // for
     [EnumMember(Value = "while")]
-    WHILE = 1102,                   // while
+    WHILE = 232,                    // while
 
     // Functional keywords
     [EnumMember(Value = "var")]
-    VAR    = 1110,                  // var
-    [EnumMember(Value = "for")]
-    FUN    = 1111,                  // fun
+    VAR    = 240,                   // var
+    [EnumMember(Value = "fun")]
+    FUN    = 241,                   // fun
     [EnumMember(Value = "return")]
-    RETURN = 1112,                  // return
+    RETURN = 242,                   // return
     [EnumMember(Value = "print")]
-    PRINT  = 1113,                  // print
+    PRINT  = 243,                   // print
 
     // Object keywords
     [EnumMember(Value = "class")]
-    CLASS = 1120,                   // class
-
-    // End of File
-    [EnumMember(Value = "")]
-    EOF = -1,                       // EOF
+    CLASS = 250,                    // class
 
     // Error token
-    ERROR = int.MaxValue            // Error
+    ERROR = byte.MaxValue           // Error
 }
 
 [FastEnum<TokenType>, PublicAPI]

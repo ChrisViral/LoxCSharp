@@ -1,3 +1,5 @@
+#define DEBUG_TRACE
+
 using System.Collections.ObjectModel;
 using Lox.Interpreter;
 using Lox.Interpreter.Scanner;
@@ -10,7 +12,7 @@ if (args is [])
     REPL repl = new();
     try
     {
-        await repl.BeginREPL();
+        await repl.BeginREPLAsync();
         Environment.Exit(0);
     }
     catch (Exception e)

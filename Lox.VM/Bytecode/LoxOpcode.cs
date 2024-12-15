@@ -1,4 +1,5 @@
 ﻿using FastEnumUtility;
+using JetBrains.Annotations;
 
 namespace Lox.VM.Bytecode;
 
@@ -8,8 +9,9 @@ public enum LoxOpcode : byte
     NOP = 0,
 
     // Constants
-    CONSTANT,
-    CONSTANT_LONG,
+    CONSTANT_8,
+    CONSTANT_16,
+    CONSTANT_24,
 
     // Unary operations
     NEGATE,
@@ -24,5 +26,5 @@ public enum LoxOpcode : byte
     RETURN,
 }
 
-[FastEnum<LoxOpcode>]
+[FastEnum<LoxOpcode>, UsedImplicitly]
 internal sealed partial class LoxOpcodeBooster;

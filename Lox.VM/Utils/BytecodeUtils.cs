@@ -42,7 +42,7 @@ public static class BytecodeUtils
     /// <param name="chunk">Chunk the instruction is taken from</param>
     /// <param name="instructionPointer">Current instruction pointer</param>
     /// <param name="offset">Current instruction offset</param>
-    public static unsafe void PrintInstruction(LoxChunk chunk, in byte* instructionPointer, in int offset)
+    public static unsafe void PrintInstruction(LoxChunk chunk, byte* instructionPointer, int offset)
     {
         LoxOpcode instruction = (LoxOpcode)(*instructionPointer);
         int line = chunk.GetLine(offset);
@@ -59,17 +59,28 @@ public static class BytecodeUtils
                 PrintSimpleInstruction(instruction);
                 break;
 
-            case LoxOpcode.CONSTANT:
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT, *(instructionPointer + 1));
+            case LoxOpcode.CONSTANT_8:
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_8, *(instructionPointer + 1));
                 break;
 
-            case LoxOpcode.CONSTANT_LONG:
+            case LoxOpcode.CONSTANT_16:
+            {
+                byte a = *(instructionPointer + 1);
+                byte b = *(instructionPointer + 2);
+                int index = BitConverter.ToUInt16([a, b]);
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_16, index);
+                break;
+            }
+
+            case LoxOpcode.CONSTANT_24:
+            {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
                 byte c = *(instructionPointer + 3);
                 int index = BitConverter.ToInt32([a, b, c, 0]);
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_LONG, index);
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_24, index);
                 break;
+            }
 
             default:
                 BytecodePrinter.AppendLine($"Unknown opcode {(byte)instruction}");
@@ -111,17 +122,28 @@ public static class BytecodeUtils
                 PrintSimpleInstruction(instruction);
                 break;
 
-            case LoxOpcode.CONSTANT:
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT, enumerator.NextByte());
+            case LoxOpcode.CONSTANT_8:
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_8, enumerator.NextByte());
                 break;
 
-            case LoxOpcode.CONSTANT_LONG:
+            case LoxOpcode.CONSTANT_16:
+            {
+                byte a = enumerator.NextByte();
+                byte b = enumerator.NextByte();
+                int index = BitConverter.ToUInt16([a, b]);
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_16, index);
+                break;
+            }
+
+            case LoxOpcode.CONSTANT_24:
+            {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
                 byte c = enumerator.NextByte();
                 int index = BitConverter.ToInt32([a, b, c, 0]);
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_LONG, index);
+                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_24, index);
                 break;
+            }
 
             default:
                 BytecodePrinter.AppendLine($"Unknown opcode {(byte)instruction}");
@@ -141,7 +163,7 @@ public static class BytecodeUtils
     /// <param name="chunk">Current chunk</param>
     /// <param name="opcode">Constant opcode</param>
     /// <param name="index">Constant index</param>
-    private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, in int index)
+    private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, int index)
     {
         BytecodePrinter.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
     }

@@ -169,9 +169,22 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <param name="toMatch">Character to match</param>
     /// <returns><see langword="true"/> if the next source char matches <paramref name="toMatch"/>, otherwise <see langword="false"/></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe bool MatchNext(in char toMatch)
+    private unsafe bool MatchNext(char toMatch)
     {
         if (this.IsEOF || *this.currentChar != toMatch) return false;
+
+        this.currentChar++;
+        return true;
+    }
+
+    /// <summary>
+    /// Checks if the next character in the source matches the given char, and consumes it if it is
+    /// </summary>
+    /// <returns><see langword="true"/> if the next source char matches <paramref name="toMatch"/>, otherwise <see langword="false"/></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe bool MatchDigit()
+    {
+        if (this.IsEOF || !char.IsAsciiDigit(*this.currentChar)) return false;
 
         this.currentChar++;
         return true;
@@ -182,7 +195,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// </summary>
     /// <param name="terminator">Terminator character to stop on</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ConsumeUntil(in char terminator)
+    private void ConsumeUntil(char terminator)
     {
         for (char current = NextChar(); !this.IsEOF && current != terminator; current = NextChar());
     }
@@ -213,7 +226,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <param name="peekDistance">Look-ahead distance</param>
     /// <returns>The source code character at the given distance ahead of the current index, or <c>\0</c> if the peek index is outside of the source code bounds</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe char PeekChar(in int peekDistance = 1) => *(this.currentChar + peekDistance);
+    private unsafe char PeekChar(int peekDistance = 1) => *(this.currentChar + peekDistance);
 
     /// <summary>
     /// Increments the index by a certain amount and returns the character at that given position
@@ -221,7 +234,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <param name="skipDistance">Skip-ahead distance</param>
     /// <returns>The source code character at the given distance ahead of the current index, or <c>\0</c> if the peek index is outside of the source code bounds</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe char SkipChar(in int skipDistance = 1) => *(this.currentChar += skipDistance);
+    private unsafe char SkipChar(int skipDistance = 1) => *(this.currentChar += skipDistance);
 
     /// <summary>
     /// Resets the token start to the current character
@@ -250,7 +263,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <param name="character">Character to test</param>
     /// <returns><see langword="true"/> if <paramref name="character"/> is an ascii letter or an underscore, otherwise <see langword="false"/></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsWordChar(in char character) => char.IsAsciiLetter(character) || character is '_';
+    private static bool IsWordChar(char character) => char.IsAsciiLetter(character) || character is '_';
 
     /// <summary>
     /// Checks if the given character is a valid identifier character
@@ -258,7 +271,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <param name="character">Character to test</param>
     /// <returns><see langword="true"/> if <paramref name="character"/> is an ascii letter, ascii digit, or an underscore, otherwise <see langword="false"/></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsIdentifierChar(in char character) => IsWordChar(character) || char.IsAsciiDigit(character);
+    private static bool IsIdentifierChar(char character) => IsWordChar(character) || char.IsAsciiDigit(character);
 
     /// <summary>
     /// Throws an <see cref="InvalidOperationException"/> if <paramref name="scanningState"/> is <see langword="true"/>

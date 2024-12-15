@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Lox.VM.Bytecode;
 using Lox.VM.Exceptions;
 using Lox.VM.Runtime;
-using Lox.VM.Utils;
 
 namespace Lox.VM;
 
@@ -21,13 +20,13 @@ public enum InterpretResult
 /// <summary>
 /// Lox Virtual Machine
 /// </summary>
-/// <param name="chunk">Lox code chunk to interpret</param>
 [PublicAPI]
-public partial class VirtualMachine(LoxChunk chunk)
+public partial class VirtualMachine
 {
     private unsafe byte* bytecode;
     private unsafe byte* instructionPointer;
     private Stack stack = null!;
+    private LoxChunk currentChunk = null!;
 
     /// <summary>
     /// If the VM is currently running
@@ -39,11 +38,12 @@ public partial class VirtualMachine(LoxChunk chunk)
     /// </summary>
     /// <returns>Completion status of the interpreter</returns>
     /// <exception cref="InvalidOperationException">If the interpreter is already running</exception>
-    public unsafe InterpretResult Interpret()
+    public unsafe InterpretResult Run(LoxChunk chunk)
     {
         if (this.IsRunning) throw new InvalidOperationException("This VM is already running");
 
-        this.IsRunning = true;
+        this.IsRunning    = true;
+        this.currentChunk = chunk;
         ReadOnlySpan<byte> bytecodeSpan = chunk.AsSpan();
         IntPtr handle = Marshal.AllocHGlobal(bytecodeSpan.Length);
         this.stack = new Stack();
@@ -63,6 +63,7 @@ public partial class VirtualMachine(LoxChunk chunk)
             Marshal.FreeHGlobal(handle);
             this.stack.Dispose();
             this.stack              = null!;
+            this.currentChunk       = null!;
             this.bytecode           = null;
             this.instructionPointer = null;
             this.IsRunning          = false;
@@ -83,7 +84,7 @@ public partial class VirtualMachine(LoxChunk chunk)
             unsafe
             {
                 this.stack.PrintStack();
-                BytecodeUtils.PrintInstruction(chunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode));
+                Utils.BytecodeUtils.PrintInstruction(this.currentChunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode));
             }
             #endif
 
@@ -94,11 +95,14 @@ public partial class VirtualMachine(LoxChunk chunk)
                     break;
 
                 // Constants
-                case LoxOpcode.CONSTANT:
-                    ReadConstant();
+                case LoxOpcode.CONSTANT_8:
+                    ReadConstant8();
                     break;
-                case LoxOpcode.CONSTANT_LONG:
-                    ReadLongConstant();
+                case LoxOpcode.CONSTANT_16:
+                    ReadConstant16();
+                    break;
+                case LoxOpcode.CONSTANT_24:
+                    ReadConstant24();
                     break;
 
                 // Unary operations

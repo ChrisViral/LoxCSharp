@@ -46,6 +46,6 @@ public readonly record struct Token(TokenType Type, string Lexeme, int Line)
     /// <param name="message">Error message</param>
     /// <param name="line">Token line</param>
     /// <returns>The created error token</returns>
-    public static Token MakeErrorToken(string message, in int line) => new(TokenType.ERROR, message, line);
+    public static Token MakeError(string message, in int line) => new(TokenType.ERROR, message, line);
     #endregion
 }

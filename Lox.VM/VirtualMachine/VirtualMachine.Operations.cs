@@ -10,20 +10,33 @@ public partial class VirtualMachine
     /// </summary>
     /// <returns>Stored constant value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ReadConstant() => this.stack.Push(chunk.GetConstant(ReadByte()));
+    private void ReadConstant8() => this.stack.Push(this.currentChunk.GetConstant(ReadByte()));
+
+    /// <summary>
+    /// Reads the next 16bit constant in the bytecode
+    /// </summary>
+    /// <returns>Stored constant value</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ReadConstant16()
+    {
+        byte a = ReadByte();
+        byte b = ReadByte();
+        int index = BitConverter.ToUInt16([a, b]);
+        this.stack.Push(this.currentChunk.GetConstant(index));
+    }
 
     /// <summary>
     /// Reads the next 24bit constant in the bytecode
     /// </summary>
     /// <returns>Stored constant value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ReadLongConstant()
+    private void ReadConstant24()
     {
         byte a = ReadByte();
         byte b = ReadByte();
         byte c = ReadByte();
         int index = BitConverter.ToInt32([a, b, c, 0]);
-        this.stack.Push(chunk.GetConstant(index));
+        this.stack.Push(this.currentChunk.GetConstant(index));
     }
 
     /// <summary>
