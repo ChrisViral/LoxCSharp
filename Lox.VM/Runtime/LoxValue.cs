@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Lox.Common.Exceptions;
 using Lox.Common.Utils;
@@ -104,16 +105,36 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     public bool IsInvalid => this.Type is ValueType.INVALID;
 
     /// <summary>
-    /// Checks if this value evaluates to true or false
+    /// Checks if this value evaluates to something equivalent to true
     /// </summary>
     /// <returns><see langword="true"/> if the object is truthy, otherwise <see langword="false"/></returns>
-    public bool IsTruthy => this.Type switch
+    public bool IsTruthy
     {
-        ValueType.BOOLEAN => this.BoolValue,
-        ValueType.NIL     => false,
-        ValueType.INVALID => throw new InvalidOperationException("Invalid value type cannot be used"),
-        _                 => true
-    };
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => this.Type switch
+        {
+            ValueType.BOOLEAN => this.BoolValue,
+            ValueType.NIL     => false,
+            ValueType.INVALID => throw new InvalidOperationException("Invalid value type cannot be used"),
+            _                 => true
+        };
+    }
+
+    /// <summary>
+    /// Checks if this value evaluates to something equivalent to false
+    /// </summary>
+    /// <returns><see langword="false"/> if the object is truthy, otherwise <see langword="true"/></returns>
+    public bool IsFalsey
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => this.Type switch
+        {
+            ValueType.BOOLEAN => !this.BoolValue,
+            ValueType.NIL     => true,
+            ValueType.INVALID => throw new InvalidOperationException("Invalid value type cannot be used"),
+            _                 => false
+        };
+    }
     #endregion
 
     #region Constructors

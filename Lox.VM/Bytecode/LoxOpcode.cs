@@ -19,6 +19,7 @@ public enum LoxOpcode : byte
     FALSE,
 
     // Unary operations
+    NOT,
     NEGATE,
 
     // Binary operations

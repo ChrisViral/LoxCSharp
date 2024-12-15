@@ -39,11 +39,23 @@ public sealed partial class LoxCompiler : IDisposable
         ObjectDisposedException.ThrowIf(this.IsDisposed, this);
 
         this.HadCompilationErrors = false;
+        if (this.Chunk.Count > 0)
+        {
+            this.Chunk.Clear();
+        }
         using LoxScanner.PinScope _ = this.scanner.OpenPinScope(source);
-        MoveNextToken();
-        ParseExpression();
-        EnsureNextToken(TokenType.EOF, "Expected end of file.");
-        EndCompilation();
+        try
+        {
+            MoveNextToken();
+            ParseExpression();
+            EnsureNextToken(TokenType.EOF, "Expected end of file.");
+            EndCompilation();
+        }
+        catch
+        {
+            this.HadCompilationErrors = true;
+        }
+
         return !this.HadCompilationErrors;
     }
 

@@ -115,6 +115,10 @@ public partial class LoxCompiler
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (operatorToken.Type)
         {
+            case TokenType.BANG:
+                EmitOpcode(LoxOpcode.NOT, operatorToken.Line);
+                break;
+
             case TokenType.MINUS:
                 EmitOpcode(LoxOpcode.NEGATE, operatorToken.Line);
                 break;

@@ -141,6 +141,9 @@ public partial class VirtualMachine
                     break;
 
                 // Unary operations
+                case LoxOpcode.NOT:
+                    this.stack.Push(this.stack.Pop().IsFalsey);
+                    break;
                 case LoxOpcode.NEGATE:
                     Negate();
                     break;

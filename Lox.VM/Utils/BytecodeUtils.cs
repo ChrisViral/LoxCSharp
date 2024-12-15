@@ -53,6 +53,7 @@ public static class BytecodeUtils
             case LoxOpcode.NIL:
             case LoxOpcode.TRUE:
             case LoxOpcode.FALSE:
+            case LoxOpcode.NOT:
             case LoxOpcode.NEGATE:
             case LoxOpcode.ADD:
             case LoxOpcode.SUBTRACT:
@@ -119,6 +120,7 @@ public static class BytecodeUtils
             case LoxOpcode.NIL:
             case LoxOpcode.TRUE:
             case LoxOpcode.FALSE:
+            case LoxOpcode.NOT:
             case LoxOpcode.NEGATE:
             case LoxOpcode.ADD:
             case LoxOpcode.SUBTRACT:

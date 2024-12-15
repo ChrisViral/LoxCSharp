@@ -71,7 +71,7 @@ public partial class LoxCompiler
             Rules[(int)TokenType.STAR]          = new ParseRule(null,     Binary, Precedence.FACTOR);
             Rules[(int)TokenType.SLASH]         = new ParseRule(null,     Binary, Precedence.FACTOR);
             // Equality
-            Rules[(int)TokenType.BANG]          = new ParseRule(null,     null,   Precedence.NONE);
+            Rules[(int)TokenType.BANG]          = new ParseRule(Unary,    null,   Precedence.NONE);
             Rules[(int)TokenType.BANG_EQUAL]    = new ParseRule(null,     null,   Precedence.NONE);
             Rules[(int)TokenType.EQUAL]         = new ParseRule(null,     null,   Precedence.NONE);
             Rules[(int)TokenType.EQUAL_EQUAL]   = new ParseRule(null,     null,   Precedence.NONE);
