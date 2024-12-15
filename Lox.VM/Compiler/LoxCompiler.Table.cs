@@ -72,13 +72,13 @@ public partial class LoxCompiler
             Rules[(int)TokenType.SLASH]         = new ParseRule(null,     Binary, Precedence.FACTOR);
             // Equality
             Rules[(int)TokenType.BANG]          = new ParseRule(Unary,    null,   Precedence.NONE);
-            Rules[(int)TokenType.BANG_EQUAL]    = new ParseRule(null,     null,   Precedence.NONE);
+            Rules[(int)TokenType.BANG_EQUAL]    = new ParseRule(null,     Binary, Precedence.EQUALITY);
             Rules[(int)TokenType.EQUAL]         = new ParseRule(null,     null,   Precedence.NONE);
-            Rules[(int)TokenType.EQUAL_EQUAL]   = new ParseRule(null,     null,   Precedence.NONE);
-            Rules[(int)TokenType.GREATER]       = new ParseRule(null,     null,   Precedence.NONE);
-            Rules[(int)TokenType.GREATER_EQUAL] = new ParseRule(null,     null,   Precedence.NONE);
-            Rules[(int)TokenType.LESS]          = new ParseRule(null,     null,   Precedence.NONE);
-            Rules[(int)TokenType.LESS_EQUAL]    = new ParseRule(null,     null,   Precedence.NONE);
+            Rules[(int)TokenType.EQUAL_EQUAL]   = new ParseRule(null,     Binary, Precedence.EQUALITY);
+            Rules[(int)TokenType.GREATER]       = new ParseRule(null,     Binary, Precedence.COMPARISON);
+            Rules[(int)TokenType.GREATER_EQUAL] = new ParseRule(null,     Binary, Precedence.COMPARISON);
+            Rules[(int)TokenType.LESS]          = new ParseRule(null,     Binary, Precedence.COMPARISON);
+            Rules[(int)TokenType.LESS_EQUAL]    = new ParseRule(null,     Binary, Precedence.COMPARISON);
             // Literals
             Rules[(int)TokenType.NIL]           = new ParseRule(Nil,      null,   Precedence.NONE);
             Rules[(int)TokenType.TRUE]          = new ParseRule(True,     null,   Precedence.NONE);

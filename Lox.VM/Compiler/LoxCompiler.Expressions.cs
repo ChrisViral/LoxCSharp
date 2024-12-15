@@ -78,6 +78,7 @@ public partial class LoxCompiler
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (operatorToken.Type)
         {
+            // Mathematical operators
             case TokenType.PLUS:
                 EmitOpcode(LoxOpcode.ADD, operatorToken.Line);
                 break;
@@ -89,6 +90,26 @@ public partial class LoxCompiler
                 break;
             case TokenType.SLASH:
                 EmitOpcode(LoxOpcode.DIVIDE, operatorToken.Line);
+                break;
+
+            // Logical operators
+            case TokenType.EQUAL_EQUAL:
+                EmitOpcode(LoxOpcode.EQUALS, operatorToken.Line);
+                break;
+            case TokenType.BANG_EQUAL:
+                EmitOpcode(LoxOpcode.NOT_EQUALS, operatorToken.Line);
+                break;
+            case TokenType.GREATER:
+                EmitOpcode(LoxOpcode.GREATER, operatorToken.Line);
+                break;
+            case TokenType.GREATER_EQUAL:
+                EmitOpcode(LoxOpcode.GREATER_EQUALS, operatorToken.Line);
+                break;
+            case TokenType.LESS:
+                EmitOpcode(LoxOpcode.LESS, operatorToken.Line);
+                break;
+            case TokenType.LESS_EQUAL:
+                EmitOpcode(LoxOpcode.LESS_EQUALS, operatorToken.Line);
                 break;
 
             default:

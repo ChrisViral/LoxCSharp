@@ -59,6 +59,12 @@ public static class BytecodeUtils
             case LoxOpcode.SUBTRACT:
             case LoxOpcode.MULTIPLY:
             case LoxOpcode.DIVIDE:
+            case LoxOpcode.EQUALS:
+            case LoxOpcode.NOT_EQUALS:
+            case LoxOpcode.GREATER:
+            case LoxOpcode.GREATER_EQUALS:
+            case LoxOpcode.LESS:
+            case LoxOpcode.LESS_EQUALS:
             case LoxOpcode.RETURN:
                 PrintSimpleInstruction(instruction);
                 break;
@@ -126,6 +132,12 @@ public static class BytecodeUtils
             case LoxOpcode.SUBTRACT:
             case LoxOpcode.MULTIPLY:
             case LoxOpcode.DIVIDE:
+            case LoxOpcode.EQUALS:
+            case LoxOpcode.NOT_EQUALS:
+            case LoxOpcode.GREATER:
+            case LoxOpcode.GREATER_EQUALS:
+            case LoxOpcode.LESS:
+            case LoxOpcode.LESS_EQUALS:
             case LoxOpcode.RETURN:
                 PrintSimpleInstruction(instruction);
                 break;

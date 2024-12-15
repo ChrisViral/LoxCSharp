@@ -48,7 +48,7 @@ public partial class VirtualMachine
     private unsafe void Negate()
     {
         LoxValue* top = this.stack.GetTop();
-        LoxValue topValue = *top;
+        ref LoxValue topValue = ref *top;
         if (!topValue.TryGetNumber(out double number)) throw new LoxRuntimeException("Negation operand must be a number.", this.CurrentLine);
 
         *top = -number;
@@ -96,6 +96,74 @@ public partial class VirtualMachine
     {
         if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
         this.stack.Push(a / b);
+    }
+
+    /// <summary>
+    /// Checks if both values atop the stack are equal
+    /// </summary>
+    /// <returns>The result of the operation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Equal()
+    {
+        ref LoxValue b = ref this.stack.Pop();
+        ref LoxValue a = ref this.stack.Pop();
+        this.stack.Push(a.Equals(b));
+    }
+
+    /// <summary>
+    /// Checks if both values atop the stack aren't equal
+    /// </summary>
+    /// <returns>The result of the operation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void NotEqual()
+    {
+        ref LoxValue b = ref this.stack.Pop();
+        ref LoxValue a = ref this.stack.Pop();
+        this.stack.Push(a.NotEquals(b));
+    }
+
+    /// <summary>
+    /// Compares the two values atop the stack to see if the first is greater than the second
+    /// </summary>
+    /// <returns>The result of the operation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Greater()
+    {
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a > b);
+    }
+
+    /// <summary>
+    /// Compares the two values atop the stack to see if the first is greater or equal to the second
+    /// </summary>
+    /// <returns>The result of the operation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void GreaterEqual()
+    {
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a >= b);
+    }
+
+    /// <summary>
+    /// Compares the two values atop the stack to see if the first is less than the second
+    /// </summary>
+    /// <returns>The result of the operation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Less()
+    {
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a < b);
+    }
+
+    /// <summary>
+    /// Compares the two values atop the stack to see if the first is less or equal to the second
+    /// </summary>
+    /// <returns>The result of the operation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void LessEqual()
+    {
+        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
+        this.stack.Push(a <= b);
     }
 
     /// <summary>

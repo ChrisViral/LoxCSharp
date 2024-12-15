@@ -22,14 +22,24 @@ public enum LoxOpcode : byte
     NOT,
     NEGATE,
 
-    // Binary operations
+    // Binary mathematical operations
     ADD,
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
 
+    // Binary equality operations
+    EQUALS,
+    NOT_EQUALS,
+
+    // Binary comparison operations
+    GREATER,
+    GREATER_EQUALS,
+    LESS,
+    LESS_EQUALS,
+
     // Control flow
-    RETURN,
+    RETURN
 }
 
 [FastEnum<LoxOpcode>, UsedImplicitly]

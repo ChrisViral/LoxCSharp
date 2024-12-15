@@ -148,7 +148,7 @@ public partial class VirtualMachine
                     Negate();
                     break;
 
-                // Binary operations
+                // Binary mathematical operations
                 case LoxOpcode.ADD:
                     Add();
                     break;
@@ -160,6 +160,28 @@ public partial class VirtualMachine
                     break;
                 case LoxOpcode.DIVIDE:
                     Divide();
+                    break;
+
+                // Binary logical operations
+                case LoxOpcode.EQUALS:
+                    Equal();
+                    break;
+                case LoxOpcode.NOT_EQUALS:
+                    NotEqual();
+                    break;
+
+                // Binary comparison operations
+                case LoxOpcode.GREATER:
+                    Greater();
+                    break;
+                case LoxOpcode.GREATER_EQUALS:
+                    GreaterEqual();
+                    break;
+                case LoxOpcode.LESS:
+                    Less();
+                    break;
+                case LoxOpcode.LESS_EQUALS:
+                    LessEqual();
                     break;
 
                 // Control flow

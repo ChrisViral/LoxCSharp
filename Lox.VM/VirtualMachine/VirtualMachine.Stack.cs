@@ -74,10 +74,10 @@ public partial class VirtualMachine
         /// </summary>
         /// <returns>The popped value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LoxValue Pop()
+        public ref LoxValue Pop()
         {
             this.top--;
-            return *this.top;
+            return ref *this.top;
         }
 
         /// <summary>
@@ -88,8 +88,7 @@ public partial class VirtualMachine
         public bool TryPopBool(out bool number)
         {
             LoxValue* currentTop = this.top - 1;
-            LoxValue value = *currentTop;
-            if (value.TryGetBool(out number))
+            if ((*currentTop).TryGetBool(out number))
             {
                 this.top = currentTop;
                 return true;
@@ -106,8 +105,7 @@ public partial class VirtualMachine
         public bool TryPopNumber(out double number)
         {
             LoxValue* currentTop = this.top - 1;
-            LoxValue value = *currentTop;
-            if (value.TryGetNumber(out number))
+            if ((*currentTop).TryGetNumber(out number))
             {
                 this.top = currentTop;
                 return true;
@@ -124,17 +122,17 @@ public partial class VirtualMachine
         /// <returns><see langword="true"/> if the numbers were successfully popped, otherwise <see langword="false"/></returns>
         public bool TryPopNumbers(out double a, out double b)
         {
-            if ((*(this.top - 1)).TryGetNumber(out a))
+            if ((*(this.top - 1)).TryGetNumber(out b))
             {
                 LoxValue* aRef = this.top - 2;
-                if ((*aRef).TryGetNumber(out b))
+                if ((*aRef).TryGetNumber(out a))
                 {
                     this.top = aRef;
                     return true;
                 }
                 return false;
             }
-            b = 0d;
+            a = 0d;
             return false;
         }
 
@@ -143,7 +141,7 @@ public partial class VirtualMachine
         /// </summary>
         /// <returns>Top value of the stack</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LoxValue Peek() => *(this.top - 1);
+        public ref LoxValue Peek() => ref *(this.top - 1);
 
         /// <summary>
         /// Gets a pointer to the top value of the stack

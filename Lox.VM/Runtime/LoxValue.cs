@@ -209,13 +209,37 @@ public readonly struct LoxValue : IEquatable<LoxValue>
         _                 => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(ValueType))
     };
 
-    /// <inheritdoc cref="IEquatable{T}.Equals(T)" />
+    /// <summary>
+    /// Checks if the other value is equal to this
+    /// </summary>
+    /// <param name="other">Other value to check</param>
+    /// <returns><see langword="true"/> if <paramref name="other"/> is equals to this value, otherwise <see langword="false"/></returns>
+    /// <exception cref="InvalidOperationException">If this value's type is <see cref="ValueType.INVALID"/></exception>
+    /// <exception cref="InvalidEnumArgumentException">For unknown values of <see cref="Type"/></exception>
     public bool Equals(in LoxValue other) => this.Type == other.Type && this.Type switch
     {
         ValueType.NIL     => true,
         ValueType.BOOLEAN => this.boolValue == other.boolValue,
         ValueType.STRING  => default,
         ValueType.NUMBER  => this.numberValue.Equals(other.numberValue),
+        ValueType.OBJECT  => default,
+        ValueType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
+        _                 => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(ValueType)),
+    };
+
+    /// <summary>
+    /// Checks if the other value isn't equal to this
+    /// </summary>
+    /// <param name="other">Other value to check</param>
+    /// <returns><see langword="true"/> if <paramref name="other"/> isn't equals to this value, otherwise <see langword="false"/></returns>
+    /// <exception cref="InvalidOperationException">If this value's type is <see cref="ValueType.INVALID"/></exception>
+    /// <exception cref="InvalidEnumArgumentException">For unknown values of <see cref="Type"/></exception>
+    public bool NotEquals(in LoxValue other) => this.Type == other.Type && this.Type switch
+    {
+        ValueType.NIL     => false,
+        ValueType.BOOLEAN => this.boolValue != other.boolValue,
+        ValueType.STRING  => default,
+        ValueType.NUMBER  => !this.numberValue.Equals(other.numberValue),
         ValueType.OBJECT  => default,
         ValueType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
         _                 => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(ValueType)),
@@ -246,7 +270,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     /// </summary>
     /// <param name="value">Boolean to cast</param>
     /// <returns>A <see cref="LoxValue"/> representing the given <see cref="bool"/></returns>
-    public static implicit operator LoxValue(in bool value) => new(value);
+    public static implicit operator LoxValue(bool value) => new(value);
 
     /// <summary>
     /// Casts the given LoxValue to a boolean
@@ -260,7 +284,7 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     /// </summary>
     /// <param name="value">Double to cast</param>
     /// <returns>A <see cref="LoxValue"/> representing the given <see cref="double"/></returns>
-    public static implicit operator LoxValue(in double value) => new(value);
+    public static implicit operator LoxValue(double value) => new(value);
 
     /// <summary>
     /// Casts the given LoxValue to a double
@@ -283,6 +307,6 @@ public readonly struct LoxValue : IEquatable<LoxValue>
     /// <param name="left">Left operand</param>
     /// <param name="right">Right operand</param>
     /// <returns><see landword="true"/> if both values are unequal, otherwise <see landword="false"/></returns>
-    public static bool operator !=(in LoxValue left, in LoxValue right) => !left.Equals(right);
+    public static bool operator !=(in LoxValue left, in LoxValue right) => left.NotEquals(right);
     #endregion
 }
