@@ -9,14 +9,12 @@ public partial class VirtualMachine
     /// <summary>
     /// Reads the next constant in the bytecode
     /// </summary>
-    /// <returns>Stored constant value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadConstant8() => this.stack.Push(this.currentChunk.GetConstant(ReadByte()));
 
     /// <summary>
     /// Reads the next 16bit constant in the bytecode
     /// </summary>
-    /// <returns>Stored constant value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadConstant16()
     {
@@ -29,7 +27,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Reads the next 24bit constant in the bytecode
     /// </summary>
-    /// <returns>Stored constant value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadConstant24()
     {
@@ -41,9 +38,18 @@ public partial class VirtualMachine
     }
 
     /// <summary>
+    /// Negates the current top value on the stack
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Not()
+    {
+        ref LoxValue topValue = ref this.stack.Peek();
+        topValue = topValue.IsFalsey;
+    }
+
+    /// <summary>
     /// Adds the top two value of the stack together and returns them
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Negate()
     {
@@ -56,7 +62,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Adds the top two value of the stack together and returns them
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Add()
     {
@@ -79,6 +84,7 @@ public partial class VirtualMachine
     /// </summary>
     /// <param name="left">Left operand</param>
     /// <param name="right">Right operand</param>
+    /// <returns>The concatenated string value struct</returns>
     private LoxValue ConcatStrings(in RawString left, in RawString right)
     {
         // Concat the string in a local span
@@ -98,7 +104,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Subtracts the top two value of the stack together and returns them
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Subtract()
     {
@@ -109,7 +114,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Multiplies the top two value of the stack together and returns them
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Multiply()
     {
@@ -131,7 +135,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Checks if both values atop the stack are equal
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Equal()
     {
@@ -143,7 +146,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Checks if both values atop the stack aren't equal
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void NotEqual()
     {
@@ -155,7 +157,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Compares the two values atop the stack to see if the first is greater than the second
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Greater()
     {
@@ -166,7 +167,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Compares the two values atop the stack to see if the first is greater or equal to the second
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void GreaterEqual()
     {
@@ -177,7 +177,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Compares the two values atop the stack to see if the first is less than the second
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Less()
     {
@@ -188,7 +187,6 @@ public partial class VirtualMachine
     /// <summary>
     /// Compares the two values atop the stack to see if the first is less or equal to the second
     /// </summary>
-    /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void LessEqual()
     {
@@ -197,12 +195,15 @@ public partial class VirtualMachine
     }
 
     /// <summary>
-    /// Return operation
+    /// Print operation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private InterpretResult Return()
-    {
-        PrintValue(this.stack.Pop());
-        return InterpretResult.SUCCESS;
-    }
+    private void Print() => PrintValue(this.stack.Pop());
+
+    /// <summary>
+    /// Return operation
+    /// </summary>
+    /// <returns>The execution result</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static InterpretResult Return() => InterpretResult.SUCCESS;
 }

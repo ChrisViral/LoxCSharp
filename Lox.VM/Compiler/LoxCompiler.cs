@@ -43,7 +43,10 @@ public sealed partial class LoxCompiler : IDisposable
         try
         {
             MoveNextToken();
-            ParseExpression();
+            while (!this.IsEOF)
+            {
+                ParseDeclaration();
+            }
             EnsureNextToken(TokenType.EOF, "Expected end of file.");
             EndCompilation(out internedStrings);
         }
@@ -80,7 +83,7 @@ public sealed partial class LoxCompiler : IDisposable
         #if DEBUG_PRINT
         if (!this.HadCompilationErrors)
         {
-            BytecodeUtils.PrintChunk(this.Chunk, "code");
+            BytecodePrinter.PrintChunk(this.Chunk, "code");
         }
         #endif
     }
@@ -181,7 +184,7 @@ public sealed partial class LoxCompiler : IDisposable
     {
         for (MoveNextToken(); !this.IsEOF; MoveNextToken())
         {
-            if (this.currentToken.Type is TokenType.SEMICOLON)
+            if (this.previousToken.Type is TokenType.SEMICOLON)
             {
                 return;
             }

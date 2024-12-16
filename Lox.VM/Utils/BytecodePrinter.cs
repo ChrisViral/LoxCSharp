@@ -7,13 +7,13 @@ namespace Lox.VM.Utils;
 /// <summary>
 /// Bytecode utility
 /// </summary>
-public static class BytecodeUtils
+public static class BytecodePrinter
 {
     #region Printing utils
     /// <summary>
     /// Internal builder
     /// </summary>
-    private static readonly StringBuilder BytecodePrinter = new();
+    private static readonly StringBuilder BytecodeStringBuilder = new();
 
     /// <summary>
     /// Prints the contents of the given chunk
@@ -22,7 +22,7 @@ public static class BytecodeUtils
     /// <param name="name">Chunk name</param>
     public static void PrintChunk(LoxChunk chunk, string name)
     {
-        BytecodePrinter.AppendLine($"== {name} ==");
+        BytecodeStringBuilder.AppendLine($"== {name} ==");
         int previousLine = -1;
         LoxChunk.BytecodeEnumerator enumerator = chunk.GetBytecodeEnumerator();
         while (enumerator.MoveNext())
@@ -32,8 +32,8 @@ public static class BytecodeUtils
             previousLine = currentLine;
             PrintInstruction(chunk, ref enumerator, newLine);
         }
-        Console.Write(BytecodePrinter.ToString());
-        BytecodePrinter.Clear();
+        Console.Write(BytecodeStringBuilder.ToString());
+        BytecodeStringBuilder.Clear();
     }
 
     /// <summary>
@@ -46,10 +46,11 @@ public static class BytecodeUtils
     {
         LoxOpcode instruction = (LoxOpcode)(*instructionPointer);
         int line = chunk.GetLine(offset);
-        BytecodePrinter.Append($"{offset:D4} {line,4} ");
+        BytecodeStringBuilder.Append($"{offset:D4} {line,4} ");
         switch (instruction)
         {
             case LoxOpcode.NOP:
+            case LoxOpcode.POP:
             case LoxOpcode.NIL:
             case LoxOpcode.TRUE:
             case LoxOpcode.FALSE:
@@ -66,6 +67,7 @@ public static class BytecodeUtils
             case LoxOpcode.LESS:
             case LoxOpcode.LESS_EQUALS:
             case LoxOpcode.RETURN:
+            case LoxOpcode.PRINT:
                 PrintSimpleInstruction(instruction);
                 break;
 
@@ -93,13 +95,13 @@ public static class BytecodeUtils
             }
 
             default:
-                BytecodePrinter.AppendLine($"Unknown opcode {(byte)instruction}");
+                BytecodeStringBuilder.AppendLine($"Unknown opcode {(byte)instruction}");
                 break;
         }
 
-        string result = BytecodePrinter.ToString();
+        string result = BytecodeStringBuilder.ToString();
         Console.Write(result);
-        BytecodePrinter.Clear();
+        BytecodeStringBuilder.Clear();
     }
 
     /// <summary>
@@ -113,16 +115,17 @@ public static class BytecodeUtils
         (LoxOpcode instruction, int offset, int line) = enumerator.CurrentInstruction;
         if (newLine)
         {
-            BytecodePrinter.Append($"{offset:D4} {line,4} ");
+            BytecodeStringBuilder.Append($"{offset:D4} {line,4} ");
         }
         else
         {
-            BytecodePrinter.Append($"{offset:D4}    | ");
+            BytecodeStringBuilder.Append($"{offset:D4}    | ");
         }
 
         switch (instruction)
         {
             case LoxOpcode.NOP:
+            case LoxOpcode.POP:
             case LoxOpcode.NIL:
             case LoxOpcode.TRUE:
             case LoxOpcode.FALSE:
@@ -139,6 +142,7 @@ public static class BytecodeUtils
             case LoxOpcode.LESS:
             case LoxOpcode.LESS_EQUALS:
             case LoxOpcode.RETURN:
+            case LoxOpcode.PRINT:
                 PrintSimpleInstruction(instruction);
                 break;
 
@@ -166,7 +170,7 @@ public static class BytecodeUtils
             }
 
             default:
-                BytecodePrinter.AppendLine($"Unknown opcode {(byte)instruction}");
+                BytecodeStringBuilder.AppendLine($"Unknown opcode {(byte)instruction}");
                 break;
         }
     }
@@ -175,7 +179,7 @@ public static class BytecodeUtils
     /// Prints the contents of a simple instruction
     /// </summary>
     /// <param name="instruction">Instruction to print</param>
-    private static void PrintSimpleInstruction(LoxOpcode instruction) => BytecodePrinter.AppendLine(FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(instruction));
+    private static void PrintSimpleInstruction(LoxOpcode instruction) => BytecodeStringBuilder.AppendLine(FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(instruction));
 
     /// <summary>
     /// Prints the contents of a constant instruction
@@ -185,7 +189,7 @@ public static class BytecodeUtils
     /// <param name="index">Constant index</param>
     private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, int index)
     {
-        BytecodePrinter.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
+        BytecodeStringBuilder.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
     }
     #endregion
 }

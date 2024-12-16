@@ -133,14 +133,20 @@ public sealed partial class VirtualMachine : IDisposable
             unsafe
             {
                 this.stack.PrintStack();
-                Utils.BytecodeUtils.PrintInstruction(this.currentChunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode));
+                Utils.BytecodePrinter.PrintInstruction(this.currentChunk, this.instructionPointer, (int)(this.instructionPointer - this.bytecode));
             }
             #endif
 
             LoxOpcode instruction = (LoxOpcode)ReadByte();
             switch (instruction)
             {
+                // No operation
                 case LoxOpcode.NOP:
+                    break;
+
+                // Pop top value and forget
+                case LoxOpcode.POP:
+                    this.stack.Pop();
                     break;
 
                 // Constants
@@ -167,7 +173,7 @@ public sealed partial class VirtualMachine : IDisposable
 
                 // Unary operations
                 case LoxOpcode.NOT:
-                    this.stack.Push(this.stack.Pop().IsFalsey);
+                    Not();
                     break;
                 case LoxOpcode.NEGATE:
                     Negate();
@@ -212,6 +218,10 @@ public sealed partial class VirtualMachine : IDisposable
                 // Control flow
                 case LoxOpcode.RETURN:
                     return Return();
+
+                case LoxOpcode.PRINT:
+                    Print();
+                    break;
 
                 default:
                     throw new LoxUnknownOpcodeException($"Unknown instruction {(byte)instruction}");

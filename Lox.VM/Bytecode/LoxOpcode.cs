@@ -8,6 +8,9 @@ public enum LoxOpcode : byte
     // No op
     NOP = 0,
 
+    // Pop value from stack
+    POP,
+
     // Constants
     CONSTANT_8,
     CONSTANT_16,
@@ -39,7 +42,8 @@ public enum LoxOpcode : byte
     LESS_EQUALS,
 
     // Control flow
-    RETURN
+    RETURN,
+    PRINT
 }
 
 [FastEnum<LoxOpcode>, UsedImplicitly]
