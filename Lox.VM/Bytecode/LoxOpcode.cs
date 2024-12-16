@@ -37,6 +37,8 @@ public enum LoxOpcode : byte
     NIL,
     TRUE,
     FALSE,
+    ZERO,
+    ONE,
 
     // Unary operations
     NOT,

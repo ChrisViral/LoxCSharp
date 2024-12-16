@@ -44,6 +44,14 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     /// False literal
     /// </summary>
     public static LoxValue False { get; } = new(false);
+    /// <summary>
+    /// Zero literal
+    /// </summary>
+    public static LoxValue Zero { get; } = new(0d);
+    /// <summary>
+    /// One literal
+    /// </summary>
+    public static LoxValue One { get; } = new(1d);
     #endregion
 
     #region Properties

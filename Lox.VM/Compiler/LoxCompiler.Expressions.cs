@@ -3,7 +3,6 @@ using FastEnumUtility;
 using Lox.Common;
 using Lox.Common.Exceptions;
 using Lox.VM.Bytecode;
-using Lox.VM.Runtime;
 using Lox.VM.Scanner;
 
 namespace Lox.VM.Compiler;
@@ -161,7 +160,20 @@ public partial class LoxCompiler
     private void ParseNumber(bool negate = false)
     {
         double value = double.Parse(this.previousToken.Lexeme);
-        EmitConstant(negate ? -value : value, out int _, ConstantType.CONSTANT);
+        switch (value)
+        {
+            case 0d:
+                EmitOpcode(LoxOpcode.ZERO);
+                break;
+
+            case 1d when !negate:
+                EmitOpcode(LoxOpcode.ONE);
+                break;
+
+            default:
+                EmitConstant(negate ? -value : value, out int _, ConstantType.CONSTANT);
+                break;
+        }
     }
 
     /// <summary>

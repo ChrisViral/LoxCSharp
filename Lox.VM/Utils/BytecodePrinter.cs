@@ -54,6 +54,8 @@ public static class BytecodePrinter
             case LoxOpcode.NIL:
             case LoxOpcode.TRUE:
             case LoxOpcode.FALSE:
+            case LoxOpcode.ZERO:
+            case LoxOpcode.ONE:
             case LoxOpcode.NOT:
             case LoxOpcode.NEGATE:
             case LoxOpcode.ADD:
@@ -75,6 +77,7 @@ public static class BytecodePrinter
             case LoxOpcode.DEF_GLOBAL_8:
             case LoxOpcode.NDF_GLOBAL_8:
             case LoxOpcode.GET_GLOBAL_8:
+            case LoxOpcode.SET_GLOBAL_8:
                 PrintConstantInstruction(chunk, instruction, *(instructionPointer + 1));
                 break;
 
@@ -82,6 +85,7 @@ public static class BytecodePrinter
             case LoxOpcode.DEF_GLOBAL_16:
             case LoxOpcode.NDF_GLOBAL_16:
             case LoxOpcode.GET_GLOBAL_16:
+            case LoxOpcode.SET_GLOBAL_16:
             {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
@@ -94,6 +98,7 @@ public static class BytecodePrinter
             case LoxOpcode.DEF_GLOBAL_24:
             case LoxOpcode.NDF_GLOBAL_24:
             case LoxOpcode.GET_GLOBAL_24:
+            case LoxOpcode.SET_GLOBAL_24:
             {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
@@ -138,6 +143,8 @@ public static class BytecodePrinter
             case LoxOpcode.NIL:
             case LoxOpcode.TRUE:
             case LoxOpcode.FALSE:
+            case LoxOpcode.ZERO:
+            case LoxOpcode.ONE:
             case LoxOpcode.NOT:
             case LoxOpcode.NEGATE:
             case LoxOpcode.ADD:
@@ -159,6 +166,7 @@ public static class BytecodePrinter
             case LoxOpcode.DEF_GLOBAL_8:
             case LoxOpcode.NDF_GLOBAL_8:
             case LoxOpcode.GET_GLOBAL_8:
+            case LoxOpcode.SET_GLOBAL_8:
                 PrintConstantInstruction(chunk, instruction, enumerator.NextByte());
                 break;
 
@@ -166,6 +174,7 @@ public static class BytecodePrinter
             case LoxOpcode.DEF_GLOBAL_16:
             case LoxOpcode.NDF_GLOBAL_16:
             case LoxOpcode.GET_GLOBAL_16:
+            case LoxOpcode.SET_GLOBAL_16:
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
@@ -178,6 +187,7 @@ public static class BytecodePrinter
             case LoxOpcode.DEF_GLOBAL_24:
             case LoxOpcode.NDF_GLOBAL_24:
             case LoxOpcode.GET_GLOBAL_24:
+            case LoxOpcode.SET_GLOBAL_24:
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();

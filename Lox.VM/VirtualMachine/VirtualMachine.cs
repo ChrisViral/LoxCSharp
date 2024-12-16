@@ -226,6 +226,12 @@ public sealed partial class VirtualMachine : IDisposable
                 case LoxOpcode.FALSE:
                     this.stack.Push(LoxValue.False);
                     break;
+                case LoxOpcode.ZERO:
+                    this.stack.Push(LoxValue.Zero);
+                    break;
+                case LoxOpcode.ONE:
+                    this.stack.Push(LoxValue.One);
+                    break;
 
                 // Unary operations
                 case LoxOpcode.NOT:
