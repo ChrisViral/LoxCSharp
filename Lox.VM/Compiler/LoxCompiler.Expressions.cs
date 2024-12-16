@@ -155,58 +155,11 @@ public partial class LoxCompiler
     private void ParseNumber(bool negate = false)
     {
         double value = double.Parse(this.previousToken.Lexeme);
-        if (!EmitConstant(negate ? -value : value, out int _))
-        {
-            ReportCompileError(this.currentToken, $"Constant limit ({LoxChunk.MAX_CONSTANT}) exceeded.");
-        }
+        EmitConstant(negate ? -value : value, out int _, ConstantType.CONSTANT);
     }
 
     /// <summary>
     /// Parses a string literal expression
     /// </summary>
-    private void ParseString()
-    {
-        // Check if we've already added a constant for the same string
-        ReadOnlySpan<char> literal = this.previousToken.Lexeme.AsSpan(1..^1);
-        if (this.interned.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(literal, out int index))
-        {
-            // Refer to existing constant instead
-            this.Chunk.AddIndexedConstant(index, this.previousToken.Line);
-        }
-        else
-        {
-            // Allocate new string constant
-            RawString.Allocate(literal, out RawString value);
-            if (!EmitConstant(value, out index))
-            {
-                ReportCompileError(this.currentToken, $"Constant limit ({LoxChunk.MAX_CONSTANT}) exceeded.");
-            }
-
-            // Keep track of that interned string
-            this.interned.Add(literal.ToString(), index);
-        }
-    }
-
-    /// <summary>
-    /// Emits the given opcode to the chunk
-    /// </summary>
-    /// <param name="opcode">Opcode to emit</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void EmitOpcode(LoxOpcode opcode) => this.Chunk.AddOpcode(opcode, this.previousToken.Line);
-
-    /// <summary>
-    /// Emits the given opcode to the chunk
-    /// </summary>
-    /// <param name="opcode">Opcode to emit</param>
-    /// <param name="line">Line at which the opcode is emited from</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void EmitOpcode(LoxOpcode opcode, int line) => this.Chunk.AddOpcode(opcode, line);
-
-    /// <summary>
-    /// Emits the given value to the chunk
-    /// </summary>
-    /// <param name="value">Value to emit</param>
-    /// <param name="index">Index the constant was added at</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool EmitConstant(in LoxValue value, out int index) => this.Chunk.AddConstant(value, this.previousToken.Line, out index);
+    private void ParseString() => EmitStringConstant(this.previousToken.Lexeme.AsSpan(1..^1), ConstantType.CONSTANT);
 }

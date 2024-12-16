@@ -16,6 +16,11 @@ public enum LoxOpcode : byte
     CONSTANT_16,
     CONSTANT_24,
 
+    // Globals
+    DEF_GLOBAL_8,
+    DEF_GLOBAL_16,
+    DEF_GLOBAL_24,
+
     // Literals
     NIL,
     TRUE,

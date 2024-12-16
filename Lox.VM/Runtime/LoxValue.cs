@@ -55,6 +55,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     /// <exception cref="LoxInvalidLiteralTypeException">If the literal value of this wrapper is not <see cref="LoxValueType.BOOLEAN"/></exception>
     public bool BoolValue
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (this.Type is not LoxValueType.BOOLEAN) throw new LoxInvalidLiteralTypeException($"Wrapped literal type is {this.Type}, tried getting {LoxValueType.BOOLEAN}");
@@ -70,6 +71,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     /// <exception cref="LoxInvalidLiteralTypeException">If the literal value of this wrapper is not <see cref="LoxValueType.NUMBER"/></exception>
     public double NumberValue
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (this.Type is not LoxValueType.NUMBER) throw new LoxInvalidLiteralTypeException($"Wrapped literal type is {this.Type}, tried getting {LoxValueType.NUMBER}");
@@ -85,12 +87,18 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     /// <exception cref="LoxInvalidLiteralTypeException">If the literal value of this wrapper is not <see cref="LoxValueType.STRING"/></exception>
     public RawString RawString
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (this.Type is not LoxValueType.STRING) throw new LoxInvalidLiteralTypeException($"Wrapped literal type is {this.Type}, tried getting {LoxValueType.STRING}");
             return this.rawString;
         }
     }
+    /// <summary>
+    /// The string literal value, accessed without type checking<br/>
+    /// <b>USE AT YOUR OWN RISK</b>
+    /// </summary>
+    public RawString RawStringUnsafe => this.RawString;
 
     /// <summary>
     /// Type of literal value this wrapper contains

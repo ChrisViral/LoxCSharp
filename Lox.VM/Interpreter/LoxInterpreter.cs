@@ -45,6 +45,7 @@ public class LoxInterpreter : ILoxInterpreter<Token>, IDisposable
         if (this.IsDisposed) return;
 
         this.compiler.Dispose();
+        this.vm.Dispose();
         GC.SuppressFinalize(this);
         this.IsDisposed = true;
     }

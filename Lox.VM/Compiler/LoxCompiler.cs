@@ -9,17 +9,32 @@ using Lox.VM.Utils;
 
 namespace Lox.VM.Compiler;
 
+/// <summary>
+/// Lox bytecode compiler
+/// </summary>
 public sealed partial class LoxCompiler : IDisposable
 {
+    #region Fields
     private readonly LoxScanner scanner = new();
     private readonly Dictionary<string, int> interned = new(StringComparer.Ordinal);
     private Token currentToken;
     private Token previousToken;
+    #endregion
 
+    #region Properties
+    /// <summary>
+    /// Compiled bytecode chunk
+    /// </summary>
     public LoxChunk Chunk { get; } = [];
 
+    /// <summary>
+    /// If the compiler is disposed
+    /// </summary>
     public bool IsDisposed { get; private set; }
 
+    /// <summary>
+    /// If any compilation errors occured
+    /// </summary>
     public bool HadCompilationErrors { get; private set; }
 
     /// <summary>
@@ -31,9 +46,22 @@ public sealed partial class LoxCompiler : IDisposable
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => this.currentToken.IsEOF;
     }
+    #endregion
 
+    #region Constructors
+    /// <summary>
+    /// Compiler finalizer
+    /// </summary>
     ~LoxCompiler() => Dispose();
+    #endregion
 
+    #region Methods
+    /// <summary>
+    /// Compiles a given source code string
+    /// </summary>
+    /// <param name="source">Source code to compile</param>
+    /// <param name="internedStrings">A dictionary of interned strings from the compiler</param>
+    /// <returns><see langword="true"/> If compilation was successful, otherwise <see langword="false"/></returns>
     public bool Compile(string source, [MaybeNullWhen(false)] out Dictionary<string, LoxValue> internedStrings)
     {
         ObjectDisposedException.ThrowIf(this.IsDisposed, this);
@@ -60,6 +88,9 @@ public sealed partial class LoxCompiler : IDisposable
         return !this.HadCompilationErrors;
     }
 
+    /// <summary>
+    /// Initializes the compilation process
+    /// </summary>
     private void InitializeCompilation()
     {
         this.Chunk.Clear();
@@ -68,6 +99,10 @@ public sealed partial class LoxCompiler : IDisposable
         this.HadCompilationErrors = false;
     }
 
+    /// <summary>
+    /// Cleans up the compilation process
+    /// </summary>
+    /// <param name="internedStrings">Dictionary of strings interned by the compiler</param>
     private void EndCompilation(out Dictionary<string, LoxValue> internedStrings)
     {
         EmitOpcode(LoxOpcode.RETURN);
@@ -78,7 +113,6 @@ public sealed partial class LoxCompiler : IDisposable
         {
             internedStrings.Add(value, this.Chunk.GetConstant(index));
         }
-        this.interned.Clear();
 
         #if DEBUG_PRINT
         if (!this.HadCompilationErrors)
@@ -94,11 +128,11 @@ public sealed partial class LoxCompiler : IDisposable
         if (this.IsDisposed) return;
 
         this.scanner.Dispose();
+        this.Chunk.Dispose();
         GC.SuppressFinalize(this);
         this.IsDisposed = true;
     }
 
-    #region Methods
     /// <summary>
     /// Requests the next token from the scanner
     /// </summary>
@@ -107,6 +141,8 @@ public sealed partial class LoxCompiler : IDisposable
     {
         this.previousToken = this.currentToken;
         this.scanner.ScanNextToken(out this.currentToken);
+
+        // ReSharper disable once InvertIf
         if (CheckCurrentToken(TokenType.ERROR))
         {
             Token firstError = this.currentToken;
@@ -119,7 +155,7 @@ public sealed partial class LoxCompiler : IDisposable
             ReportParseError(firstError);
         }
 
-        return this.currentToken;
+        return this.previousToken;
     }
 
     /// <summary>
@@ -132,26 +168,6 @@ public sealed partial class LoxCompiler : IDisposable
     {
         if (CheckCurrentToken(tokenType))
         {
-            matchedToken = MoveNextToken();
-            return true;
-        }
-
-        matchedToken = default;
-        return false;
-    }
-
-    /// <summary>
-    /// Checks if the current token matches any of the specified types
-    /// </summary>
-    /// <param name="matchedToken">The matched token, if any</param>
-    /// <param name="validTypes">Valid types to match</param>
-    /// <returns><see langword="true"/> if a token was matched, otherwise <see langword="false"/></returns>
-    private bool TryMatchToken(out Token matchedToken, params ReadOnlySpan<TokenType> validTypes)
-    {
-        foreach (TokenType type in validTypes)
-        {
-            if (!CheckCurrentToken(type)) continue;
-
             matchedToken = MoveNextToken();
             return true;
         }
@@ -182,17 +198,74 @@ public sealed partial class LoxCompiler : IDisposable
     /// </summary>
     private void Synchronize()
     {
-        for (MoveNextToken(); !this.IsEOF; MoveNextToken())
+        while (!this.IsEOF)
         {
+            Token current = MoveNextToken();
             if (this.previousToken.Type is TokenType.SEMICOLON)
             {
                 return;
             }
 
-            if (this.currentToken.IsStatementStart)
+            if (current.IsStatementStart)
             {
                 return;
             }
+        }
+    }
+
+    /// <summary>
+    /// Emits the given opcode to the chunk
+    /// </summary>
+    /// <param name="opcode">Opcode to emit</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EmitOpcode(LoxOpcode opcode) => this.Chunk.AddOpcode(opcode, this.previousToken.Line);
+
+    /// <summary>
+    /// Emits the given opcode to the chunk
+    /// </summary>
+    /// <param name="opcode">Opcode to emit</param>
+    /// <param name="line">Line at which the opcode is emitted from</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EmitOpcode(LoxOpcode opcode, int line) => this.Chunk.AddOpcode(opcode, line);
+
+    /// <summary>
+    /// Emits the given value to the chunk
+    /// </summary>
+    /// <param name="value">Value to emit</param>
+    /// <param name="index">Index the constant was added at</param>
+    /// <param name="type">Emitted constant type</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EmitConstant(in LoxValue value, out int index, ConstantType type)
+    {
+        // Check if the constant was successfully added
+        if (!this.Chunk.AddConstant(value, this.previousToken.Line, out index, type))
+        {
+            ReportCompileError(this.currentToken, $"Constant limit ({LoxChunk.MAX_CONSTANT}) exceeded.");
+        }
+    }
+
+    /// <summary>
+    /// Emits the given string value to the chunk
+    /// </summary>
+    /// <param name="stringValue">Value to emit</param>
+    /// <param name="type">Emitted constant type, defaults to <see cref="ConstantType.CONSTANT"/></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EmitStringConstant(ReadOnlySpan<char> stringValue, ConstantType type)
+    {
+        // Check if we've already added a constant for the same string
+        if (this.interned.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(stringValue, out int index))
+        {
+            // Refer to existing constant instead
+            this.Chunk.AddIndexedConstant(index, this.previousToken.Line, type);
+        }
+        else
+        {
+            // Allocate new string constant
+            RawString.Allocate(stringValue, out RawString value);
+            EmitConstant(value, out index, type);
+
+            // Keep track of that interned string
+            this.interned.Add(stringValue.ToString(), index);
         }
     }
 
@@ -203,13 +276,6 @@ public sealed partial class LoxCompiler : IDisposable
     /// <returns><see langword="true"/> if the current token matches <paramref name="type"/>, otherwise <see langword="false"/></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool CheckCurrentToken(TokenType type) => this.currentToken.Type == type;
-
-    /// <summary>
-    /// Reports a parsing error from the scanner at the current token
-    /// </summary>
-    /// <exception cref="LoxParseException">Always throws</exception>
-    [DoesNotReturn]
-    private void ReportParseError() => ReportParseError(this.currentToken);
 
     /// <summary>
     /// Reports a parsing error from the scanner at the given token

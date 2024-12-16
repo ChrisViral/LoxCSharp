@@ -6,6 +6,15 @@ using Lox.VM.Runtime;
 namespace Lox.VM.Bytecode;
 
 /// <summary>
+/// Constant value type
+/// </summary>
+public enum ConstantType : byte
+{
+    CONSTANT = LoxOpcode.CONSTANT_8,
+    GLOBAL   = LoxOpcode.DEF_GLOBAL_8
+}
+
+/// <summary>
 /// Lox bytecode chunk
 /// </summary>
 [PublicAPI]
@@ -61,7 +70,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// <summary>
     /// Chunk finalizer
     /// </summary>
-    ~LoxChunk() => Clear();
+    ~LoxChunk() => Dispose();
     #endregion
 
     #region Methods
@@ -88,14 +97,15 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// <param name="value">Constant to add</param>
     /// <param name="line">Line for this constant</param>
     /// <param name="index">Index the constant was added at</param>
+    /// <param name="type">Constant value type</param>
     /// <returns><see langword="true"/> if the constant was successfully added, otherwise <see langword="false"/> if the constant limit has been reached</returns>
-    public bool AddConstant(in LoxValue value, int line, out int index)
+    public bool AddConstant(in LoxValue value, int line, out int index, ConstantType type)
     {
         index = this.values.Count;
         if (index >= MAX_CONSTANT) return false;
 
         this.values.Add(value);
-        AddConstantOpcode(index, line);
+        AddConstantOpcode(index, line, type);
         return true;
     }
 
@@ -104,11 +114,12 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// </summary>
     /// <param name="index">Index of the constant to add the opcode for</param>
     /// <param name="line">Opcode line</param>
-    public void AddIndexedConstant(int index, int line)
+    /// <param name="type">Constant value type</param>
+    public void AddIndexedConstant(int index, int line, ConstantType type)
     {
         if (index is < 0 or >= MAX_CONSTANT) throw new ArgumentOutOfRangeException(nameof(index), index, "Constant index outside of range [0, 2^24[");
 
-        AddConstantOpcode(index, line);
+        AddConstantOpcode(index, line, type);
     }
 
     /// <summary>
@@ -116,13 +127,15 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// </summary>
     /// <param name="index">Index of the constant to add the opcode for</param>
     /// <param name="line">Opcode line</param>
-    public void AddConstantOpcode(int index, int line)
+    /// <param name="type">Constant value type</param>
+    public void AddConstantOpcode(int index, int line, ConstantType type)
     {
         this.version++;
+        byte opcode = (byte)type;
         switch (index)
         {
             case <= byte.MaxValue:
-                this.code.AddRange((byte)LoxOpcode.CONSTANT_8, (byte)index);
+                this.code.AddRange((byte)opcode, (byte)index);
                 AddLine(line, 2);
                 break;
 
@@ -130,7 +143,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
             {
                 Span<byte> bytes = stackalloc byte[sizeof(ushort)];
                 BitConverter.TryWriteBytes(bytes, (ushort)index);
-                this.code.AddRange((byte)LoxOpcode.CONSTANT_16, bytes[0], bytes[1]);
+                this.code.AddRange((byte)(opcode + 1), bytes[0], bytes[1]);
                 AddLine(line, 3);
                 break;
             }
@@ -139,7 +152,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
             {
                 Span<byte> bytes = stackalloc byte[sizeof(int)];
                 BitConverter.TryWriteBytes(bytes, index);
-                this.code.AddRange((byte)LoxOpcode.CONSTANT_24, bytes[0], bytes[1], bytes[2]);
+                this.code.AddRange((byte)(opcode + 2), bytes[0], bytes[1], bytes[2]);
                 AddLine(line, 4);
                 break;
             }
@@ -249,12 +262,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     public void Clear()
     {
         this.version = 0;
-        foreach (LoxValue value in this.values)
-        {
-            value.FreeResources();
-        }
         this.code.Clear();
-        this.values.Clear();
         this.lines.Clear();
     }
 
@@ -274,9 +282,15 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     public BytecodeEnumerator GetBytecodeEnumerator() => new(this);
 
     /// <inheritdoc />
-#pragma warning disable CA1816
-    public void Dispose() => Clear();
-#pragma warning restore CA1816
+    public void Dispose()
+    {
+        foreach (LoxValue value in this.values)
+        {
+            value.FreeResources();
+        }
+        this.values.Clear();
+        GC.SuppressFinalize(this);
+    }
     #endregion
 
     #region Explicit interface implementations

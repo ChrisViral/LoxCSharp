@@ -29,8 +29,10 @@ public sealed partial class VirtualMachine : IDisposable
     private unsafe byte* instructionPointer;
     private Stack stack = null!;
     private LoxChunk currentChunk = null!;
-    private Dictionary<string, LoxValue> interned = null!;
+    private readonly Dictionary<string, LoxValue> interned = [];
+
     private readonly List<IntPtr> allocations = new(byte.MaxValue + 1);
+    private readonly Dictionary<string, LoxValue> globals = new(StringComparer.Ordinal);
     #endregion
 
     #region Properties
@@ -85,12 +87,15 @@ public sealed partial class VirtualMachine : IDisposable
 
         this.IsRunning    = true;
         this.currentChunk = chunk;
-        this.interned     = internedStrings;
+        foreach ((string name, LoxValue value) in internedStrings)
+        {
+            this.interned.TryAdd(name, value);
+        }
         try
         {
             this.stack = new Stack();
             ReadOnlySpan<byte> bytecodeSpan = chunk.AsSpan();
-            this.bytecode           = (byte*)Marshal.AllocHGlobal(bytecodeSpan.Length);
+            this.bytecode = (byte*)Marshal.AllocHGlobal(bytecodeSpan.Length);
             this.instructionPointer = this.bytecode;
             using (UnmanagedMemoryStream stream = new(this.bytecode, bytecodeSpan.Length, bytecodeSpan.Length, FileAccess.Write))
             {
@@ -111,10 +116,17 @@ public sealed partial class VirtualMachine : IDisposable
         }
         finally
         {
-            FreeResources();
+            // Dispose bytecode allocation
+            Marshal.FreeHGlobal((IntPtr)this.bytecode);
+            this.bytecode           = null;
+            this.instructionPointer = null;
+
+            // Dispose stack
+            this.stack.Dispose();
             this.stack              = null!;
+
+            // Clear non-owned references
             this.currentChunk       = null!;
-            this.interned           = null!;
             this.IsRunning          = false;
         }
     }
@@ -151,13 +163,24 @@ public sealed partial class VirtualMachine : IDisposable
 
                 // Constants
                 case LoxOpcode.CONSTANT_8:
-                    ReadConstant8();
+                    ReadConstant(GetIndex8());
                     break;
                 case LoxOpcode.CONSTANT_16:
-                    ReadConstant16();
+                    ReadConstant(GetIndex16());
                     break;
                 case LoxOpcode.CONSTANT_24:
-                    ReadConstant24();
+                    ReadConstant(GetIndex24());
+                    break;
+
+                // Globals
+                case LoxOpcode.DEF_GLOBAL_8:
+                    DefineGlobal(GetIndex8());
+                    break;
+                case LoxOpcode.DEF_GLOBAL_16:
+                    DefineGlobal(GetIndex16());
+                    break;
+                case LoxOpcode.DEF_GLOBAL_24:
+                    DefineGlobal(GetIndex24());
                     break;
 
                 // Literals
@@ -241,7 +264,6 @@ public sealed partial class VirtualMachine : IDisposable
     /// </summary>
     private unsafe void FreeResources()
     {
-        // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         if (this.bytecode != null)
         {
             Marshal.FreeHGlobal((IntPtr)this.bytecode);
@@ -249,14 +271,13 @@ public sealed partial class VirtualMachine : IDisposable
             this.instructionPointer = null;
         }
 
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         this.stack?.Dispose();
         foreach (IntPtr alloc in this.allocations)
         {
             Marshal.FreeHGlobal(alloc);
         }
-        this.currentChunk?.Dispose();
         this.allocations.Clear();
-        // ReSharper enable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
     }
 
     /// <inheritdoc />

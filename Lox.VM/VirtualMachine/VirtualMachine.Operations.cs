@@ -10,31 +10,46 @@ public partial class VirtualMachine
     /// Reads the next constant in the bytecode
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ReadConstant8() => this.stack.Push(this.currentChunk.GetConstant(ReadByte()));
+    private int GetIndex8() => ReadByte();
 
     /// <summary>
     /// Reads the next 16bit constant in the bytecode
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ReadConstant16()
+    private int GetIndex16()
     {
         byte a = ReadByte();
         byte b = ReadByte();
-        int index = BitConverter.ToUInt16([a, b]);
-        this.stack.Push(this.currentChunk.GetConstant(index));
+        return BitConverter.ToUInt16([a, b]);
     }
 
     /// <summary>
     /// Reads the next 24bit constant in the bytecode
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ReadConstant24()
+    private int GetIndex24()
     {
         byte a = ReadByte();
         byte b = ReadByte();
         byte c = ReadByte();
-        int index = BitConverter.ToInt32([a, b, c, 0]);
-        this.stack.Push(this.currentChunk.GetConstant(index));
+        return BitConverter.ToInt32([a, b, c, 0]);
+    }
+
+    /// <summary>
+    /// Reads the next constant in the bytecode
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ReadConstant(int index) => this.stack.Push(this.currentChunk.GetConstant(index));
+
+    /// <summary>
+    /// Reads the next constant in the bytecode
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void DefineGlobal(int index)
+    {
+        ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
+        Dictionary<string, LoxValue>.AlternateLookup<ReadOnlySpan<char>> lookup = this.globals.GetAlternateLookup<ReadOnlySpan<char>>();
+        lookup[identifier.RawStringUnsafe.AsSpan()] = this.stack.Pop();
     }
 
     /// <summary>

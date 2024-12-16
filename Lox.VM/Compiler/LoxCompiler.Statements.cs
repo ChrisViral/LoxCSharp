@@ -14,7 +14,17 @@ public partial class LoxCompiler
     {
         try
         {
-            ParseStatement();
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+            switch (this.currentToken.Type)
+            {
+                case TokenType.VAR:
+                    ParseVariableDeclaration();
+                    break;
+
+                default:
+                    ParseStatement();
+                    break;
+            }
         }
         catch (LoxParseException)
         {
@@ -22,11 +32,28 @@ public partial class LoxCompiler
         }
     }
 
+    private void ParseVariableDeclaration()
+    {
+        MoveNextToken();
+        Token identifier = EnsureNextToken(TokenType.IDENTIFIER, "Expected variable name.");
+        if (TryMatchToken(TokenType.EQUAL, out Token _))
+        {
+            ParseExpression();
+        }
+        else
+        {
+            EmitOpcode(LoxOpcode.NIL);
+        }
+        EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
+        EmitStringConstant(identifier.Lexeme, ConstantType.GLOBAL);
+    }
+
     /// <summary>
     /// Parses a statement
     /// </summary>
     private void ParseStatement()
     {
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (this.currentToken.Type)
         {
             case TokenType.PRINT:

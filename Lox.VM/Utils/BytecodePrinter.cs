@@ -72,25 +72,28 @@ public static class BytecodePrinter
                 break;
 
             case LoxOpcode.CONSTANT_8:
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_8, *(instructionPointer + 1));
+            case LoxOpcode.DEF_GLOBAL_8:
+                PrintConstantInstruction(chunk, instruction, *(instructionPointer + 1));
                 break;
 
             case LoxOpcode.CONSTANT_16:
+            case LoxOpcode.DEF_GLOBAL_16:
             {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
                 int index = BitConverter.ToUInt16([a, b]);
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_16, index);
+                PrintConstantInstruction(chunk, instruction, index);
                 break;
             }
 
             case LoxOpcode.CONSTANT_24:
+            case LoxOpcode.DEF_GLOBAL_24:
             {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
                 byte c = *(instructionPointer + 3);
                 int index = BitConverter.ToInt32([a, b, c, 0]);
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_24, index);
+                PrintConstantInstruction(chunk, instruction, index);
                 break;
             }
 
@@ -147,25 +150,28 @@ public static class BytecodePrinter
                 break;
 
             case LoxOpcode.CONSTANT_8:
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_8, enumerator.NextByte());
+            case LoxOpcode.DEF_GLOBAL_8:
+                PrintConstantInstruction(chunk, instruction, enumerator.NextByte());
                 break;
 
             case LoxOpcode.CONSTANT_16:
+            case LoxOpcode.DEF_GLOBAL_16:
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
                 int index = BitConverter.ToUInt16([a, b]);
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_16, index);
+                PrintConstantInstruction(chunk, instruction, index);
                 break;
             }
 
             case LoxOpcode.CONSTANT_24:
+            case LoxOpcode.DEF_GLOBAL_24:
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
                 byte c = enumerator.NextByte();
                 int index = BitConverter.ToInt32([a, b, c, 0]);
-                PrintConstantInstruction(chunk, LoxOpcode.CONSTANT_24, index);
+                PrintConstantInstruction(chunk, instruction, index);
                 break;
             }
 
