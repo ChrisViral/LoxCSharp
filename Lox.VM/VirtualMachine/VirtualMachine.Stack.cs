@@ -167,13 +167,6 @@ public partial class VirtualMachine
         public ref LoxValue Peek() => ref *(this.top - 1);
 
         /// <summary>
-        /// Gets a pointer to the top value of the stack
-        /// </summary>
-        /// <returns>Pointer to the last value in the stack</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LoxValue* GetTop() => this.top - 1;
-
-        /// <summary>
         /// Resets the stack
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

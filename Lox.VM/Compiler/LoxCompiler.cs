@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Lox.Common;
 using Lox.Common.Exceptions;
 using Lox.VM.Bytecode;
-using Lox.VM.Exceptions;
+using Lox.VM.Runtime;
 using Lox.VM.Scanner;
 using Lox.VM.Utils;
 
@@ -13,6 +12,7 @@ namespace Lox.VM.Compiler;
 public sealed partial class LoxCompiler : IDisposable
 {
     private readonly LoxScanner scanner = new();
+    private readonly Dictionary<string, int> interned = new(StringComparer.Ordinal);
     private Token currentToken;
     private Token previousToken;
 
@@ -34,35 +34,49 @@ public sealed partial class LoxCompiler : IDisposable
 
     ~LoxCompiler() => Dispose();
 
-    public bool Compile(string source)
+    public bool Compile(string source, [MaybeNullWhen(false)] out Dictionary<string, LoxValue> internedStrings)
     {
         ObjectDisposedException.ThrowIf(this.IsDisposed, this);
 
-        this.HadCompilationErrors = false;
-        if (this.Chunk.Count > 0)
-        {
-            this.Chunk.Clear();
-        }
+        InitializeCompilation();
         using LoxScanner.PinScope _ = this.scanner.OpenPinScope(source);
         try
         {
             MoveNextToken();
             ParseExpression();
             EnsureNextToken(TokenType.EOF, "Expected end of file.");
-            EndCompilation();
+            EndCompilation(out internedStrings);
         }
         catch (Exception e)
         {
             Console.Error.WriteLine(e);
             this.HadCompilationErrors = true;
+            internedStrings           = null;
         }
 
         return !this.HadCompilationErrors;
     }
 
-    private void EndCompilation()
+    private void InitializeCompilation()
+    {
+        this.Chunk.Clear();
+        this.previousToken        = default;
+        this.currentToken         = default;
+        this.HadCompilationErrors = false;
+    }
+
+    private void EndCompilation(out Dictionary<string, LoxValue> internedStrings)
     {
         EmitOpcode(LoxOpcode.RETURN);
+
+        // Copy interned strings to a new dictionary for the VM
+        internedStrings = new Dictionary<string, LoxValue>(this.interned.Count, StringComparer.Ordinal);
+        foreach ((string value, int index) in this.interned)
+        {
+            internedStrings.Add(value, this.Chunk.GetConstant(index));
+        }
+        this.interned.Clear();
+
         #if DEBUG_PRINT
         if (!this.HadCompilationErrors)
         {

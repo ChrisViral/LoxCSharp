@@ -45,13 +45,12 @@ public partial class VirtualMachine
     /// </summary>
     /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe void Negate()
+    private void Negate()
     {
-        LoxValue* top = this.stack.GetTop();
-        ref LoxValue topValue = ref *top;
+        ref LoxValue topValue = ref this.stack.Peek();
         if (!topValue.TryGetNumber(out double number)) throw new LoxRuntimeException("Negation operand must be a number.", this.CurrentLine);
 
-        *top = -number;
+        topValue = -number;
     }
 
     /// <summary>
@@ -67,14 +66,33 @@ public partial class VirtualMachine
         }
         else if (this.stack.TryPopStrings(out RawString left, out RawString right))
         {
-            IntPtr allocatedResult = RawString.Concat(left, right, out RawString concatenated);
-            this.allocations.Add(allocatedResult);
-            this.stack.Push(concatenated);
+            this.stack.Push(ConcatStrings(left, right));
         }
         else
         {
             throw new LoxRuntimeException("Operands must be a numbers or strings.", this.CurrentLine);
         }
+    }
+
+    /// <summary>
+    /// Concatenates two strings and pushes the result to the stack
+    /// </summary>
+    /// <param name="left">Left operand</param>
+    /// <param name="right">Right operand</param>
+    private LoxValue ConcatStrings(in RawString left, in RawString right)
+    {
+        // Concat the string in a local span
+        Span<char> concat = stackalloc char[left.length + right.length];
+        left.AsSpan().CopyTo(concat);
+        right.AsSpan().CopyTo(concat[left.length..]);
+
+        // Try and get from interned strings
+        if (this.interned.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(concat, out LoxValue value)) return value;
+
+        // If not found, allocate and intern
+        this.allocations.Add(RawString.Allocate(concat, out RawString concatRaw));
+        this.interned.Add(concat.ToString(), concatRaw);
+        return concatRaw;
     }
 
     /// <summary>

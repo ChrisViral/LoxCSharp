@@ -29,6 +29,7 @@ public sealed partial class VirtualMachine : IDisposable
     private unsafe byte* instructionPointer;
     private Stack stack = null!;
     private LoxChunk currentChunk = null!;
+    private Dictionary<string, LoxValue> interned = null!;
     private readonly List<IntPtr> allocations = new(byte.MaxValue + 1);
     #endregion
 
@@ -66,28 +67,30 @@ public sealed partial class VirtualMachine : IDisposable
     /// <summary>
     /// Finalizer
     /// </summary>
-    ~VirtualMachine() => Dispose();
+    ~VirtualMachine() => FreeResources();
     #endregion
 
     #region Methods
     /// <summary>
     /// Starts this Lox VM interpreter
     /// </summary>
+    /// <param name="chunk">Chunk to execute</param>
+    /// <param name="internedStrings">Dictionary of interned strings from the compiler</param>
     /// <returns>Completion status of the interpreter</returns>
     /// <exception cref="InvalidOperationException">If the interpreter is already running</exception>
-    public unsafe InterpretResult Run(LoxChunk chunk)
+    public unsafe InterpretResult Run(LoxChunk chunk, Dictionary<string, LoxValue> internedStrings)
     {
         if (this.IsRunning) throw new InvalidOperationException("This VM is already running");
         ObjectDisposedException.ThrowIf(this.IsDisposed, this);
 
         this.IsRunning    = true;
         this.currentChunk = chunk;
-        ReadOnlySpan<byte> bytecodeSpan = chunk.AsSpan();
-        IntPtr handle = Marshal.AllocHGlobal(bytecodeSpan.Length);
-        this.stack = new Stack();
+        this.interned     = internedStrings;
         try
         {
-            this.bytecode           = (byte*)handle;
+            this.stack = new Stack();
+            ReadOnlySpan<byte> bytecodeSpan = chunk.AsSpan();
+            this.bytecode           = (byte*)Marshal.AllocHGlobal(bytecodeSpan.Length);
             this.instructionPointer = this.bytecode;
             using (UnmanagedMemoryStream stream = new(this.bytecode, bytecodeSpan.Length, bytecodeSpan.Length, FileAccess.Write))
             {
@@ -101,14 +104,17 @@ public sealed partial class VirtualMachine : IDisposable
             Console.Error.WriteLine($"[line {e.Line}] {e.Message}");
             return InterpretResult.RUNTIME_ERROR;
         }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine("Unhandled exception: \n" + e);
+            return InterpretResult.RUNTIME_ERROR;
+        }
         finally
         {
-            Marshal.FreeHGlobal(handle);
-            this.stack.Dispose();
+            FreeResources();
             this.stack              = null!;
             this.currentChunk       = null!;
-            this.bytecode           = null;
-            this.instructionPointer = null;
+            this.interned           = null!;
             this.IsRunning          = false;
         }
     }
@@ -220,20 +226,35 @@ public sealed partial class VirtualMachine : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe byte ReadByte() => *this.instructionPointer++;
 
+    /// <summary>
+    /// Frees allocated resources
+    /// </summary>
+    private unsafe void FreeResources()
+    {
+        // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        if (this.bytecode != null)
+        {
+            Marshal.FreeHGlobal((IntPtr)this.bytecode);
+            this.bytecode           = null;
+            this.instructionPointer = null;
+        }
+
+        this.stack?.Dispose();
+        foreach (IntPtr alloc in this.allocations)
+        {
+            Marshal.FreeHGlobal(alloc);
+        }
+        this.currentChunk?.Dispose();
+        this.allocations.Clear();
+        // ReSharper enable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
         if (this.IsDisposed) return;
 
-        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-        this.stack?.Dispose();
-
-        foreach (IntPtr stringPtr in this.allocations)
-        {
-            Marshal.FreeBSTR(stringPtr);
-        }
-        this.allocations.Clear();
-        this.currentChunk.Dispose();
+        FreeResources();
         this.IsDisposed = true;
         GC.SuppressFinalize(this);
     }

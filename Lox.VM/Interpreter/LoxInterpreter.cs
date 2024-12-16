@@ -1,5 +1,6 @@
 ﻿using Lox.Common;
 using Lox.VM.Compiler;
+using Lox.VM.Runtime;
 using Lox.VM.Scanner;
 
 namespace Lox.VM;
@@ -26,12 +27,13 @@ public class LoxInterpreter : ILoxInterpreter<Token>, IDisposable
     {
         ObjectDisposedException.ThrowIf(this.IsDisposed, this);
 
-        if (!this.compiler.Compile(source))
+        if (!this.compiler.Compile(source, out Dictionary<string, LoxValue>? internedStrings))
         {
             this.Result = InterpretResult.COMPILE_ERROR;
             return;
         }
-        this.Result = this.vm.Run(this.compiler.Chunk);
+
+        this.Result = this.vm.Run(this.compiler.Chunk, internedStrings);
     }
 
     /// <inheritdoc />

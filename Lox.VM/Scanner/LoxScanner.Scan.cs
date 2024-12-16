@@ -131,7 +131,6 @@ public sealed partial class LoxScanner
             }
         }
 
-        // Include final quote
         return new Token(TokenType.STRING, GetCurrentLexeme(), this.currentLine);
     }
 

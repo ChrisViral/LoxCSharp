@@ -32,7 +32,8 @@ public readonly unsafe struct RawString(char* pointer, int length) : IEquatable<
     public ReadOnlySpan<char> AsSpan() => new(this.pointer, this.length);
 
     /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
-    public bool Equals(in RawString other) => this.pointer == other.pointer && this.length == other.length;
+    public bool Equals(in RawString other) => this.pointer == other.pointer && this.length == other.length
+                                           || AsSpan().SequenceEqual(other.AsSpan());
 
     /// <inheritdoc />
     bool IEquatable<RawString>.Equals(RawString other) => Equals(other);
@@ -41,7 +42,7 @@ public readonly unsafe struct RawString(char* pointer, int length) : IEquatable<
     public override bool Equals(object? obj) => obj is RawString other && Equals(other);
 
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine((int)this.pointer, this.length);
+    public override int GetHashCode() => string.GetHashCode(AsSpan());
 
     /// <summary>
     /// Returns the string value contained within this raw string
@@ -68,30 +69,6 @@ public readonly unsafe struct RawString(char* pointer, int length) : IEquatable<
         valueSpan.CopyTo(allocatedSpan);
         allocated = new RawString(allocatedValue, length);
         return allocatedPtr;
-    }
-
-    /// <summary>
-    /// Concatenates two raw strings and allocates the result onto the unmanaged heap.<br/>
-    /// You <i>must</i> take ownership of the pointer returned by this function.
-    /// </summary>
-    /// <param name="left">Left string to concat</param>
-    /// <param name="right">Right string to concat</param>
-    /// <param name="concatenated">The concatenated result of this string</param>
-    /// <returns>The allocated unmanaged heat pointer for the concatenated string</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr Concat(in RawString left, in RawString right, out RawString concatenated)
-    {
-        int leftLength = left.length;
-        int rightLength = right.length;
-        int leftSize  = leftLength  * sizeof(char);
-        int rightSize = rightLength * sizeof(char);
-        IntPtr allocatedResult = Marshal.AllocHGlobal(leftSize + rightSize);
-        char* allocString = (char*)allocatedResult;
-
-        Buffer.MemoryCopy(left.pointer,  allocString,              leftSize,  leftSize);
-        Buffer.MemoryCopy(right.pointer, allocString + leftLength, rightSize, rightSize);
-        concatenated = new RawString(allocString, leftLength + rightLength);
-        return allocatedResult;
     }
     #endregion
 

@@ -15,7 +15,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// <summary>
     /// Maximum constant index value (24bits)
     /// </summary>
-    public const int MAX_CONSTANT = 0xFFFFFF;
+    public const int MAX_CONSTANT = 1 << 24;
     #endregion
 
     #region Fields
@@ -87,14 +87,38 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// </summary>
     /// <param name="value">Constant to add</param>
     /// <param name="line">Line for this constant</param>
+    /// <param name="index">Index the constant was added at</param>
     /// <returns><see langword="true"/> if the constant was successfully added, otherwise <see langword="false"/> if the constant limit has been reached</returns>
-    public bool AddConstant(in LoxValue value, int line)
+    public bool AddConstant(in LoxValue value, int line, out int index)
     {
-        int index = this.values.Count;
-        if (index > MAX_CONSTANT) return false;
+        index = this.values.Count;
+        if (index >= MAX_CONSTANT) return false;
 
-        this.version++;
         this.values.Add(value);
+        AddConstantOpcode(index, line);
+        return true;
+    }
+
+    /// <summary>
+    /// Adds a constant opcode for the constant at the given index
+    /// </summary>
+    /// <param name="index">Index of the constant to add the opcode for</param>
+    /// <param name="line">Opcode line</param>
+    public void AddIndexedConstant(int index, int line)
+    {
+        if (index is < 0 or >= MAX_CONSTANT) throw new ArgumentOutOfRangeException(nameof(index), index, "Constant index outside of range [0, 2^24[");
+
+        AddConstantOpcode(index, line);
+    }
+
+    /// <summary>
+    /// Adds a constant opcode for the constant at the given index
+    /// </summary>
+    /// <param name="index">Index of the constant to add the opcode for</param>
+    /// <param name="line">Opcode line</param>
+    public void AddConstantOpcode(int index, int line)
+    {
+        this.version++;
         switch (index)
         {
             case <= byte.MaxValue:
@@ -111,7 +135,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
                 break;
             }
 
-            case <= MAX_CONSTANT:
+            default:
             {
                 Span<byte> bytes = stackalloc byte[sizeof(int)];
                 BitConverter.TryWriteBytes(bytes, index);
@@ -120,8 +144,6 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
                 break;
             }
         }
-
-        return true;
     }
 
     /// <summary>
@@ -129,7 +151,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// </summary>
     /// <param name="index">Constant index to get</param>
     /// <returns>The constants value</returns>
-    public LoxValue GetConstant(int index) => this.values[index];
+    public ref LoxValue GetConstant(int index) => ref CollectionsMarshal.AsSpan(this.values)[index];
 
     /// <summary>
     /// Adds a given line entry
