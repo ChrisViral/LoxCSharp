@@ -42,14 +42,62 @@ public partial class VirtualMachine
     private void ReadConstant(int index) => this.stack.Push(this.currentChunk.GetConstant(index));
 
     /// <summary>
-    /// Reads the next constant in the bytecode
+    /// Defines an initialized global variable
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void DefineGlobal(int index)
     {
         ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
-        Dictionary<string, LoxValue>.AlternateLookup<ReadOnlySpan<char>> lookup = this.globals.GetAlternateLookup<ReadOnlySpan<char>>();
-        lookup[identifier.RawStringUnsafe.AsSpan()] = this.stack.Pop();
+        // ReSharper disable once SuggestVarOrType_Elsewhere
+        var internedLookup = this.globals.GetAlternateLookup<ReadOnlySpan<char>>();
+        internedLookup[identifier.RawStringUnsafe.AsSpan()] = this.stack.Pop();
+    }
+
+    /// <summary>
+    /// Defines an uninitialized global variable with the specified identifier
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void NDefineGlobal(int index)
+    {
+        ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
+        // ReSharper disable once SuggestVarOrType_Elsewhere
+        var internedLookup = this.globals.GetAlternateLookup<ReadOnlySpan<char>>();
+        internedLookup[identifier.RawStringUnsafe.AsSpan()] = LoxValue.Nil;
+    }
+
+    /// <summary>
+    /// Puts the value of a global variable onto the stack
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void GetGlobal(int index)
+    {
+        ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
+        // ReSharper disable once SuggestVarOrType_Elsewhere
+        var internedLookup = this.globals.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (!internedLookup.TryGetValue(identifier.RawStringUnsafe.AsSpan(), out LoxValue value))
+        {
+            throw new LoxRuntimeException($"Undefined variable {identifier.RawStringUnsafe.AsSpan()}");
+        }
+
+        this.stack.Push(value);
+    }
+
+    /// <summary>
+    /// Sets the value of a global variable
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SetGlobal(int index)
+    {
+        ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
+        // ReSharper disable once SuggestVarOrType_Elsewhere
+        var internedLookup = this.globals.GetAlternateLookup<ReadOnlySpan<char>>();
+        ReadOnlySpan<char> identifierSpan = identifier.RawStringUnsafe.AsSpan();
+        if (!internedLookup.ContainsKey(identifierSpan))
+        {
+            throw new LoxRuntimeException($"Undefined variable {identifierSpan}");
+        }
+
+        internedLookup[identifierSpan] = this.stack.Peek();
     }
 
     /// <summary>
@@ -108,11 +156,13 @@ public partial class VirtualMachine
         right.AsSpan().CopyTo(concat[left.length..]);
 
         // Try and get from interned strings
-        if (this.interned.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(concat, out LoxValue value)) return value;
+        // ReSharper disable once SuggestVarOrType_Elsewhere
+        var internedLookup = this.interned.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (internedLookup.TryGetValue(concat, out LoxValue value)) return value;
 
         // If not found, allocate and intern
         this.allocations.Add(RawString.Allocate(concat, out RawString concatRaw));
-        this.interned.Add(concat.ToString(), concatRaw);
+        internedLookup[concat] = concatRaw;
         return concatRaw;
     }
 

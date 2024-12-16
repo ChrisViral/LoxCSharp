@@ -253,7 +253,9 @@ public sealed partial class LoxCompiler : IDisposable
     private void EmitStringConstant(ReadOnlySpan<char> stringValue, ConstantType type)
     {
         // Check if we've already added a constant for the same string
-        if (this.interned.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(stringValue, out int index))
+        // ReSharper disable once SuggestVarOrType_Elsewhere
+        var internedLookup = this.interned.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (internedLookup.TryGetValue(stringValue, out int index))
         {
             // Refer to existing constant instead
             this.Chunk.AddIndexedConstant(index, this.previousToken.Line, type);
@@ -265,7 +267,7 @@ public sealed partial class LoxCompiler : IDisposable
             EmitConstant(value, out index, type);
 
             // Keep track of that interned string
-            this.interned.Add(stringValue.ToString(), index);
+            internedLookup[stringValue] = index;
         }
     }
 

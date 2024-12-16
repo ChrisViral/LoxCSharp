@@ -39,13 +39,14 @@ public partial class LoxCompiler
         if (TryMatchToken(TokenType.EQUAL, out Token _))
         {
             ParseExpression();
+            EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
+            EmitStringConstant(identifier.Lexeme, ConstantType.DEF_GLOBAL);
         }
         else
         {
-            EmitOpcode(LoxOpcode.NIL);
+            EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
+            EmitStringConstant(identifier.Lexeme, ConstantType.NDF_GLOBAL);
         }
-        EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
-        EmitStringConstant(identifier.Lexeme, ConstantType.GLOBAL);
     }
 
     /// <summary>

@@ -16,10 +16,22 @@ public enum LoxOpcode : byte
     CONSTANT_16,
     CONSTANT_24,
 
-    // Globals
+    // Define global
     DEF_GLOBAL_8,
     DEF_GLOBAL_16,
     DEF_GLOBAL_24,
+    // Define uninitialized global
+    NDF_GLOBAL_8,
+    NDF_GLOBAL_16,
+    NDF_GLOBAL_24,
+    // Get global
+    GET_GLOBAL_8,
+    GET_GLOBAL_16,
+    GET_GLOBAL_24,
+    // Get global
+    SET_GLOBAL_8,
+    SET_GLOBAL_16,
+    SET_GLOBAL_24,
 
     // Literals
     NIL,

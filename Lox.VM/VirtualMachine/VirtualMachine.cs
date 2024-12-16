@@ -172,7 +172,7 @@ public sealed partial class VirtualMachine : IDisposable
                     ReadConstant(GetIndex24());
                     break;
 
-                // Globals
+                // Globals define
                 case LoxOpcode.DEF_GLOBAL_8:
                     DefineGlobal(GetIndex8());
                     break;
@@ -181,6 +181,39 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
                 case LoxOpcode.DEF_GLOBAL_24:
                     DefineGlobal(GetIndex24());
+                    break;
+
+                // Globals uninitialized define
+                case LoxOpcode.NDF_GLOBAL_8:
+                    NDefineGlobal(GetIndex8());
+                    break;
+                case LoxOpcode.NDF_GLOBAL_16:
+                    NDefineGlobal(GetIndex16());
+                    break;
+                case LoxOpcode.NDF_GLOBAL_24:
+                    NDefineGlobal(GetIndex24());
+                    break;
+
+                // Globals get
+                case LoxOpcode.GET_GLOBAL_8:
+                    GetGlobal(GetIndex8());
+                    break;
+                case LoxOpcode.GET_GLOBAL_16:
+                    GetGlobal(GetIndex16());
+                    break;
+                case LoxOpcode.GET_GLOBAL_24:
+                    GetGlobal(GetIndex24());
+                    break;
+
+                // Globals set
+                case LoxOpcode.SET_GLOBAL_8:
+                    SetGlobal(GetIndex8());
+                    break;
+                case LoxOpcode.SET_GLOBAL_16:
+                    SetGlobal(GetIndex16());
+                    break;
+                case LoxOpcode.SET_GLOBAL_24:
+                    SetGlobal(GetIndex24());
                     break;
 
                 // Literals
@@ -247,7 +280,7 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
 
                 default:
-                    throw new LoxUnknownOpcodeException($"Unknown instruction {(byte)instruction}");
+                    throw new LoxUnknownOpcodeException($"Unknown instruction {instruction}");
             }
         }
     }

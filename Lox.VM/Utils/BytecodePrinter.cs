@@ -73,11 +73,15 @@ public static class BytecodePrinter
 
             case LoxOpcode.CONSTANT_8:
             case LoxOpcode.DEF_GLOBAL_8:
+            case LoxOpcode.NDF_GLOBAL_8:
+            case LoxOpcode.GET_GLOBAL_8:
                 PrintConstantInstruction(chunk, instruction, *(instructionPointer + 1));
                 break;
 
             case LoxOpcode.CONSTANT_16:
             case LoxOpcode.DEF_GLOBAL_16:
+            case LoxOpcode.NDF_GLOBAL_16:
+            case LoxOpcode.GET_GLOBAL_16:
             {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
@@ -88,6 +92,8 @@ public static class BytecodePrinter
 
             case LoxOpcode.CONSTANT_24:
             case LoxOpcode.DEF_GLOBAL_24:
+            case LoxOpcode.NDF_GLOBAL_24:
+            case LoxOpcode.GET_GLOBAL_24:
             {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
@@ -151,11 +157,15 @@ public static class BytecodePrinter
 
             case LoxOpcode.CONSTANT_8:
             case LoxOpcode.DEF_GLOBAL_8:
+            case LoxOpcode.NDF_GLOBAL_8:
+            case LoxOpcode.GET_GLOBAL_8:
                 PrintConstantInstruction(chunk, instruction, enumerator.NextByte());
                 break;
 
             case LoxOpcode.CONSTANT_16:
             case LoxOpcode.DEF_GLOBAL_16:
+            case LoxOpcode.NDF_GLOBAL_16:
+            case LoxOpcode.GET_GLOBAL_16:
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
@@ -166,6 +176,8 @@ public static class BytecodePrinter
 
             case LoxOpcode.CONSTANT_24:
             case LoxOpcode.DEF_GLOBAL_24:
+            case LoxOpcode.NDF_GLOBAL_24:
+            case LoxOpcode.GET_GLOBAL_24:
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();

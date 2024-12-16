@@ -48,11 +48,17 @@ public partial class LoxCompiler
             return;
         }
 
-        prefix(this);
+        bool canAssign = precedence <= Precedence.ASSIGNMENT;
+        prefix(this, canAssign);
         for (ref ParseRule currentRule = ref Table.GetRule(this.currentToken.Type); precedence <= currentRule.precedence; currentRule = ref Table.GetRule(this.currentToken.Type))
         {
             MoveNextToken();
-            currentRule.infix!(this);
+            currentRule.infix!(this, canAssign);
+        }
+
+        if (canAssign && TryMatchToken(TokenType.EQUAL, out Token equal))
+        {
+            ReportCompileError(equal, "Invalid assignment target");
         }
     }
 
@@ -162,4 +168,21 @@ public partial class LoxCompiler
     /// Parses a string literal expression
     /// </summary>
     private void ParseString() => EmitStringConstant(this.previousToken.Lexeme.AsSpan(1..^1), ConstantType.CONSTANT);
+
+    /// <summary>
+    /// Parses an identifier expression
+    /// </summary>
+    private void ParseIdentifier(bool canAssign)
+    {
+        string identifierName = this.previousToken.Lexeme;
+        if (canAssign && TryMatchToken(TokenType.EQUAL, out Token _))
+        {
+            ParseExpression();
+            EmitStringConstant(identifierName, ConstantType.SET_GLOBAL);
+        }
+        else
+        {
+            EmitStringConstant(identifierName, ConstantType.GET_GLOBAL);
+        }
+    }
 }
