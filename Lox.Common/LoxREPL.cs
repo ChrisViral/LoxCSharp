@@ -73,7 +73,7 @@ public class LoxREPL<TToken, TScanner, TInterpreter>
     public virtual void BeginREPL()
     {
         // Print header
-        Version version = Assembly.GetExecutingAssembly().GetName().Version!;
+        Version version = Assembly.GetCallingAssembly().GetName().Version!;
         Console.WriteLine("Lox v" + version);
 
         // Begin prompt

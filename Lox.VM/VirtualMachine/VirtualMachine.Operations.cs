@@ -1,9 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Lox.VM.Exceptions.Runtime;
 using Lox.VM.Runtime;
-
-#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 
 namespace Lox.VM;
 
@@ -62,29 +59,22 @@ public partial class VirtualMachine
     /// </summary>
     /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe void Add()
+    private void Add()
     {
         if (this.stack.TryPopNumbers(out double a, out double b))
         {
             this.stack.Push(a + b);
-            return;
         }
-        if (this.stack.TryPopStrings(out char* left, out int lenLeft, out char* right, out int lenRight))
+        else if (this.stack.TryPopStrings(out RawString left, out RawString right))
         {
-            int leftSize  = lenLeft  * sizeof(char);
-            int rightSize = lenRight * sizeof(char);
-            IntPtr allocatedResult = Marshal.AllocHGlobal(leftSize + rightSize);
-            this.strings.Add(allocatedResult);
-
-            char* allocString = (char*)allocatedResult;
-            Buffer.MemoryCopy(left,  allocString,           leftSize,  leftSize);
-            Buffer.MemoryCopy(right, allocString + lenLeft, rightSize, rightSize);
-            LoxValue loxString = new(allocString, lenLeft + lenRight);
-            this.stack.Push(loxString);
-            return;
+            IntPtr allocatedResult = RawString.Concat(left, right, out RawString concatenated);
+            this.allocations.Add(allocatedResult);
+            this.stack.Push(concatenated);
         }
-
-        throw new LoxRuntimeException("Operands must be a numbers or strings.", this.CurrentLine);
+        else
+        {
+            throw new LoxRuntimeException("Operands must be a numbers or strings.", this.CurrentLine);
+        }
     }
 
     /// <summary>

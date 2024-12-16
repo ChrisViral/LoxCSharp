@@ -51,8 +51,9 @@ public sealed partial class LoxCompiler : IDisposable
             EnsureNextToken(TokenType.EOF, "Expected end of file.");
             EndCompilation();
         }
-        catch
+        catch (Exception e)
         {
+            Console.Error.WriteLine(e);
             this.HadCompilationErrors = true;
         }
 

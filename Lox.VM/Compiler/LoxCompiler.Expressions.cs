@@ -1,13 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using FastEnumUtility;
 using Lox.Common;
 using Lox.Common.Exceptions;
 using Lox.VM.Bytecode;
 using Lox.VM.Runtime;
 using Lox.VM.Scanner;
-
-#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 
 namespace Lox.VM.Compiler;
 
@@ -167,15 +164,10 @@ public partial class LoxCompiler
     /// <summary>
     /// Parses a string literal expression
     /// </summary>
-    private unsafe void ParseString()
+    private void ParseString()
     {
-        ReadOnlySpan<char> valueSpan = this.previousToken.Lexeme.AsSpan(1..^1);
-        int length = valueSpan.Length;
-        char* allocatedValue = (char*)Marshal.AllocHGlobal(length * sizeof(char));
-        Span<char> allocatedSpan = new(allocatedValue, length);
-        valueSpan.CopyTo(allocatedSpan);
-        LoxValue loxString = new(allocatedValue, length);
-        EmitConstant(loxString);
+        RawString.Allocate(this.previousToken.Lexeme.AsSpan(1..^1), out RawString value);
+        EmitConstant(value);
     }
 
     /// <summary>

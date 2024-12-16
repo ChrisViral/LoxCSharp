@@ -24,12 +24,15 @@ public enum InterpretResult
 [PublicAPI]
 public sealed partial class VirtualMachine : IDisposable
 {
+    #region Fields
     private unsafe byte* bytecode;
     private unsafe byte* instructionPointer;
     private Stack stack = null!;
     private LoxChunk currentChunk = null!;
-    private List<IntPtr> strings = new(byte.MaxValue + 1);
+    private readonly List<IntPtr> allocations = new(byte.MaxValue + 1);
+    #endregion
 
+    #region Properties
     /// <summary>
     /// If the VM is currently running
     /// </summary>
@@ -57,12 +60,16 @@ public sealed partial class VirtualMachine : IDisposable
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => this.currentChunk.GetLine(this.CurrentIndex);
     }
+    #endregion
 
+    #region Constructors
     /// <summary>
     /// Finalizer
     /// </summary>
     ~VirtualMachine() => Dispose();
+    #endregion
 
+    #region Methods
     /// <summary>
     /// Starts this Lox VM interpreter
     /// </summary>
@@ -213,28 +220,31 @@ public sealed partial class VirtualMachine : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe byte ReadByte() => *this.instructionPointer++;
 
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (this.IsDisposed) return;
+
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        this.stack?.Dispose();
+
+        foreach (IntPtr stringPtr in this.allocations)
+        {
+            Marshal.FreeBSTR(stringPtr);
+        }
+        this.allocations.Clear();
+        this.currentChunk.Dispose();
+        this.IsDisposed = true;
+        GC.SuppressFinalize(this);
+    }
+    #endregion
+
+    #region Static methods
     /// <summary>
     /// Prints the given value
     /// </summary>
     /// <param name="value">Value to print</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void PrintValue(in LoxValue value) => Console.WriteLine(value.ToString());
-
-    #region IDisposable
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        if (this.IsDisposed) return;
-
-        this.stack?.Dispose();
-        foreach (IntPtr stringPtr in this.strings)
-        {
-            Marshal.FreeBSTR(stringPtr);
-        }
-        this.strings.Clear();
-        this.currentChunk.Dispose();
-        this.IsDisposed = true;
-        GC.SuppressFinalize(this);
-    }
     #endregion
 }

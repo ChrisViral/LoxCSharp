@@ -138,42 +138,24 @@ public partial class VirtualMachine
         }
 
         /// <summary>
-        /// Tries to pop a string from the stack
-        /// </summary>
-        /// <param name="value">Popped string, if valid</param>
-        /// <returns><see langword="true"/> if a string was successfully popped, otherwise <see langword="false"/></returns>
-        public bool TryPopString(out ReadOnlySpan<char> value)
-        {
-            LoxValue* currentTop = this.top - 1;
-            if ((*currentTop).TryGetString(out value))
-            {
-                this.top = currentTop;
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Tries to pop two operand strings from the stack
         /// </summary>
         /// <param name="a">LHS operand</param>
         /// <param name="b">RHS operand</param>
         /// <returns><see langword="true"/> if the strings were successfully popped, otherwise <see langword="false"/></returns>
-        public bool TryPopStrings(out char* a, out int lenA, out char* b, out int lenB)
+        public bool TryPopStrings(out RawString a, out RawString b)
         {
-            if ((*(this.top - 1)).TryGetStringRaw(out b, out lenB))
+            if ((*(this.top - 1)).TryGetRawString(out b))
             {
                 LoxValue* aRef = this.top - 2;
-                if ((*aRef).TryGetStringRaw(out a, out lenA))
+                if ((*aRef).TryGetRawString(out a))
                 {
                     this.top = aRef;
                     return true;
                 }
                 return false;
             }
-            a    = null;
-            lenA = 0;
+            a = default;
             return false;
         }
 

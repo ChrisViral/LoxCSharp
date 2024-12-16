@@ -81,29 +81,17 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     }
 
     [FieldOffset(0)]
-    private readonly char* stringPointer;
+    private readonly RawString rawString;
     /// <summary>
     /// The string literal value
     /// </summary>
     /// <exception cref="LoxInvalidLiteralTypeException">If the literal value of this wrapper is not <see cref="LoxValueType.STRING"/></exception>
-    public ReadOnlySpan<char> StringValue
+    public RawString RawString
     {
         get
         {
             if (this.Type is not LoxValueType.STRING) throw new LoxInvalidLiteralTypeException($"Wrapped literal type is {this.Type}, tried getting {LoxValueType.STRING}");
-            return new ReadOnlySpan<char>(this.stringPointer, this.StringLength);
-        }
-    }
-    /// <summary>
-    /// The string literal value
-    /// </summary>
-    /// <exception cref="LoxInvalidLiteralTypeException">If the literal value of this wrapper is not <see cref="LoxValueType.STRING"/></exception>
-    public char* StringPointer
-    {
-        get
-        {
-            if (this.Type is not LoxValueType.STRING) throw new LoxInvalidLiteralTypeException($"Wrapped literal type is {this.Type}, tried getting {LoxValueType.STRING}");
-            return this.stringPointer;
+            return this.rawString;
         }
     }
 
@@ -131,15 +119,12 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     {
         LoxValueType.NIL     => null,
         LoxValueType.BOOLEAN => this.boolValue,
-        LoxValueType.STRING  => *this.stringPointer,
+        LoxValueType.STRING  => this.rawString.ToString(),
         LoxValueType.NUMBER  => this.numberValue,
         LoxValueType.OBJECT  => *this.objectPointer,
         LoxValueType.INVALID => throw new InvalidOperationException("Invalid value type cannot be used"),
         _                 => throw new InvalidEnumArgumentException(nameof(this.Type), (int)this.Type, typeof(LoxValueType))
     };
-
-    [field: FieldOffset(8)]
-    public int StringLength { get; } = 1;
 
     /// <summary>
     /// Type of literal value this wrapper contains
@@ -190,7 +175,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     /// Creates a new <see cref="bool"/> value
     /// </summary>
     /// <param name="value">Value to wrap</param>
-    public LoxValue(bool value) : this(LoxValueType.BOOLEAN) => this.boolValue   = value;
+    public LoxValue(bool value) : this(LoxValueType.BOOLEAN) => this.boolValue = value;
 
     /// <summary>
     /// Creates a new <see cref="double"/> value
@@ -201,12 +186,11 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     /// <summary>
     /// Creates a new <see cref="string"/> value
     /// </summary>
-    /// <param name="value">Value to wrap</param>
-    /// <param name="length">String length</param>
-    public LoxValue(char* value, int length) : this(LoxValueType.STRING)
+    /// <param name="rawString">Value to wrap</param>
+    public LoxValue(in RawString rawString)
     {
-        this.stringPointer = value;
-        this.StringLength  = length;
+        this.rawString = rawString;
+        this.Type      = LoxValueType.STRING; // This *has* to be set second to avoid the RawString assignment to override the bytes
     }
 
     /// <summary>
@@ -262,35 +246,15 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     /// </summary>
     /// <param name="output">Output value parameter</param>
     /// <returns><see langword="true"/> if this value is a <see cref="string"/>, otherwise <see langword="false"/></returns>
-    public bool TryGetString(out ReadOnlySpan<char> output)
+    public bool TryGetRawString(out RawString output)
     {
         if (this.Type is LoxValueType.STRING)
         {
-            output = new ReadOnlySpan<char>(this.stringPointer, this.StringLength);
+            output = this.rawString;
             return true;
         }
 
-        output = ReadOnlySpan<char>.Empty;
-        return false;
-    }
-
-    /// <summary>
-    /// Tries to get this value as a string
-    /// </summary>
-    /// <param name="pointer">Output value parameter</param>
-    /// <param name="length">Length of the raw string</param>
-    /// <returns><see langword="true"/> if this value is a <see cref="string"/>, otherwise <see langword="false"/></returns>
-    public bool TryGetStringRaw(out char* pointer, out int length)
-    {
-        if (this.Type is LoxValueType.STRING)
-        {
-            pointer = this.stringPointer;
-            length  = this.StringLength;
-            return true;
-        }
-
-        pointer = null;
-        length  = 0;
+        output = default;
         return false;
     }
 
@@ -321,7 +285,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     {
         LoxValueType.NIL     => LoxUtils.NilString,
         LoxValueType.BOOLEAN => this.boolValue ? LoxUtils.TrueString : LoxUtils.FalseString,
-        LoxValueType.STRING  => new string(this.stringPointer, 0, this.StringLength),
+        LoxValueType.STRING  => this.rawString.ToString(),
         LoxValueType.NUMBER  => this.numberValue.ToString(CultureInfo.InvariantCulture),
         LoxValueType.OBJECT  => this.objectPointer->ToString()!,
         LoxValueType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
@@ -339,7 +303,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     {
         LoxValueType.NIL     => true,
         LoxValueType.BOOLEAN => this.boolValue == other.boolValue,
-        LoxValueType.STRING  => this.stringPointer == other.stringPointer || this.stringPointer->Equals(*other.stringPointer),
+        LoxValueType.STRING  => this.rawString.Equals(other.rawString),
         LoxValueType.NUMBER  => this.numberValue.Equals(other.numberValue),
         LoxValueType.OBJECT  => this.objectPointer == other.objectPointer || this.objectPointer->Equals(*other.objectPointer),
         LoxValueType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
@@ -357,7 +321,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     {
         LoxValueType.NIL     => false,
         LoxValueType.BOOLEAN => this.boolValue != other.boolValue,
-        LoxValueType.STRING  => this.stringPointer != other.stringPointer || !this.stringPointer->Equals(*other.stringPointer),
+        LoxValueType.STRING  => !this.rawString.Equals(other.rawString),
         LoxValueType.NUMBER  => !this.numberValue.Equals(other.numberValue),
         LoxValueType.OBJECT  => this.objectPointer != other.objectPointer || !this.objectPointer->Equals(*other.objectPointer),
         LoxValueType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
@@ -375,7 +339,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     {
         LoxValueType.NIL     => throw new NullReferenceException("Cannot get the hashcode of a nil"),
         LoxValueType.BOOLEAN => this.boolValue.GetHashCode(),
-        LoxValueType.STRING  => string.GetHashCode(new ReadOnlySpan<char>(this.stringPointer, this.StringLength)),
+        LoxValueType.STRING  => this.rawString.GetHashCode(),
         LoxValueType.NUMBER  => this.numberValue.GetHashCode(),
         LoxValueType.OBJECT  => this.objectPointer->GetHashCode(),
         LoxValueType.INVALID => throw new InvalidOperationException("None literal type is invalid"),
@@ -390,7 +354,7 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
         switch (this.Type)
         {
             case LoxValueType.STRING:
-                Marshal.FreeHGlobal((IntPtr)this.stringPointer);
+                Marshal.FreeHGlobal((IntPtr)this.rawString.pointer);
                 return;
         }
     }
@@ -426,11 +390,18 @@ public readonly unsafe struct LoxValue : IEquatable<LoxValue>
     public static explicit operator double(in LoxValue value) => value.NumberValue;
 
     /// <summary>
+    /// Casts the given raw string to a LoxValue
+    /// </summary>
+    /// <param name="value">Double to cast</param>
+    /// <returns>A <see cref="LoxValue"/> representing the given <see cref="double"/></returns>
+    public static implicit operator LoxValue(in RawString value) => new(value);
+
+    /// <summary>
     /// Casts the given LoxValue to a string
     /// </summary>
     /// <param name="value">LoxValue to cast</param>
     /// <returns>The casted <see cref="string"/> value</returns>
-    public static explicit operator ReadOnlySpan<char>(in LoxValue value) => value.StringValue;
+    public static explicit operator RawString(in LoxValue value) => value.RawString;
 
     /// <summary>
     /// Casts the given object pointer to a LoxValue
