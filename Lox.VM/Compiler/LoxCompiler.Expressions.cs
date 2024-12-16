@@ -40,7 +40,7 @@ public partial class LoxCompiler
     private void ParseWithPrecedence(Precedence precedence)
     {
         MoveNextToken();
-        ParseFunc? prefix = Table.GetRule(this.previousToken.Type).prefix;
+        ParseFunc? prefix = Table.GetRule(this.previousToken.Type).Prefix;
         if (prefix is null)
         {
             ReportCompileError(this.previousToken, "Expected expression.");
@@ -49,10 +49,10 @@ public partial class LoxCompiler
 
         bool canAssign = precedence <= Precedence.ASSIGNMENT;
         prefix(this, canAssign);
-        for (ref ParseRule currentRule = ref Table.GetRule(this.currentToken.Type); precedence <= currentRule.precedence; currentRule = ref Table.GetRule(this.currentToken.Type))
+        for (ref ParseRule currentRule = ref Table.GetRule(this.currentToken.Type); precedence <= currentRule.Precedence; currentRule = ref Table.GetRule(this.currentToken.Type))
         {
             MoveNextToken();
-            currentRule.infix!(this, canAssign);
+            currentRule.Infix!(this, canAssign);
         }
 
         if (canAssign && TryMatchToken(TokenType.EQUAL, out Token equal))
@@ -77,7 +77,7 @@ public partial class LoxCompiler
     private void ParseBinary()
     {
         Token operatorToken = this.previousToken;
-        ParseWithPrecedence(Table.GetRule(operatorToken.Type).precedence + 1);
+        ParseWithPrecedence(Table.GetRule(operatorToken.Type).Precedence + 1);
 
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (operatorToken.Type)

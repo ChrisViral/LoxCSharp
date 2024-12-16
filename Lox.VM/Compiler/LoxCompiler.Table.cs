@@ -16,26 +16,10 @@ public partial class LoxCompiler
     /// <summary>
     /// Parse rule struct
     /// </summary>
-    /// <param name="prefix">Prefix parse function</param>
-    /// <param name="infix">Infix parse function</param>
-    /// <param name="precedence">Operation precedence</param>
-    private readonly struct ParseRule(ParseFunc? prefix, ParseFunc? infix, Precedence precedence)
-    {
-        #region Fields
-        /// <summary>
-        /// Prefix parse function
-        /// </summary>
-        public readonly ParseFunc? prefix     = prefix;
-        /// <summary>
-        /// Infix parse function
-        /// </summary>
-        public readonly ParseFunc? infix      = infix;
-        /// <summary>
-        /// Operation precedence
-        /// </summary>
-        public readonly Precedence precedence = precedence;
-        #endregion
-    }
+    /// <param name="Prefix">Prefix parse function</param>
+    /// <param name="Infix">Infix parse function</param>
+    /// <param name="Precedence">Operation precedence</param>
+    private readonly record struct ParseRule(ParseFunc? Prefix, ParseFunc? Infix, Precedence Precedence);
 
     /// <summary>
     /// Parse rules table
