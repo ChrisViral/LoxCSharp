@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
@@ -51,7 +52,7 @@ public partial class VirtualMachine
         {
             this.Capacity = DEFAULT_SIZE;
             this.handle  = Marshal.AllocHGlobal(DEFAULT_SIZE * sizeof(LoxValue));
-            this.stack   = (LoxValue*)this.handle.ToPointer();
+            this.stack   = (LoxValue*)this.handle;
             this.top     = this.stack;
         }
         #endregion
@@ -137,6 +138,45 @@ public partial class VirtualMachine
         }
 
         /// <summary>
+        /// Tries to pop a string from the stack
+        /// </summary>
+        /// <param name="value">Popped string, if valid</param>
+        /// <returns><see langword="true"/> if a string was successfully popped, otherwise <see langword="false"/></returns>
+        public bool TryPopString([MaybeNullWhen(false)] out string value)
+        {
+            LoxValue* currentTop = this.top - 1;
+            if ((*currentTop).TryGetString(out value))
+            {
+                this.top = currentTop;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to pop two operand strings from the stack
+        /// </summary>
+        /// <param name="a">LHS operand</param>
+        /// <param name="b">RHS operand</param>
+        /// <returns><see langword="true"/> if the strings were successfully popped, otherwise <see langword="false"/></returns>
+        public bool TryPopNumbers([MaybeNullWhen(false)] out string a, [MaybeNullWhen(false)] out string b)
+        {
+            if ((*(this.top - 1)).TryGetString(out b))
+            {
+                LoxValue* aRef = this.top - 2;
+                if ((*aRef).TryGetString(out a))
+                {
+                    this.top = aRef;
+                    return true;
+                }
+                return false;
+            }
+            a = null;
+            return false;
+        }
+
+        /// <summary>
         /// Returns a the top value of the stack
         /// </summary>
         /// <returns>Top value of the stack</returns>
@@ -164,7 +204,7 @@ public partial class VirtualMachine
             nint oldCapacity = this.Capacity;
             this.Capacity *= 2;
             this.handle    = Marshal.ReAllocHGlobal(this.handle, this.Capacity * sizeof(LoxValue));
-            this.stack     = (LoxValue*)this.handle.ToPointer();
+            this.stack     = (LoxValue*)this.handle;
             this.top       = this.stack + oldCapacity;
         }
 

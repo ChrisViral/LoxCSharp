@@ -84,7 +84,7 @@ public partial class LoxCompiler
             Rules[(int)TokenType.TRUE]          = new ParseRule(True,     null,   Precedence.NONE);
             Rules[(int)TokenType.FALSE]         = new ParseRule(False,    null,   Precedence.NONE);
             Rules[(int)TokenType.NUMBER]        = new ParseRule(Number,   null,   Precedence.NONE);
-            Rules[(int)TokenType.STRING]        = new ParseRule(null,     null,   Precedence.NONE);
+            Rules[(int)TokenType.STRING]        = new ParseRule(String,   null,   Precedence.NONE);
             Rules[(int)TokenType.IDENTIFIER]    = new ParseRule(null,     null,   Precedence.NONE);
             // Conditional keywords
             Rules[(int)TokenType.AND]           = new ParseRule(null,     null,   Precedence.NONE);
@@ -147,6 +147,13 @@ public partial class LoxCompiler
         /// <param name="compiler">Compiler instance</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Number(LoxCompiler compiler) => compiler.ParseNumber();
+
+        /// <summary>
+        /// String parse
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void String(LoxCompiler compiler) => compiler.ParseString();
 
         /// <summary>
         /// Nil parse

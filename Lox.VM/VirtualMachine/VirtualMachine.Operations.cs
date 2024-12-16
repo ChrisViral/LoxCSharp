@@ -1,6 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Lox.VM.Exceptions.Runtime;
 using Lox.VM.Runtime;
+
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 
 namespace Lox.VM;
 
@@ -59,10 +62,23 @@ public partial class VirtualMachine
     /// </summary>
     /// <returns>The result of the operation</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void Add()
+    private unsafe void Add()
     {
-        if (!this.stack.TryPopNumbers(out double a, out double b)) throw new LoxRuntimeException("Operands must be a numbers.", this.CurrentLine);
-        this.stack.Push(a + b);
+        if (this.stack.TryPopNumbers(out double a, out double b))
+        {
+            this.stack.Push(a + b);
+            return;
+        }
+        if (this.stack.TryPopNumbers(out string? l, out string? r))
+        {
+            string result = l + r;
+            IntPtr allocatedResult = Marshal.StringToBSTR(result);
+            this.strings.Add(allocatedResult);
+            this.stack.Push((string*)allocatedResult);
+            return;
+        }
+
+        throw new LoxRuntimeException("Operands must be a numbers or strings.", this.CurrentLine);
     }
 
     /// <summary>

@@ -106,7 +106,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
         }
 
         this.sourceHandle = GCHandle.Alloc(this.sourceCode, GCHandleType.Pinned);
-        this.tokenStart   = (char*)this.sourceHandle.AddrOfPinnedObject().ToPointer();
+        this.tokenStart   = (char*)this.sourceHandle.AddrOfPinnedObject();
         this.currentChar  = this.tokenStart;
         this.currentLine  = 1;
         this.returnedEof  = false;

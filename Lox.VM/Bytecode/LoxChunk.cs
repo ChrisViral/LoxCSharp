@@ -9,7 +9,7 @@ namespace Lox.VM.Bytecode;
 /// Lox bytecode chunk
 /// </summary>
 [PublicAPI]
-public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
+public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
 {
     #region Constants
     /// <summary>
@@ -28,6 +28,11 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     #region Properties
     /// <inheritdoc cref="List{T}.Count" />
     public int Count => this.code.Count;
+
+    /// <summary>
+    /// If this object has been disposed or not
+    /// </summary>
+    public bool IsDisposed { get; private set; }
     #endregion
 
     #region Indexer
@@ -50,6 +55,13 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <param name="range">Range to get</param>
     public ReadOnlySpan<byte> this[Range range] => CollectionsMarshal.AsSpan(this.code)[range];
+    #endregion
+
+    #region Constructors
+    /// <summary>
+    /// Chunk finalizer
+    /// </summary>
+    ~LoxChunk() => Clear();
     #endregion
 
     #region Methods
@@ -215,6 +227,10 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     public void Clear()
     {
         this.version = 0;
+        foreach (LoxValue value in this.values)
+        {
+            value.FreeResources();
+        }
         this.code.Clear();
         this.values.Clear();
         this.lines.Clear();
@@ -234,6 +250,11 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>
     /// </summary>
     /// <returns>Bytecode enumerator</returns>
     public BytecodeEnumerator GetBytecodeEnumerator() => new(this);
+
+    /// <inheritdoc />
+#pragma warning disable CA1816
+    public void Dispose() => Clear();
+#pragma warning restore CA1816
     #endregion
 
     #region Explicit interface implementations

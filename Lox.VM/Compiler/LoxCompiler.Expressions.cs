@@ -1,11 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using FastEnumUtility;
 using Lox.Common;
 using Lox.Common.Exceptions;
 using Lox.VM.Bytecode;
-using Lox.VM.Exceptions;
 using Lox.VM.Runtime;
 using Lox.VM.Scanner;
+
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 
 namespace Lox.VM.Compiler;
 
@@ -160,6 +162,15 @@ public partial class LoxCompiler
         {
             ReportCompileError(this.currentToken, $"Constant limit ({LoxChunk.MAX_CONSTANT}) exceeded.");
         }
+    }
+
+    /// <summary>
+    /// Parses a string literal expression
+    /// </summary>
+    private unsafe void ParseString()
+    {
+        string value = this.previousToken.Lexeme[1..^1];
+        EmitConstant((string*)Marshal.StringToBSTR(value).ToPointer());
     }
 
     /// <summary>

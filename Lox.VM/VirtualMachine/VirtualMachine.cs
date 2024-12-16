@@ -22,17 +22,23 @@ public enum InterpretResult
 /// Lox Virtual Machine
 /// </summary>
 [PublicAPI]
-public partial class VirtualMachine
+public sealed partial class VirtualMachine : IDisposable
 {
     private unsafe byte* bytecode;
     private unsafe byte* instructionPointer;
     private Stack stack = null!;
     private LoxChunk currentChunk = null!;
+    private List<IntPtr> strings = new(byte.MaxValue + 1);
 
     /// <summary>
     /// If the VM is currently running
     /// </summary>
     public bool IsRunning { get; private set; }
+
+    /// <summary>
+    /// If this VirtualMachine has been disposed or not
+    /// </summary>
+    public bool IsDisposed { get; private set; }
 
     /// <summary>
     /// Gets the current instruction index
@@ -53,6 +59,11 @@ public partial class VirtualMachine
     }
 
     /// <summary>
+    /// Finalizer
+    /// </summary>
+    ~VirtualMachine() => Dispose();
+
+    /// <summary>
     /// Starts this Lox VM interpreter
     /// </summary>
     /// <returns>Completion status of the interpreter</returns>
@@ -60,6 +71,7 @@ public partial class VirtualMachine
     public unsafe InterpretResult Run(LoxChunk chunk)
     {
         if (this.IsRunning) throw new InvalidOperationException("This VM is already running");
+        ObjectDisposedException.ThrowIf(this.IsDisposed, this);
 
         this.IsRunning    = true;
         this.currentChunk = chunk;
@@ -68,7 +80,7 @@ public partial class VirtualMachine
         this.stack = new Stack();
         try
         {
-            this.bytecode           = (byte*)handle.ToPointer();
+            this.bytecode           = (byte*)handle;
             this.instructionPointer = this.bytecode;
             using (UnmanagedMemoryStream stream = new(this.bytecode, bytecodeSpan.Length, bytecodeSpan.Length, FileAccess.Write))
             {
@@ -207,4 +219,22 @@ public partial class VirtualMachine
     /// <param name="value">Value to print</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void PrintValue(in LoxValue value) => Console.WriteLine(value.ToString());
+
+    #region IDisposable
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (this.IsDisposed) return;
+
+        this.stack?.Dispose();
+        foreach (IntPtr stringPtr in this.strings)
+        {
+            Marshal.FreeBSTR(stringPtr);
+        }
+        this.strings.Clear();
+        this.currentChunk.Dispose();
+        this.IsDisposed = true;
+        GC.SuppressFinalize(this);
+    }
+    #endregion
 }
