@@ -69,12 +69,18 @@ public partial class VirtualMachine
             this.stack.Push(a + b);
             return;
         }
-        if (this.stack.TryPopNumbers(out string? l, out string? r))
+        if (this.stack.TryPopStrings(out char* left, out int lenLeft, out char* right, out int lenRight))
         {
-            string result = l + r;
-            IntPtr allocatedResult = Marshal.StringToBSTR(result);
+            int leftSize  = lenLeft  * sizeof(char);
+            int rightSize = lenRight * sizeof(char);
+            IntPtr allocatedResult = Marshal.AllocHGlobal(leftSize + rightSize);
             this.strings.Add(allocatedResult);
-            this.stack.Push((string*)allocatedResult);
+
+            char* allocString = (char*)allocatedResult;
+            Buffer.MemoryCopy(left,  allocString,           leftSize,  leftSize);
+            Buffer.MemoryCopy(right, allocString + lenLeft, rightSize, rightSize);
+            LoxValue loxString = new(allocString, lenLeft + lenRight);
+            this.stack.Push(loxString);
             return;
         }
 

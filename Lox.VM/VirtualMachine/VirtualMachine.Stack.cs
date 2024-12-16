@@ -142,7 +142,7 @@ public partial class VirtualMachine
         /// </summary>
         /// <param name="value">Popped string, if valid</param>
         /// <returns><see langword="true"/> if a string was successfully popped, otherwise <see langword="false"/></returns>
-        public bool TryPopString([MaybeNullWhen(false)] out string value)
+        public bool TryPopString(out ReadOnlySpan<char> value)
         {
             LoxValue* currentTop = this.top - 1;
             if ((*currentTop).TryGetString(out value))
@@ -160,19 +160,20 @@ public partial class VirtualMachine
         /// <param name="a">LHS operand</param>
         /// <param name="b">RHS operand</param>
         /// <returns><see langword="true"/> if the strings were successfully popped, otherwise <see langword="false"/></returns>
-        public bool TryPopNumbers([MaybeNullWhen(false)] out string a, [MaybeNullWhen(false)] out string b)
+        public bool TryPopStrings(out char* a, out int lenA, out char* b, out int lenB)
         {
-            if ((*(this.top - 1)).TryGetString(out b))
+            if ((*(this.top - 1)).TryGetStringRaw(out b, out lenB))
             {
                 LoxValue* aRef = this.top - 2;
-                if ((*aRef).TryGetString(out a))
+                if ((*aRef).TryGetStringRaw(out a, out lenA))
                 {
                     this.top = aRef;
                     return true;
                 }
                 return false;
             }
-            a = null;
+            a    = null;
+            lenA = 0;
             return false;
         }
 

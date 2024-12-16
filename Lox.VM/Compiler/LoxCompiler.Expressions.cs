@@ -169,8 +169,13 @@ public partial class LoxCompiler
     /// </summary>
     private unsafe void ParseString()
     {
-        string value = this.previousToken.Lexeme[1..^1];
-        EmitConstant((string*)Marshal.StringToBSTR(value).ToPointer());
+        ReadOnlySpan<char> valueSpan = this.previousToken.Lexeme.AsSpan(1..^1);
+        int length = valueSpan.Length;
+        char* allocatedValue = (char*)Marshal.AllocHGlobal(length * sizeof(char));
+        Span<char> allocatedSpan = new(allocatedValue, length);
+        valueSpan.CopyTo(allocatedSpan);
+        LoxValue loxString = new(allocatedValue, length);
+        EmitConstant(loxString);
     }
 
     /// <summary>
