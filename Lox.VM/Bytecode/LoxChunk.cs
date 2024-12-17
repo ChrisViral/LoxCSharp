@@ -23,13 +23,6 @@ public enum ConstantType : byte
 [PublicAPI]
 public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
 {
-    #region Constants
-    /// <summary>
-    /// Maximum constant index value (24bits)
-    /// </summary>
-    public const int MAX_CONSTANT = 1 << 24;
-    #endregion
-
     #region Fields
     private int version;
     private readonly List<byte> code       = [];
@@ -102,13 +95,18 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// <param name="index">Index the constant was added at</param>
     /// <param name="type">Constant value type</param>
     /// <returns><see langword="true"/> if the constant was successfully added, otherwise <see langword="false"/> if the constant limit has been reached</returns>
-    public bool AddConstant(in LoxValue value, int line, out int index, ConstantType type)
+    public bool AddConstant(in LoxValue value, int line, out ushort index, ConstantType type)
     {
-        index = this.values.Count;
-        if (index >= MAX_CONSTANT) return false;
+        int count = this.values.Count;
+        if (count >= ushort.MaxValue)
+        {
+            index = 0;
+            return false;
+        }
 
+        index = (ushort)count;
         this.values.Add(value);
-        AddConstantOpcode(index, line, type);
+        AddIndexedConstant(index, line, type);
         return true;
     }
 
@@ -118,47 +116,21 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// <param name="index">Index of the constant to add the opcode for</param>
     /// <param name="line">Opcode line</param>
     /// <param name="type">Constant value type</param>
-    public void AddIndexedConstant(int index, int line, ConstantType type)
-    {
-        if (index is < 0 or >= MAX_CONSTANT) throw new ArgumentOutOfRangeException(nameof(index), index, "Constant index outside of range [0, 2^24[");
-
-        AddConstantOpcode(index, line, type);
-    }
-
-    /// <summary>
-    /// Adds a constant opcode for the constant at the given index
-    /// </summary>
-    /// <param name="index">Index of the constant to add the opcode for</param>
-    /// <param name="line">Opcode line</param>
-    /// <param name="type">Constant value type</param>
-    public void AddConstantOpcode(int index, int line, ConstantType type)
+    public void AddIndexedConstant(ushort index, int line, ConstantType type)
     {
         this.version++;
         byte opcode = (byte)type;
-        switch (index)
+        if (index <= byte.MaxValue)
         {
-            case <= byte.MaxValue:
-                this.code.AddRange((byte)opcode, (byte)index);
-                AddLine(line, 2);
-                break;
-
-            case <= ushort.MaxValue:
-            {
-                Span<byte> bytes = stackalloc byte[sizeof(ushort)];
-                BitConverter.TryWriteBytes(bytes, (ushort)index);
-                this.code.AddRange((byte)(opcode + 1), bytes[0], bytes[1]);
-                AddLine(line, 3);
-                break;
-            }
-
-            default:
-            {
-                Span<byte> bytes = stackalloc byte[sizeof(int)];
-                BitConverter.TryWriteBytes(bytes, index);
-                this.code.AddRange((byte)(opcode + 2), bytes[0], bytes[1], bytes[2]);
-                AddLine(line, 4);
-                break;
-            }
+            this.code.AddRange(opcode, (byte)index);
+            AddLine(line, 2);
+        }
+        else
+        {
+            Span<byte> bytes = stackalloc byte[sizeof(ushort)];
+            BitConverter.TryWriteBytes(bytes, index);
+            this.code.AddRange((byte)(opcode + 1), bytes[0], bytes[1]);
+            AddLine(line, 3);
         }
     }
 
@@ -167,7 +139,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// </summary>
     /// <param name="index">Constant index to get</param>
     /// <returns>The constants value</returns>
-    public ref LoxValue GetConstant(int index) => ref CollectionsMarshal.AsSpan(this.values)[index];
+    public ref LoxValue GetConstant(ushort index) => ref CollectionsMarshal.AsSpan(this.values)[index];
 
     /// <summary>
     /// Adds a given line entry

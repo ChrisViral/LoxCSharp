@@ -89,24 +89,11 @@ public static class BytecodePrinter
             {
                 byte a = *(instructionPointer + 1);
                 byte b = *(instructionPointer + 2);
-                int index = BitConverter.ToUInt16([a, b]);
+                ushort index = BitConverter.ToUInt16([a, b]);
                 PrintConstantInstruction(chunk, instruction, index);
                 break;
             }
 
-            case LoxOpcode.CONSTANT_24:
-            case LoxOpcode.DEF_GLOBAL_24:
-            case LoxOpcode.NDF_GLOBAL_24:
-            case LoxOpcode.GET_GLOBAL_24:
-            case LoxOpcode.SET_GLOBAL_24:
-            {
-                byte a = *(instructionPointer + 1);
-                byte b = *(instructionPointer + 2);
-                byte c = *(instructionPointer + 3);
-                int index = BitConverter.ToInt32([a, b, c, 0]);
-                PrintConstantInstruction(chunk, instruction, index);
-                break;
-            }
 
             default:
                 BytecodeStringBuilder.AppendLine($"Unknown opcode {(byte)instruction}");
@@ -178,21 +165,7 @@ public static class BytecodePrinter
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
-                int index = BitConverter.ToUInt16([a, b]);
-                PrintConstantInstruction(chunk, instruction, index);
-                break;
-            }
-
-            case LoxOpcode.CONSTANT_24:
-            case LoxOpcode.DEF_GLOBAL_24:
-            case LoxOpcode.NDF_GLOBAL_24:
-            case LoxOpcode.GET_GLOBAL_24:
-            case LoxOpcode.SET_GLOBAL_24:
-            {
-                byte a = enumerator.NextByte();
-                byte b = enumerator.NextByte();
-                byte c = enumerator.NextByte();
-                int index = BitConverter.ToInt32([a, b, c, 0]);
+                ushort index = BitConverter.ToUInt16([a, b]);
                 PrintConstantInstruction(chunk, instruction, index);
                 break;
             }
@@ -215,7 +188,7 @@ public static class BytecodePrinter
     /// <param name="chunk">Current chunk</param>
     /// <param name="opcode">Constant opcode</param>
     /// <param name="index">Constant index</param>
-    private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, int index)
+    private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, ushort index)
     {
         BytecodeStringBuilder.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
     }

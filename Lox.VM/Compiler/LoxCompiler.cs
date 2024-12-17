@@ -16,7 +16,7 @@ public sealed partial class LoxCompiler : IDisposable
 {
     #region Fields
     private readonly LoxScanner scanner = new();
-    private readonly Dictionary<string, int> interned = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ushort> interned = new(StringComparer.Ordinal);
     private Token currentToken;
     private Token previousToken;
     #endregion
@@ -109,7 +109,7 @@ public sealed partial class LoxCompiler : IDisposable
 
         // Copy interned strings to a new dictionary for the VM
         internedStrings = new Dictionary<string, LoxValue>(this.interned.Count, StringComparer.Ordinal);
-        foreach ((string value, int index) in this.interned)
+        foreach ((string value, ushort index) in this.interned)
         {
             internedStrings.Add(value, this.Chunk.GetConstant(index));
         }
@@ -235,12 +235,12 @@ public sealed partial class LoxCompiler : IDisposable
     /// <param name="index">Index the constant was added at</param>
     /// <param name="type">Emitted constant type</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void EmitConstant(in LoxValue value, out int index, ConstantType type)
+    private void EmitConstant(in LoxValue value, out ushort index, ConstantType type)
     {
         // Check if the constant was successfully added
         if (!this.Chunk.AddConstant(value, this.previousToken.Line, out index, type))
         {
-            ReportCompileError(this.currentToken, $"Constant limit ({LoxChunk.MAX_CONSTANT}) exceeded.");
+            ReportCompileError(this.currentToken, $"Constant limit ({ushort.MaxValue}) exceeded.");
         }
     }
 
@@ -249,13 +249,12 @@ public sealed partial class LoxCompiler : IDisposable
     /// </summary>
     /// <param name="stringValue">Value to emit</param>
     /// <param name="type">Emitted constant type, defaults to <see cref="ConstantType.CONSTANT"/></param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void EmitStringConstant(ReadOnlySpan<char> stringValue, ConstantType type)
     {
         // Check if we've already added a constant for the same string
         // ReSharper disable once SuggestVarOrType_Elsewhere
         var internedLookup = this.interned.GetAlternateLookup<ReadOnlySpan<char>>();
-        if (internedLookup.TryGetValue(stringValue, out int index))
+        if (internedLookup.TryGetValue(stringValue, out ushort index))
         {
             // Refer to existing constant instead
             this.Chunk.AddIndexedConstant(index, this.previousToken.Line, type);
@@ -263,7 +262,7 @@ public sealed partial class LoxCompiler : IDisposable
         else
         {
             // Allocate new string constant
-            RawString.Allocate(stringValue, out RawString value);
+            RawString value = RawString.Allocate(stringValue, out IntPtr _);
             EmitConstant(value, out index, type);
 
             // Keep track of that interned string

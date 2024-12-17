@@ -168,9 +168,6 @@ public sealed partial class VirtualMachine : IDisposable
                 case LoxOpcode.CONSTANT_16:
                     ReadConstant(GetIndex16());
                     break;
-                case LoxOpcode.CONSTANT_24:
-                    ReadConstant(GetIndex24());
-                    break;
 
                 // Globals define
                 case LoxOpcode.DEF_GLOBAL_8:
@@ -178,9 +175,6 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
                 case LoxOpcode.DEF_GLOBAL_16:
                     DefineGlobal(GetIndex16());
-                    break;
-                case LoxOpcode.DEF_GLOBAL_24:
-                    DefineGlobal(GetIndex24());
                     break;
 
                 // Globals uninitialized define
@@ -190,9 +184,6 @@ public sealed partial class VirtualMachine : IDisposable
                 case LoxOpcode.NDF_GLOBAL_16:
                     NDefineGlobal(GetIndex16());
                     break;
-                case LoxOpcode.NDF_GLOBAL_24:
-                    NDefineGlobal(GetIndex24());
-                    break;
 
                 // Globals get
                 case LoxOpcode.GET_GLOBAL_8:
@@ -201,9 +192,6 @@ public sealed partial class VirtualMachine : IDisposable
                 case LoxOpcode.GET_GLOBAL_16:
                     GetGlobal(GetIndex16());
                     break;
-                case LoxOpcode.GET_GLOBAL_24:
-                    GetGlobal(GetIndex24());
-                    break;
 
                 // Globals set
                 case LoxOpcode.SET_GLOBAL_8:
@@ -211,9 +199,6 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
                 case LoxOpcode.SET_GLOBAL_16:
                     SetGlobal(GetIndex16());
-                    break;
-                case LoxOpcode.SET_GLOBAL_24:
-                    SetGlobal(GetIndex24());
                     break;
 
                 // Literals

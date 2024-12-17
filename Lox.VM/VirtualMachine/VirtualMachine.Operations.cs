@@ -10,13 +10,13 @@ public partial class VirtualMachine
     /// Reads the next constant in the bytecode
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int GetIndex8() => ReadByte();
+    private byte GetIndex8() => ReadByte();
 
     /// <summary>
     /// Reads the next 16bit constant in the bytecode
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int GetIndex16()
+    private ushort GetIndex16()
     {
         byte a = ReadByte();
         byte b = ReadByte();
@@ -24,28 +24,16 @@ public partial class VirtualMachine
     }
 
     /// <summary>
-    /// Reads the next 24bit constant in the bytecode
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int GetIndex24()
-    {
-        byte a = ReadByte();
-        byte b = ReadByte();
-        byte c = ReadByte();
-        return BitConverter.ToInt32([a, b, c, 0]);
-    }
-
-    /// <summary>
     /// Reads the next constant in the bytecode
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ReadConstant(int index) => this.stack.Push(this.currentChunk.GetConstant(index));
+    private void ReadConstant(ushort index) => this.stack.Push(this.currentChunk.GetConstant(index));
 
     /// <summary>
     /// Defines an initialized global variable
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void DefineGlobal(int index)
+    private void DefineGlobal(ushort index)
     {
         ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
         // ReSharper disable once SuggestVarOrType_Elsewhere
@@ -57,7 +45,7 @@ public partial class VirtualMachine
     /// Defines an uninitialized global variable with the specified identifier
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void NDefineGlobal(int index)
+    private void NDefineGlobal(ushort index)
     {
         ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
         // ReSharper disable once SuggestVarOrType_Elsewhere
@@ -69,7 +57,7 @@ public partial class VirtualMachine
     /// Puts the value of a global variable onto the stack
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void GetGlobal(int index)
+    private void GetGlobal(ushort index)
     {
         ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
         // ReSharper disable once SuggestVarOrType_Elsewhere
@@ -86,7 +74,7 @@ public partial class VirtualMachine
     /// Sets the value of a global variable
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void SetGlobal(int index)
+    private void SetGlobal(ushort index)
     {
         ref LoxValue identifier = ref this.currentChunk.GetConstant(index);
         // ReSharper disable once SuggestVarOrType_Elsewhere
@@ -161,7 +149,8 @@ public partial class VirtualMachine
         if (internedLookup.TryGetValue(concat, out LoxValue value)) return value;
 
         // If not found, allocate and intern
-        this.allocations.Add(RawString.Allocate(concat, out RawString concatRaw));
+        RawString concatRaw = RawString.Allocate(concat, out IntPtr address);
+        this.allocations.Add(address);
         internedLookup[concat] = concatRaw;
         return concatRaw;
     }

@@ -171,7 +171,7 @@ public partial class LoxCompiler
                 break;
 
             default:
-                EmitConstant(negate ? -value : value, out int _, ConstantType.CONSTANT);
+                EmitConstant(negate ? -value : value, out ushort _, ConstantType.CONSTANT);
                 break;
         }
     }

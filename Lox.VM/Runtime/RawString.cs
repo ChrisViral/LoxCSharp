@@ -57,18 +57,17 @@ public readonly unsafe struct RawString(char* pointer, int length) : IEquatable<
     /// You <i>must</i> take ownership of the pointer returned by this function.
     /// </summary>
     /// <param name="valueSpan">Value to allocate to the heap</param>
-    /// <param name="allocated">Allocated value output</param>
+    /// <param name="address">Allocated value output</param>
     /// <returns>The allocated unmanaged heat pointer for this string</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr Allocate(ReadOnlySpan<char> valueSpan, out RawString allocated)
+    public static RawString Allocate(ReadOnlySpan<char> valueSpan, out IntPtr address)
     {
         int length = valueSpan.Length;
-        IntPtr allocatedPtr = Marshal.AllocHGlobal(length * sizeof(char));
-        char* allocatedValue = (char*)allocatedPtr;
+        address = Marshal.AllocHGlobal(length * sizeof(char));
+        char* allocatedValue = (char*)address;
         Span<char> allocatedSpan = new(allocatedValue, length);
         valueSpan.CopyTo(allocatedSpan);
-        allocated = new RawString(allocatedValue, length);
-        return allocatedPtr;
+        return new RawString(allocatedValue, length);
     }
     #endregion
 
