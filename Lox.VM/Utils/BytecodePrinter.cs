@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 using FastEnumUtility;
 using Lox.VM.Bytecode;
 
@@ -46,7 +47,7 @@ public static class BytecodePrinter
     {
         LoxOpcode instruction = (LoxOpcode)(*instructionPointer);
         int line = chunk.GetLine(offset);
-        BytecodeStringBuilder.Append($"{offset:D4} {line,4} ");
+        BytecodeStringBuilder.Append($"{offset:D6} {line,6} ");
         switch (instruction)
         {
             case LoxOpcode.NOP:
@@ -73,6 +74,17 @@ public static class BytecodePrinter
                 PrintSimpleInstruction(instruction);
                 break;
 
+            case LoxOpcode.POPN_8:
+                PrintOperandInstruction(instruction, *(instructionPointer + 1));
+                break;
+
+            case LoxOpcode.POPN_16:
+            {
+                ushort operand = Unsafe.ReadUnaligned<ushort>(instructionPointer + 1);
+                PrintOperandInstruction(instruction, operand);
+                break;
+            }
+
             case LoxOpcode.CONSTANT_8:
             case LoxOpcode.DEF_GLOBAL_8:
             case LoxOpcode.NDF_GLOBAL_8:
@@ -87,16 +99,13 @@ public static class BytecodePrinter
             case LoxOpcode.GET_GLOBAL_16:
             case LoxOpcode.SET_GLOBAL_16:
             {
-                byte a = *(instructionPointer + 1);
-                byte b = *(instructionPointer + 2);
-                ushort index = BitConverter.ToUInt16([a, b]);
+                ushort index = Unsafe.ReadUnaligned<ushort>(instructionPointer + 1);
                 PrintConstantInstruction(chunk, instruction, index);
                 break;
             }
 
-
             default:
-                BytecodeStringBuilder.AppendLine($"Unknown opcode {(byte)instruction}");
+                BytecodeStringBuilder.AppendLine($"Unknown opcode {instruction}");
                 break;
         }
 
@@ -116,11 +125,11 @@ public static class BytecodePrinter
         (LoxOpcode instruction, int offset, int line) = enumerator.CurrentInstruction;
         if (newLine)
         {
-            BytecodeStringBuilder.Append($"{offset:D4} {line,4} ");
+            BytecodeStringBuilder.Append($"{offset:D6} {line,6} ");
         }
         else
         {
-            BytecodeStringBuilder.Append($"{offset:D4}    | ");
+            BytecodeStringBuilder.Append($"{offset:D6}      | ");
         }
 
         switch (instruction)
@@ -148,6 +157,19 @@ public static class BytecodePrinter
             case LoxOpcode.PRINT:
                 PrintSimpleInstruction(instruction);
                 break;
+
+            case LoxOpcode.POPN_8:
+                PrintOperandInstruction(instruction, enumerator.NextByte());
+                break;
+
+            case LoxOpcode.POPN_16:
+            {
+                byte a = enumerator.NextByte();
+                byte b = enumerator.NextByte();
+                ushort operand = BitConverter.ToUInt16([a, b]);
+                PrintOperandInstruction(instruction, operand);
+                break;
+            }
 
             case LoxOpcode.CONSTANT_8:
             case LoxOpcode.DEF_GLOBAL_8:
@@ -171,7 +193,7 @@ public static class BytecodePrinter
             }
 
             default:
-                BytecodeStringBuilder.AppendLine($"Unknown opcode {(byte)instruction}");
+                BytecodeStringBuilder.AppendLine($"Unknown opcode {instruction}");
                 break;
         }
     }
@@ -180,17 +202,30 @@ public static class BytecodePrinter
     /// Prints the contents of a simple instruction
     /// </summary>
     /// <param name="instruction">Instruction to print</param>
-    private static void PrintSimpleInstruction(LoxOpcode instruction) => BytecodeStringBuilder.AppendLine(FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(instruction));
+    private static void PrintSimpleInstruction(LoxOpcode instruction)
+    {
+        BytecodeStringBuilder.AppendLine(FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(instruction));
+    }
+
+    /// <summary>
+    /// Prints an instruction with it's operand
+    /// </summary>
+    /// <param name="instruction">Instruction to print</param>
+    /// <param name="operand">Operand value</param>
+    private static void PrintOperandInstruction(LoxOpcode instruction, ushort operand)
+    {
+        BytecodeStringBuilder.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(instruction),-16} {operand:D5}");
+    }
 
     /// <summary>
     /// Prints the contents of a constant instruction
     /// </summary>
     /// <param name="chunk">Current chunk</param>
-    /// <param name="opcode">Constant opcode</param>
+    /// <param name="instruction">Constant opcode</param>
     /// <param name="index">Constant index</param>
-    private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode opcode, ushort index)
+    private static void PrintConstantInstruction(LoxChunk chunk, LoxOpcode instruction, ushort index)
     {
-        BytecodeStringBuilder.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(opcode),-16} {index:D4} '{chunk.GetConstant(index)}'");
+        BytecodeStringBuilder.AppendLine($"{FastEnum.ToString<LoxOpcode, LoxOpcodeBooster>(instruction),-16} {index:D5} '{chunk.GetConstant(index)}'");
     }
     #endregion
 }

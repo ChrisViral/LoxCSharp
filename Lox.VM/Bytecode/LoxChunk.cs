@@ -88,6 +88,34 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     }
 
     /// <summary>
+    /// Adds the given opcode and its operand to the chunk
+    /// </summary>
+    /// <param name="opcode">Opcode to add</param>
+    /// <param name="operand">Opcode operand</param>
+    /// <param name="line">Line for this opcode</param>
+    public void AddOpcode(LoxOpcode opcode, byte operand, int line)
+    {
+        this.version++;
+        this.code.AddRange((byte)opcode, operand);
+        AddLine(line, 2);
+    }
+
+    /// <summary>
+    /// Adds the given opcode and its 16bit operand to the chunk
+    /// </summary>
+    /// <param name="opcode">Opcode to add</param>
+    /// <param name="operand">Opcode operand</param>
+    /// <param name="line">Line for this opcode</param>
+    public void AddOpcode(LoxOpcode opcode, ushort operand, int line)
+    {
+        this.version++;
+        Span<byte> bytes = stackalloc byte[2];
+        BitConverter.TryWriteBytes(bytes, operand);
+        this.code.AddRange((byte)opcode, bytes[0], bytes[1]);
+        AddLine(line, 3);
+    }
+
+    /// <summary>
     /// Adds a constant to the chunk
     /// </summary>
     /// <param name="value">Constant to add</param>
@@ -119,17 +147,16 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     public void AddIndexedConstant(ushort index, int line, ConstantType type)
     {
         this.version++;
-        byte opcode = (byte)type;
         if (index <= byte.MaxValue)
         {
-            this.code.AddRange(opcode, (byte)index);
+            this.code.AddRange((byte)type, (byte)index);
             AddLine(line, 2);
         }
         else
         {
-            Span<byte> bytes = stackalloc byte[sizeof(ushort)];
+            Span<byte> bytes = stackalloc byte[2];
             BitConverter.TryWriteBytes(bytes, index);
-            this.code.AddRange((byte)(opcode + 1), bytes[0], bytes[1]);
+            this.code.AddRange((byte)(type + 1), bytes[0], bytes[1]);
             AddLine(line, 3);
         }
     }

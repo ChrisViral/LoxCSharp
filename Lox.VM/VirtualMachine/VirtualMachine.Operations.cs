@@ -10,23 +10,6 @@ public partial class VirtualMachine
     /// Reads the next constant in the bytecode
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private byte GetIndex8() => ReadByte();
-
-    /// <summary>
-    /// Reads the next 16bit constant in the bytecode
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ushort GetIndex16()
-    {
-        byte a = ReadByte();
-        byte b = ReadByte();
-        return BitConverter.ToUInt16([a, b]);
-    }
-
-    /// <summary>
-    /// Reads the next constant in the bytecode
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReadConstant(ushort index) => this.stack.Push(this.currentChunk.GetConstant(index));
 
     /// <summary>

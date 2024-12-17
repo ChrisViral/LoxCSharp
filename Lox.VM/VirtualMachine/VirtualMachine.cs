@@ -160,45 +160,51 @@ public sealed partial class VirtualMachine : IDisposable
                 case LoxOpcode.POP:
                     this.stack.Pop();
                     break;
+                case LoxOpcode.POPN_8:
+                    this.stack.Pop(ReadByte());
+                    break;
+                case LoxOpcode.POPN_16:
+                    this.stack.Pop(ReadUInt16());
+                    break;
 
                 // Constants
                 case LoxOpcode.CONSTANT_8:
-                    ReadConstant(GetIndex8());
+                    ReadConstant(ReadByte());
                     break;
                 case LoxOpcode.CONSTANT_16:
-                    ReadConstant(GetIndex16());
+                    ReadConstant(ReadUInt16());
                     break;
 
                 // Globals define
                 case LoxOpcode.DEF_GLOBAL_8:
-                    DefineGlobal(GetIndex8());
+                    DefineGlobal(ReadByte());
                     break;
                 case LoxOpcode.DEF_GLOBAL_16:
-                    DefineGlobal(GetIndex16());
+                    DefineGlobal(ReadUInt16());
                     break;
 
                 // Globals uninitialized define
                 case LoxOpcode.NDF_GLOBAL_8:
-                    NDefineGlobal(GetIndex8());
+                    NDefineGlobal(ReadByte());
                     break;
                 case LoxOpcode.NDF_GLOBAL_16:
-                    NDefineGlobal(GetIndex16());
+                    NDefineGlobal(ReadUInt16());
                     break;
 
                 // Globals get
                 case LoxOpcode.GET_GLOBAL_8:
-                    GetGlobal(GetIndex8());
+                    GetGlobal(ReadByte());
                     break;
                 case LoxOpcode.GET_GLOBAL_16:
-                    GetGlobal(GetIndex16());
+                    GetGlobal(ReadUInt16());
                     break;
 
                 // Globals set
                 case LoxOpcode.SET_GLOBAL_8:
-                    SetGlobal(GetIndex8());
+                    SetGlobal(ReadByte());
                     break;
                 case LoxOpcode.SET_GLOBAL_16:
-                    SetGlobal(GetIndex16());
+                    SetGlobal(ReadUInt16());
                     break;
 
                 // Literals
@@ -282,6 +288,18 @@ public sealed partial class VirtualMachine : IDisposable
     /// <returns>Next bytecode value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe byte ReadByte() => *this.instructionPointer++;
+
+    /// <summary>
+    /// Reads the next bytecode
+    /// </summary>
+    /// <returns>Next bytecode value</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe ushort ReadUInt16()
+    {
+        ushort value = Unsafe.ReadUnaligned<ushort>(this.instructionPointer);
+        this.instructionPointer += 2;
+        return value;
+    }
 
     /// <summary>
     /// Frees allocated resources

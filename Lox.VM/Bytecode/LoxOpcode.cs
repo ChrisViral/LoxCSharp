@@ -10,6 +10,8 @@ public enum LoxOpcode : byte
 
     // Pop value from stack
     POP,
+    POPN_8,
+    POPN_16,
 
     // Constants
     CONSTANT_8,

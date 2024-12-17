@@ -14,9 +14,13 @@ namespace Lox.VM.Compiler;
 /// </summary>
 public sealed partial class LoxCompiler : IDisposable
 {
+    private readonly record struct Local(in Token Identifier, int Depth);
+
     #region Fields
     private readonly LoxScanner scanner = new();
     private readonly Dictionary<string, ushort> interned = new(StringComparer.Ordinal);
+    private readonly List<Local> locals = new(byte.MaxValue + 1);
+    private int scopeDepth;
     private Token currentToken;
     private Token previousToken;
     #endregion
@@ -45,6 +49,15 @@ public sealed partial class LoxCompiler : IDisposable
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => this.currentToken.IsEOF;
+    }
+
+    /// <summary>
+    /// If we're currently in the global scope or not
+    /// </summary>
+    private bool IsGlobalScope
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => this.scopeDepth is 0;
     }
     #endregion
 
@@ -94,6 +107,8 @@ public sealed partial class LoxCompiler : IDisposable
     private void InitializeCompilation()
     {
         this.Chunk.Clear();
+        this.locals.Clear();
+        this.scopeDepth           = 0;
         this.previousToken        = default;
         this.currentToken         = default;
         this.HadCompilationErrors = false;
@@ -152,7 +167,7 @@ public sealed partial class LoxCompiler : IDisposable
             }
             while (CheckCurrentToken(TokenType.ERROR));
 
-            ReportParseError(firstError);
+            ReportErrorToken(firstError);
         }
 
         return this.previousToken;
@@ -210,6 +225,46 @@ public sealed partial class LoxCompiler : IDisposable
             {
                 return;
             }
+        }
+    }
+
+    /// <summary>
+    /// Opens a new scope level
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void OpenScope() => this.scopeDepth++;
+
+    /// <summary>
+    /// Closes one scope level
+    /// </summary>
+    private void CloseScope()
+    {
+        this.scopeDepth--;
+        int i;
+        for (i = this.locals.Count; i > 0 && this.locals[i - 1].Depth > this.scopeDepth; i--);
+        int count = this.locals.Count - i;
+
+        switch (count)
+        {
+            case 0:
+                return;
+
+            case 1:
+                this.locals.RemoveAt(i);
+                EmitOpcode(LoxOpcode.POP);
+                break;
+
+            default:
+                this.locals.RemoveRange(i, count);
+                if (count <= byte.MaxValue)
+                {
+                    this.Chunk.AddOpcode(LoxOpcode.POPN_8, (byte)count, this.previousToken.Line);
+                }
+                else
+                {
+                    this.Chunk.AddOpcode(LoxOpcode.POPN_16, (ushort)count, this.previousToken.Line);
+                }
+                break;
         }
     }
 
@@ -284,7 +339,7 @@ public sealed partial class LoxCompiler : IDisposable
     /// <param name="token">Error token</param>
     /// <exception cref="LoxParseException">Always throws</exception>
     [DoesNotReturn]
-    private void ReportParseError(in Token token) => ReportError($"[line {token.Line}] Error: {token.Lexeme}", token.Line);
+    private void ReportErrorToken(in Token token) => ReportError($"[line {token.Line}] Error: {token.Lexeme}", token.Line);
 
     /// <summary>
     /// Reports a compilation error at the provided token

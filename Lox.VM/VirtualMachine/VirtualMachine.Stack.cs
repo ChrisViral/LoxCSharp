@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
@@ -80,6 +79,13 @@ public partial class VirtualMachine
             this.top--;
             return ref *this.top;
         }
+
+        /// <summary>
+        /// Pops the given amount of values from the stack
+        /// </summary>
+        /// <param name="count">Amount of values to pop</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Pop(ushort count) => this.top -= count;
 
         /// <summary>
         /// Tries to pop a boolean from the stack
@@ -189,7 +195,7 @@ public partial class VirtualMachine
         /// </summary>
         public void PrintStack()
         {
-            StackBuilder.Append("          ");
+            StackBuilder.Append(' ', 14);
             for (LoxValue* slot = this.stack; slot < this.top; slot++)
             {
                 StackBuilder.Append($"[ {(*slot).ToString()} ]");

@@ -31,7 +31,7 @@ public readonly record struct Token(TokenType Type, string Lexeme, int Line)
     /// </summary>
     /// <param name="type">Token type</param>
     /// <param name="line">Token line</param>
-    public Token(in TokenType type, in int line) : this(type, type.GetEnumMemberValue()!, line) { }
+    public Token(TokenType type, int line) : this(type, type.GetEnumMemberValue()!, line) { }
     #endregion
 
     #region Methods
@@ -46,6 +46,6 @@ public readonly record struct Token(TokenType Type, string Lexeme, int Line)
     /// <param name="message">Error message</param>
     /// <param name="line">Token line</param>
     /// <returns>The created error token</returns>
-    public static Token MakeError(string message, in int line) => new(TokenType.ERROR, message, line);
+    public static Token MakeError(string message, int line) => new(TokenType.ERROR, message, line);
     #endregion
 }
