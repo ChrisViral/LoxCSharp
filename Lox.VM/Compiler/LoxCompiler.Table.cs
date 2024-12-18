@@ -39,8 +39,7 @@ public partial class LoxCompiler
         /// </summary>
         static Table()
         {
-            // ======= Token Type ============================= Prefix ==== Infix = Precedence
-            // End of File
+            // End of File ==================================== Prefix ==== Infix = Precedence
             Rules[(int)TokenType.EOF]           = new ParseRule(null,       null,   Precedence.NONE);
             // Groupings
             Rules[(int)TokenType.LEFT_PAREN]    = new ParseRule(Grouping,   null,   Precedence.NONE);
@@ -73,8 +72,8 @@ public partial class LoxCompiler
             Rules[(int)TokenType.STRING]        = new ParseRule(String,     null,   Precedence.NONE);
             Rules[(int)TokenType.IDENTIFIER]    = new ParseRule(Identifier, null,   Precedence.NONE);
             // Conditional keywords
-            Rules[(int)TokenType.AND]           = new ParseRule(null,       null,   Precedence.NONE);
-            Rules[(int)TokenType.OR]            = new ParseRule(null,       null,   Precedence.NONE);
+            Rules[(int)TokenType.AND]           = new ParseRule(null,       And,    Precedence.AND);
+            Rules[(int)TokenType.OR]            = new ParseRule(null,       Or,     Precedence.OR);
             Rules[(int)TokenType.ELSE]          = new ParseRule(null,       null,   Precedence.NONE);
             // OOP Keywords
             Rules[(int)TokenType.THIS]          = new ParseRule(null,       null,   Precedence.NONE);
@@ -92,7 +91,7 @@ public partial class LoxCompiler
             Rules[(int)TokenType.CLASS]         = new ParseRule(null,       null,   Precedence.NONE);
             // Error token
             Rules[(int)TokenType.ERROR]         = new ParseRule(null,       null,   Precedence.NONE);
-            // ======= Token Type ============================= Prefix ==== Infix = Precedence
+            // ================================================ Prefix ==== Infix = Precedence
         }
         #endregion
 
@@ -130,6 +129,22 @@ public partial class LoxCompiler
         /// <param name="canAssign">If the parser is currently in a situation in which it can assign variables</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Unary(LoxCompiler compiler, bool canAssign) => compiler.ParseUnary();
+        
+        /// <summary>
+        /// And operator
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
+        /// <param name="canAssign">If the parser is currently in a situation in which it can assign variables</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void And(LoxCompiler compiler, bool canAssign) => compiler.ParseAnd();
+
+        /// <summary>
+        /// Or operator
+        /// </summary>
+        /// <param name="compiler">Compiler instance</param>
+        /// <param name="canAssign">If the parser is currently in a situation in which it can assign variables</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Or(LoxCompiler compiler, bool canAssign) => compiler.ParseOr();
 
         /// <summary>
         /// Number parse

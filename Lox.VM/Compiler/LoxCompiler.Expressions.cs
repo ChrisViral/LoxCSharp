@@ -154,6 +154,30 @@ public partial class LoxCompiler
     }
 
     /// <summary>
+    /// Parses an and operator expression
+    /// </summary>
+    private void ParseAnd()
+    {
+        Token andToken = this.previousToken;
+        int andJumpAddress = EmitJump(LoxOpcode.JUMP_FALSE);
+        EmitOpcode(LoxOpcode.POP);
+        ParseWithPrecedence(Precedence.AND);
+        PatchJump(andToken, andJumpAddress);
+    }
+
+    /// <summary>
+    /// Parses and or operator expression
+    /// </summary>
+    private void ParseOr()
+    {
+        Token orToken = this.previousToken;
+        int orJumpAddress = EmitJump(LoxOpcode.JUMP_TRUE);
+        EmitOpcode(LoxOpcode.POP);
+        ParseWithPrecedence(Precedence.OR);
+        PatchJump(orToken, orJumpAddress);
+    }
+
+    /// <summary>
     /// Parses a number literal expression
     /// </summary>
     /// <param name="negate">If the number should be negated</param>

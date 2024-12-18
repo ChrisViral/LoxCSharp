@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Lox.Common.Exceptions;
+using Lox.VM.Exceptions.Runtime;
 
 namespace Lox.VM.Exceptions;
 
@@ -7,7 +8,7 @@ namespace Lox.VM.Exceptions;
 /// Lox unknown opcode exception
 /// </summary>
 [PublicAPI]
-public sealed class LoxUnknownOpcodeException : LoxException
+public sealed class LoxUnknownOpcodeException : LoxRuntimeException
 {
     /// <inheritdoc />
     public LoxUnknownOpcodeException() { }

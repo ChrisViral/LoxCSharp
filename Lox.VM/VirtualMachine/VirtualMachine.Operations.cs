@@ -259,6 +259,22 @@ public partial class VirtualMachine
     /// Jumps to the given offset if the top value of the stack evaluates to false
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void JumpTrue()
+    {
+        if (this.stack.Peek().IsTruthy)
+        {
+            this.instructionPointer += ReadUInt16();
+        }
+        else
+        {
+            this.instructionPointer += 2;
+        }
+    }
+
+    /// <summary>
+    /// Jumps to the given offset if the top value of the stack evaluates to false
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void JumpFalse()
     {
         if (this.stack.Peek().IsFalsey)

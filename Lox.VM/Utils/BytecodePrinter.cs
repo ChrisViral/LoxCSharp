@@ -84,6 +84,7 @@ public static class BytecodePrinter
             case LoxOpcode.GET_LOCAL_16:
             case LoxOpcode.SET_LOCAL_16:
             case LoxOpcode.JUMP:
+            case LoxOpcode.JUMP_TRUE:
             case LoxOpcode.JUMP_FALSE:
             {
                 ushort operand = Unsafe.ReadUnaligned<ushort>(instructionPointer + 1);
@@ -174,6 +175,7 @@ public static class BytecodePrinter
             case LoxOpcode.GET_LOCAL_16:
             case LoxOpcode.SET_LOCAL_16:
             case LoxOpcode.JUMP:
+            case LoxOpcode.JUMP_TRUE:
             case LoxOpcode.JUMP_FALSE:
             {
                 byte a = enumerator.NextByte();

@@ -293,6 +293,9 @@ public sealed partial class VirtualMachine : IDisposable
                 case LoxOpcode.JUMP:
                     Jump();
                     break;
+                case LoxOpcode.JUMP_TRUE:
+                    JumpTrue();
+                    break;
                 case LoxOpcode.JUMP_FALSE:
                     JumpFalse();
                     break;
