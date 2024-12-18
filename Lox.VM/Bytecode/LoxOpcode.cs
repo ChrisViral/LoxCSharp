@@ -70,7 +70,9 @@ public enum LoxOpcode : byte
     // Control flow
     JUMP,
     JUMP_TRUE,
+    JUMP_TRUE_POP,
     JUMP_FALSE,
+    JUMP_FALSE_POP,
     RETURN
 }
 

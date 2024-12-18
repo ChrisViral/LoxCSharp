@@ -160,7 +160,6 @@ public partial class LoxCompiler
     {
         Token andToken = this.previousToken;
         int andJumpAddress = EmitJump(LoxOpcode.JUMP_FALSE);
-        EmitOpcode(LoxOpcode.POP);
         ParseWithPrecedence(Precedence.AND);
         PatchJump(andToken, andJumpAddress);
     }
@@ -172,7 +171,6 @@ public partial class LoxCompiler
     {
         Token orToken = this.previousToken;
         int orJumpAddress = EmitJump(LoxOpcode.JUMP_TRUE);
-        EmitOpcode(LoxOpcode.POP);
         ParseWithPrecedence(Precedence.OR);
         PatchJump(orToken, orJumpAddress);
     }

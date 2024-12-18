@@ -148,21 +148,19 @@ public partial class LoxCompiler
         ParseExpression();
         EnsureNextToken(TokenType.RIGHT_PAREN, "Expected ')' after condition.");
 
-        int ifJumpAddress = EmitJump(LoxOpcode.JUMP_FALSE);
-        EmitOpcode(LoxOpcode.POP);
+        int skipIfJumpAddress = EmitJump(LoxOpcode.JUMP_FALSE_POP);
         ParseStatement();
 
         if (!TryMatchToken(TokenType.ELSE, out Token elseToken))
         {
-            PatchJump(ifToken, ifJumpAddress);
+            PatchJump(ifToken, skipIfJumpAddress);
             return;
         }
 
-        int elseJumpAddress = EmitJump(LoxOpcode.JUMP);
-        PatchJump(ifToken, ifJumpAddress);
-        EmitOpcode(LoxOpcode.POP);
+        int skipElseJumpAddress = EmitJump(LoxOpcode.JUMP);
+        PatchJump(ifToken, skipIfJumpAddress);
         ParseStatement();
-        PatchJump(elseToken, elseJumpAddress);
+        PatchJump(elseToken, skipElseJumpAddress);
     }
 
     /// <summary>

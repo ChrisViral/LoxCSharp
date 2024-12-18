@@ -250,13 +250,13 @@ public partial class VirtualMachine
     private void Print() => PrintValue(this.stack.Pop());
 
     /// <summary>
-    /// Jumps to the given offset if the top value of the stack evaluates to false
+    /// Jumps to the given offset
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void Jump() => this.instructionPointer += ReadUInt16();
 
     /// <summary>
-    /// Jumps to the given offset if the top value of the stack evaluates to false
+    /// Jumps to the given offset if the top value of the stack evaluates to true, otherwise pops it
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void JumpTrue()
@@ -267,17 +267,51 @@ public partial class VirtualMachine
         }
         else
         {
+            this.stack.Pop();
             this.instructionPointer += 2;
         }
     }
 
     /// <summary>
-    /// Jumps to the given offset if the top value of the stack evaluates to false
+    /// Jumps to the given offset if the top value of the stack evaluates to true and pops it
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void JumpTruePop()
+    {
+        if (this.stack.Pop().IsTruthy)
+        {
+            this.instructionPointer += ReadUInt16();
+        }
+        else
+        {
+            this.instructionPointer += 2;
+        }
+    }
+
+    /// <summary>
+    /// Jumps to the given offset if the top value of the stack evaluates to false, otherwise pops it
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void JumpFalse()
     {
         if (this.stack.Peek().IsFalsey)
+        {
+            this.instructionPointer += ReadUInt16();
+        }
+        else
+        {
+            this.stack.Pop();
+            this.instructionPointer += 2;
+        }
+    }
+
+    /// <summary>
+    /// Jumps to the given offset if the top value of the stack evaluates to false and pops it
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void JumpFalsePop()
+    {
+        if (this.stack.Pop().IsFalsey)
         {
             this.instructionPointer += ReadUInt16();
         }
