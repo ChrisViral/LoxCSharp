@@ -43,6 +43,14 @@ public partial class VirtualMachine
         public nint Size => (nint)(this.top - this.stack);
         #endregion
 
+        #region Indexers
+        /// <summary>
+        /// Gets the value at the given index in the stack
+        /// </summary>
+        /// <param name="index">Index to get</param>
+        public ref LoxValue this[ushort index] => ref *(this.stack + index);
+        #endregion
+
         #region Constructor
         /// <summary>
         /// Allocates a new stack to unmanaged memory

@@ -258,7 +258,7 @@ public sealed partial class LoxScanner : ILoxScanner<Token>, IEnumerable<Token>,
     /// <param name="character">Character to test</param>
     /// <returns><see langword="true"/> if <paramref name="character"/> is an ascii letter, ascii digit, or an underscore, otherwise <see langword="false"/></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsIdentifierChar(char character) => IsWordChar(character) || char.IsAsciiDigit(character);
+    private static bool IsIdentifierChar(char character) => char.IsAsciiLetterOrDigit(character) || character is '_';
 
     /// <summary>
     /// Throws an <see cref="InvalidOperationException"/> if <paramref name="scanningState"/> is <see langword="true"/>

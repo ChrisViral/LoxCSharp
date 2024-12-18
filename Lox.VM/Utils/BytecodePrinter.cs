@@ -74,22 +74,26 @@ public static class BytecodePrinter
                 PrintSimpleInstruction(instruction);
                 break;
 
-            case LoxOpcode.POPN_8:
+            case LoxOpcode.POPN:
+            case LoxOpcode.GET_LOCAL:
+            case LoxOpcode.SET_LOCAL:
                 PrintOperandInstruction(instruction, *(instructionPointer + 1));
                 break;
 
             case LoxOpcode.POPN_16:
+            case LoxOpcode.GET_LOCAL_16:
+            case LoxOpcode.SET_LOCAL_16:
             {
                 ushort operand = Unsafe.ReadUnaligned<ushort>(instructionPointer + 1);
                 PrintOperandInstruction(instruction, operand);
                 break;
             }
 
-            case LoxOpcode.CONSTANT_8:
-            case LoxOpcode.DEF_GLOBAL_8:
-            case LoxOpcode.NDF_GLOBAL_8:
-            case LoxOpcode.GET_GLOBAL_8:
-            case LoxOpcode.SET_GLOBAL_8:
+            case LoxOpcode.CONSTANT:
+            case LoxOpcode.DEF_GLOBAL:
+            case LoxOpcode.NDF_GLOBAL:
+            case LoxOpcode.GET_GLOBAL:
+            case LoxOpcode.SET_GLOBAL:
                 PrintConstantInstruction(chunk, instruction, *(instructionPointer + 1));
                 break;
 
@@ -158,11 +162,15 @@ public static class BytecodePrinter
                 PrintSimpleInstruction(instruction);
                 break;
 
-            case LoxOpcode.POPN_8:
+            case LoxOpcode.POPN:
+            case LoxOpcode.GET_LOCAL:
+            case LoxOpcode.SET_LOCAL:
                 PrintOperandInstruction(instruction, enumerator.NextByte());
                 break;
 
             case LoxOpcode.POPN_16:
+            case LoxOpcode.GET_LOCAL_16:
+            case LoxOpcode.SET_LOCAL_16:
             {
                 byte a = enumerator.NextByte();
                 byte b = enumerator.NextByte();
@@ -171,11 +179,11 @@ public static class BytecodePrinter
                 break;
             }
 
-            case LoxOpcode.CONSTANT_8:
-            case LoxOpcode.DEF_GLOBAL_8:
-            case LoxOpcode.NDF_GLOBAL_8:
-            case LoxOpcode.GET_GLOBAL_8:
-            case LoxOpcode.SET_GLOBAL_8:
+            case LoxOpcode.CONSTANT:
+            case LoxOpcode.DEF_GLOBAL:
+            case LoxOpcode.NDF_GLOBAL:
+            case LoxOpcode.GET_GLOBAL:
+            case LoxOpcode.SET_GLOBAL:
                 PrintConstantInstruction(chunk, instruction, enumerator.NextByte());
                 break;
 

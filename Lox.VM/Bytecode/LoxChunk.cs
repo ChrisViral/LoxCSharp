@@ -10,11 +10,11 @@ namespace Lox.VM.Bytecode;
 /// </summary>
 public enum ConstantType : byte
 {
-    CONSTANT   = LoxOpcode.CONSTANT_8,
-    NDF_GLOBAL = LoxOpcode.NDF_GLOBAL_8,
-    DEF_GLOBAL = LoxOpcode.DEF_GLOBAL_8,
-    GET_GLOBAL = LoxOpcode.GET_GLOBAL_8,
-    SET_GLOBAL = LoxOpcode.SET_GLOBAL_8
+    CONSTANT   = LoxOpcode.CONSTANT,
+    NDF_GLOBAL = LoxOpcode.NDF_GLOBAL,
+    DEF_GLOBAL = LoxOpcode.DEF_GLOBAL,
+    GET_GLOBAL = LoxOpcode.GET_GLOBAL,
+    SET_GLOBAL = LoxOpcode.SET_GLOBAL
 }
 
 /// <summary>

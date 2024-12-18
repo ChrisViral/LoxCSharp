@@ -57,38 +57,48 @@ public partial class LoxCompiler
         }
         else
         {
-            DeclareLocal();
             if (TryMatchToken(TokenType.EQUAL, out Token _))
             {
+                Local declared = DeclareLocal(identifier);
                 ParseExpression();
+                InitializeLocal(declared);
+                EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
             }
             else
             {
+                DeclareLocal(identifier, State.DEFINED);
+                EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
                 EmitOpcode(LoxOpcode.NIL);
             }
-            EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
         }
     }
 
     /// <summary>
     /// Declares a new local variable
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void DeclareLocal()
+    private Local DeclareLocal(in Token identifier, State state = State.UNDEFINED)
     {
-        if (this.locals.Count is ushort.MaxValue) ReportCompileError(this.previousToken, $"Local variable limit ({ushort.MaxValue}) exceeded.");
+        if (this.totalLocalsCount >= ushort.MaxValue) ReportCompileError(identifier, $"Local variable limit ({ushort.MaxValue}) exceeded.");
 
-        for (int i = this.locals.Count - 1; i >= 0; i--)
+        Dictionary<string, Local> scope = this.localsPerScope[this.scopeDepth - 1];
+        if (scope.ContainsKey(identifier.Lexeme))
         {
-            Local local = this.locals[i];
-            if (local.Depth is not -1 && local.Depth < this.scopeDepth) break;
-            if (local.Identifier.Lexeme == this.previousToken.Lexeme)
-            {
-                ReportCompileError(this.previousToken, "Variable with same name already declared in this scope.");
-            }
+            ReportCompileError(identifier, "Variable with same name already declared in this scope.");
         }
 
-        this.locals.Add(new Local(this.previousToken, this.scopeDepth));
+        Local declared = new(identifier, this.totalLocalsCount++, state);
+        scope.Add(identifier.Lexeme, declared);
+        return declared;
+    }
+
+    /// <summary>
+    /// Initializes the given last local variable
+    /// </summary>
+    /// <param name="template">Local template</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void InitializeLocal(in Local template)
+    {
+        this.localsPerScope[this.scopeDepth - 1][template.Identifier.Lexeme] = template with { State = State.DEFINED };
     }
 
     /// <summary>

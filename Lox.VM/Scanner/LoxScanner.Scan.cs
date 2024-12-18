@@ -63,7 +63,7 @@ public sealed partial class LoxScanner
                 case TokenType.LESS:
                     return new Token(MatchNext('=') ? castedType + (int)TokenType.EQUALITY : castedType, this.currentLine);
 
-                default:
+                case TokenType when current < 127 && !IsIdentifierChar(current):
                     return new Token(castedType, this.currentLine);
             }
         }

@@ -10,25 +10,32 @@ public enum LoxOpcode : byte
 
     // Pop value from stack
     POP,
-    POPN_8,
+    POPN,
     POPN_16,
 
     // Constants
-    CONSTANT_8,
+    CONSTANT,
     CONSTANT_16,
 
     // Define global
-    DEF_GLOBAL_8,
+    DEF_GLOBAL,
     DEF_GLOBAL_16,
     // Define uninitialized global
-    NDF_GLOBAL_8,
+    NDF_GLOBAL,
     NDF_GLOBAL_16,
     // Get global
-    GET_GLOBAL_8,
+    GET_GLOBAL,
     GET_GLOBAL_16,
     // Get global
-    SET_GLOBAL_8,
+    SET_GLOBAL,
     SET_GLOBAL_16,
+
+    // Get local
+    GET_LOCAL,
+    GET_LOCAL_16,
+    // Set local
+    SET_LOCAL,
+    SET_LOCAL_16,
 
     // Literals
     NIL,
@@ -58,8 +65,8 @@ public enum LoxOpcode : byte
     LESS_EQUALS,
 
     // Control flow
-    RETURN,
-    PRINT
+    PRINT,
+    RETURN
 }
 
 [FastEnum<LoxOpcode>, UsedImplicitly]

@@ -72,6 +72,18 @@ public partial class VirtualMachine
     }
 
     /// <summary>
+    /// Puts the value of a local variable onto the stack
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void GetLocal(ushort index) => this.stack.Push(this.stack[index]);
+
+    /// <summary>
+    /// Sets the value of a local variable
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SetLocal(ushort index) => this.stack[index] = this.stack.Peek();
+
+    /// <summary>
     /// Negates the current top value on the stack
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

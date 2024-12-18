@@ -160,7 +160,7 @@ public sealed partial class VirtualMachine : IDisposable
                 case LoxOpcode.POP:
                     this.stack.Pop();
                     break;
-                case LoxOpcode.POPN_8:
+                case LoxOpcode.POPN:
                     this.stack.Pop(ReadByte());
                     break;
                 case LoxOpcode.POPN_16:
@@ -168,7 +168,7 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
 
                 // Constants
-                case LoxOpcode.CONSTANT_8:
+                case LoxOpcode.CONSTANT:
                     ReadConstant(ReadByte());
                     break;
                 case LoxOpcode.CONSTANT_16:
@@ -176,7 +176,7 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
 
                 // Globals define
-                case LoxOpcode.DEF_GLOBAL_8:
+                case LoxOpcode.DEF_GLOBAL:
                     DefineGlobal(ReadByte());
                     break;
                 case LoxOpcode.DEF_GLOBAL_16:
@@ -184,7 +184,7 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
 
                 // Globals uninitialized define
-                case LoxOpcode.NDF_GLOBAL_8:
+                case LoxOpcode.NDF_GLOBAL:
                     NDefineGlobal(ReadByte());
                     break;
                 case LoxOpcode.NDF_GLOBAL_16:
@@ -192,7 +192,7 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
 
                 // Globals get
-                case LoxOpcode.GET_GLOBAL_8:
+                case LoxOpcode.GET_GLOBAL:
                     GetGlobal(ReadByte());
                     break;
                 case LoxOpcode.GET_GLOBAL_16:
@@ -200,11 +200,27 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
 
                 // Globals set
-                case LoxOpcode.SET_GLOBAL_8:
+                case LoxOpcode.SET_GLOBAL:
                     SetGlobal(ReadByte());
                     break;
                 case LoxOpcode.SET_GLOBAL_16:
                     SetGlobal(ReadUInt16());
+                    break;
+
+                // Locals get
+                case LoxOpcode.GET_LOCAL:
+                    GetLocal(ReadByte());
+                    break;
+                case LoxOpcode.GET_LOCAL_16:
+                    GetLocal(ReadUInt16());
+                    break;
+
+                // Locals set
+                case LoxOpcode.SET_LOCAL:
+                    SetLocal(ReadByte());
+                    break;
+                case LoxOpcode.SET_LOCAL_16:
+                    SetLocal(ReadUInt16());
                     break;
 
                 // Literals
@@ -268,13 +284,14 @@ public sealed partial class VirtualMachine : IDisposable
                     LessEqual();
                     break;
 
-                // Control flow
-                case LoxOpcode.RETURN:
-                    return Return();
-
+                // Print
                 case LoxOpcode.PRINT:
                     Print();
                     break;
+
+                // Control flow
+                case LoxOpcode.RETURN:
+                    return Return();
 
                 default:
                     throw new LoxUnknownOpcodeException($"Unknown instruction {instruction}");

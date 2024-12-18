@@ -14,12 +14,28 @@ namespace Lox.VM.Compiler;
 /// </summary>
 public sealed partial class LoxCompiler : IDisposable
 {
-    private readonly record struct Local(in Token Identifier, int Depth);
+    /// <summary>
+    /// Local variable defined state
+    /// </summary>
+    private enum State
+    {
+        UNDEFINED,
+        DEFINED
+    }
+
+    /// <summary>
+    /// Local declaration
+    /// </summary>
+    /// <param name="Identifier">Local identifier</param>
+    /// <param name="Index">Local stack index</param>
+    /// <param name="State">Local defined state</param>
+    private readonly record struct Local(in Token Identifier, int Index, State State);
 
     #region Fields
     private readonly LoxScanner scanner = new();
     private readonly Dictionary<string, ushort> interned = new(StringComparer.Ordinal);
-    private readonly List<Local> locals = new(byte.MaxValue + 1);
+    private readonly List<Dictionary<string, Local>> localsPerScope = [];
+    private int totalLocalsCount;
     private int scopeDepth;
     private Token currentToken;
     private Token previousToken;
@@ -107,7 +123,7 @@ public sealed partial class LoxCompiler : IDisposable
     private void InitializeCompilation()
     {
         this.Chunk.Clear();
-        this.locals.Clear();
+        this.totalLocalsCount     = 0;
         this.scopeDepth           = 0;
         this.previousToken        = default;
         this.currentToken         = default;
@@ -231,8 +247,14 @@ public sealed partial class LoxCompiler : IDisposable
     /// <summary>
     /// Opens a new scope level
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void OpenScope() => this.scopeDepth++;
+    private void OpenScope()
+    {
+        this.scopeDepth++;
+        if (this.localsPerScope.Count <= this.scopeDepth)
+        {
+            this.localsPerScope.Add(new Dictionary<string, Local>(StringComparer.Ordinal));
+        }
+    }
 
     /// <summary>
     /// Closes one scope level
@@ -240,29 +262,29 @@ public sealed partial class LoxCompiler : IDisposable
     private void CloseScope()
     {
         this.scopeDepth--;
-        int i;
-        for (i = this.locals.Count; i > 0 && this.locals[i - 1].Depth > this.scopeDepth; i--);
-        int count = this.locals.Count - i;
+        Dictionary<string, Local> scope = this.localsPerScope[this.scopeDepth];
+        int poppedCount = scope.Count;
+        this.totalLocalsCount -= poppedCount;
 
-        switch (count)
+        switch (poppedCount)
         {
             case 0:
                 return;
 
             case 1:
-                this.locals.RemoveAt(i);
+                scope.Clear();
                 EmitOpcode(LoxOpcode.POP);
                 break;
 
             default:
-                this.locals.RemoveRange(i, count);
-                if (count <= byte.MaxValue)
+                scope.Clear();
+                if (poppedCount <= byte.MaxValue)
                 {
-                    this.Chunk.AddOpcode(LoxOpcode.POPN_8, (byte)count, this.previousToken.Line);
+                    EmitOpcode(LoxOpcode.POPN, (byte)poppedCount);
                 }
                 else
                 {
-                    this.Chunk.AddOpcode(LoxOpcode.POPN_16, (ushort)count, this.previousToken.Line);
+                    EmitOpcode(LoxOpcode.POPN_16, (ushort)poppedCount);
                 }
                 break;
         }
@@ -282,6 +304,43 @@ public sealed partial class LoxCompiler : IDisposable
     /// <param name="line">Line at which the opcode is emitted from</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void EmitOpcode(LoxOpcode opcode, int line) => this.Chunk.AddOpcode(opcode, line);
+
+    /// <summary>
+    /// Emits the given opcode to the chunk, along with an operand, if the operand breaks the 8bit limit, the opcode is moved up to its 16bit version
+    /// </summary>
+    /// <param name="opcode">Opcode to emit</param>
+    /// <param name="operand">Opcode operand</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EmitOpcode(LoxOpcode opcode, ushort operand)
+    {
+        if (operand <= byte.MaxValue)
+        {
+            this.Chunk.AddOpcode(opcode, (byte)operand, this.previousToken.Line);
+        }
+        else
+        {
+            this.Chunk.AddOpcode(opcode + 1, operand, this.previousToken.Line);
+        }
+    }
+
+    /// <summary>
+    /// Emits the given opcode to the chunk
+    /// </summary>
+    /// <param name="opcode">Opcode to emit</param>
+    /// <param name="operand">Opcode operand</param>
+    /// <param name="line">Line at which the opcode is emitted from</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EmitOpcode(LoxOpcode opcode, ushort operand, int line)
+    {
+        if (operand <= byte.MaxValue)
+        {
+            this.Chunk.AddOpcode(opcode, (byte)operand, line);
+        }
+        else
+        {
+            this.Chunk.AddOpcode(opcode + 1, operand, line);
+        }
+    }
 
     /// <summary>
     /// Emits the given value to the chunk

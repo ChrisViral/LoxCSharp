@@ -186,15 +186,57 @@ public partial class LoxCompiler
     /// </summary>
     private void ParseIdentifier(bool canAssign)
     {
-        string identifierName = this.previousToken.Lexeme;
-        if (canAssign && TryMatchToken(TokenType.EQUAL, out Token _))
+        if (TryResolveLocal(this.previousToken, out ushort index))
         {
-            ParseExpression();
-            EmitStringConstant(identifierName, ConstantType.SET_GLOBAL);
+            if (canAssign && TryMatchToken(TokenType.EQUAL, out Token _))
+            {
+                ParseExpression();
+                EmitOpcode(LoxOpcode.SET_LOCAL, index);
+            }
+            else
+            {
+                EmitOpcode(LoxOpcode.GET_LOCAL, index);
+            }
         }
         else
         {
-            EmitStringConstant(identifierName, ConstantType.GET_GLOBAL);
+            if (canAssign && TryMatchToken(TokenType.EQUAL, out Token _))
+            {
+                ParseExpression();
+                EmitStringConstant(this.previousToken.Lexeme, ConstantType.SET_GLOBAL);
+            }
+            else
+            {
+                EmitStringConstant(this.previousToken.Lexeme, ConstantType.GET_GLOBAL);
+            }
         }
+    }
+
+    /// <summary>
+    /// Tries to resolve the index of a local variable
+    /// </summary>
+    /// <param name="identifier">Variable identifier</param>
+    /// <param name="index">Resulting index, if found</param>
+    /// <returns><see langword="true"/> if a local with the given name was found, otherwise <see langword="false"/></returns>
+    private bool TryResolveLocal(in Token identifier, out ushort index)
+    {
+        // Look through all current scopes starting at the end
+        for (int i = this.scopeDepth - 1; i >= 0; i--)
+        {
+            Dictionary<string, Local> scope = this.localsPerScope[i];
+            // ReSharper disable once InvertIf
+            if (scope.TryGetValue(identifier.Lexeme, out Local local))
+            {
+                if (local.State is State.UNDEFINED)
+                {
+                    ReportCompileError(identifier, "Cannot read local variable in its own initializer.");
+                }
+
+                index = (ushort)local.Index;
+                return true;
+            }
+        }
+        index = 0;
+        return false;
     }
 }
