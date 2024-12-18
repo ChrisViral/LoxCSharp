@@ -68,7 +68,8 @@ public enum LoxOpcode : byte
     PRINT,
 
     // Control flow
-    JMP_FALSE,
+    JUMP,
+    JUMP_FALSE,
     RETURN
 }
 
