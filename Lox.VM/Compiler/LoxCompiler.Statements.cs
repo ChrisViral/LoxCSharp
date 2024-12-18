@@ -113,6 +113,10 @@ public partial class LoxCompiler
                 ParsePrintStatement();
                 break;
 
+            case TokenType.IF:
+                ParseIfStatement();
+                break;
+
             case TokenType.LEFT_BRACE:
                 ParseBlockStatement();
                 break;
@@ -132,6 +136,21 @@ public partial class LoxCompiler
         ParseExpression();
         EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after value.");
         EmitOpcode(LoxOpcode.PRINT, printToken.Line);
+    }
+
+    /// <summary>
+    /// Parses an if statement
+    /// </summary>
+    private void ParseIfStatement()
+    {
+        Token ifToken = MoveNextToken();
+        EnsureNextToken(TokenType.LEFT_PAREN, "Expected '(' after 'if'.");
+        ParseExpression();
+        EnsureNextToken(TokenType.RIGHT_PAREN, "Expected ')' after condition.");
+
+        int address = EmitJump(LoxOpcode.JMP_FALSE);
+        ParseStatement();
+        PatchJump(ifToken, address);
     }
 
     /// <summary>

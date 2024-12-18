@@ -250,6 +250,22 @@ public partial class VirtualMachine
     private void Print() => PrintValue(this.stack.Pop());
 
     /// <summary>
+    /// Jumps to the given offset if the top value of the stack evaluates to false
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void JumpFalse()
+    {
+        if (this.stack.Peek().IsFalsey)
+        {
+            this.instructionPointer += ReadUInt16();
+        }
+        else
+        {
+            this.instructionPointer += 2;
+        }
+    }
+
+    /// <summary>
     /// Return operation
     /// </summary>
     /// <returns>The execution result</returns>

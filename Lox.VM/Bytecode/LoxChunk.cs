@@ -116,6 +116,17 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     }
 
     /// <summary>
+    /// Patches a given operand at the specified address
+    /// </summary>
+    /// <param name="address">Operand address</param>
+    /// <param name="operand">Operand value</param>
+    public void PatchJump(int address, ushort operand)
+    {
+        Span<byte> target = CollectionsMarshal.AsSpan(this.code).Slice(address, 2);
+        BitConverter.TryWriteBytes(target, operand);
+    }
+
+    /// <summary>
     /// Adds a constant to the chunk
     /// </summary>
     /// <param name="value">Constant to add</param>

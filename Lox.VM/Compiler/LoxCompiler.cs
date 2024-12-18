@@ -324,25 +324,6 @@ public sealed partial class LoxCompiler : IDisposable
     }
 
     /// <summary>
-    /// Emits the given opcode to the chunk
-    /// </summary>
-    /// <param name="opcode">Opcode to emit</param>
-    /// <param name="operand">Opcode operand</param>
-    /// <param name="line">Line at which the opcode is emitted from</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void EmitOpcode(LoxOpcode opcode, ushort operand, int line)
-    {
-        if (operand <= byte.MaxValue)
-        {
-            this.Chunk.AddOpcode(opcode, (byte)operand, line);
-        }
-        else
-        {
-            this.Chunk.AddOpcode(opcode + 1, operand, line);
-        }
-    }
-
-    /// <summary>
     /// Emits the given value to the chunk
     /// </summary>
     /// <param name="value">Value to emit</param>
@@ -382,6 +363,35 @@ public sealed partial class LoxCompiler : IDisposable
             // Keep track of that interned string
             internedLookup[stringValue] = index;
         }
+    }
+
+    /// <summary>
+    /// Emits a jump instruction and provides the backpatching address
+    /// </summary>
+    /// <param name="jump">Jump opcode</param>
+    /// <returns>The address at which the jump operand should be patched</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int EmitJump(LoxOpcode jump)
+    {
+        this.Chunk.AddOpcode(jump, ushort.MaxValue, this.previousToken.Line);
+        return this.Chunk.Count - 2;
+    }
+
+    /// <summary>
+    /// Patches a jump operand value
+    /// </summary>
+    /// <param name="controlFlowToken">Token from which the control flow originated</param>
+    /// <param name="address">Operand address</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void PatchJump(in Token controlFlowToken, int address)
+    {
+        int jump = this.Chunk.Count - address;
+        if (jump > ushort.MaxValue)
+        {
+            ReportCompileError(controlFlowToken, $"Maximum jump length ({ushort.MaxValue}) exceeded");
+        }
+
+        this.Chunk.PatchJump(address, (ushort)jump);
     }
 
     /// <summary>

@@ -290,6 +290,9 @@ public sealed partial class VirtualMachine : IDisposable
                     break;
 
                 // Control flow
+                case LoxOpcode.JMP_FALSE:
+                    JumpFalse();
+                    break;
                 case LoxOpcode.RETURN:
                     return Return();
 

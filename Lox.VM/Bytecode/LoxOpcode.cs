@@ -64,8 +64,11 @@ public enum LoxOpcode : byte
     LESS,
     LESS_EQUALS,
 
-    // Control flow
+    // Print
     PRINT,
+
+    // Control flow
+    JMP_FALSE,
     RETURN
 }
 
