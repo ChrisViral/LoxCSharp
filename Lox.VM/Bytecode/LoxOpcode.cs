@@ -73,6 +73,7 @@ public enum LoxOpcode : byte
     JUMP_TRUE_POP,
     JUMP_FALSE,
     JUMP_FALSE_POP,
+    LOOP,
     RETURN
 }
 

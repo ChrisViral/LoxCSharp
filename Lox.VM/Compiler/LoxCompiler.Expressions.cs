@@ -222,14 +222,15 @@ public partial class LoxCompiler
         }
         else
         {
+            Token identifier = this.previousToken;
             if (canAssign && TryMatchToken(TokenType.EQUAL, out Token _))
             {
                 ParseExpression();
-                EmitStringConstant(this.previousToken.Lexeme, ConstantType.SET_GLOBAL);
+                EmitStringConstant(identifier.Lexeme, ConstantType.SET_GLOBAL);
             }
             else
             {
-                EmitStringConstant(this.previousToken.Lexeme, ConstantType.GET_GLOBAL);
+                EmitStringConstant(identifier.Lexeme, ConstantType.GET_GLOBAL);
             }
         }
     }

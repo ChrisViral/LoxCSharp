@@ -117,6 +117,10 @@ public partial class LoxCompiler
                 ParseIfStatement();
                 break;
 
+            case TokenType.WHILE:
+                ParseWhileStatement();
+                break;
+
             case TokenType.LEFT_BRACE:
                 ParseBlockStatement();
                 break;
@@ -161,6 +165,23 @@ public partial class LoxCompiler
         PatchJump(ifToken, skipIfJumpAddress);
         ParseStatement();
         PatchJump(elseToken, skipElseJumpAddress);
+    }
+
+    /// <summary>
+    /// Parses a while statement
+    /// </summary>
+    private void ParseWhileStatement()
+    {
+        Token whileToken = MoveNextToken();
+        int whileStart = this.Chunk.Count;
+        EnsureNextToken(TokenType.LEFT_PAREN, "Expected '(' after 'while'.");
+        ParseExpression();
+        EnsureNextToken(TokenType.RIGHT_PAREN, "Expected ')' after condition.");
+
+        int exitJumpAddress = EmitJump(LoxOpcode.JUMP_FALSE_POP);
+        ParseStatement();
+        EmitLoop(whileToken, whileStart);
+        PatchJump(whileToken, exitJumpAddress);
     }
 
     /// <summary>

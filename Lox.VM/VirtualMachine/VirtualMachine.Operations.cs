@@ -322,6 +322,12 @@ public partial class VirtualMachine
     }
 
     /// <summary>
+    /// Loops back by a given offset
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void Loop() => this.instructionPointer -= ReadUInt16();
+
+    /// <summary>
     /// Return operation
     /// </summary>
     /// <returns>The execution result</returns>

@@ -395,6 +395,22 @@ public sealed partial class LoxCompiler : IDisposable
     }
 
     /// <summary>
+    /// Emits a loop instruction to the given address
+    /// </summary>
+    /// <param name="controlFlowToken">Token from which the control flow originated</param>
+    /// <param name="address">address to jump to</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EmitLoop(in Token controlFlowToken, int address)
+    {
+        int jump = this.Chunk.Count - address + 1;
+        if (jump > ushort.MaxValue)
+        {
+            ReportCompileError(controlFlowToken, $"Maximum jump length ({ushort.MaxValue}) exceeded");
+        }
+        this.Chunk.AddOpcode(LoxOpcode.LOOP, (ushort)jump, this.previousToken.Line);
+    }
+
+    /// <summary>
     /// Check if the current token matches the specified type
     /// </summary>
     /// <param name="type">Token type to match</param>
