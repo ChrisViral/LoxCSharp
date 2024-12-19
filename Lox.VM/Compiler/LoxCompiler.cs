@@ -193,10 +193,28 @@ public sealed partial class LoxCompiler : IDisposable
     /// Checks if the current token matches the specified token type
     /// </summary>
     /// <param name="tokenType">Token type to match</param>
+    /// <returns><see langword="true"/> if a token was matched, otherwise <see langword="false"/></returns>
+    private bool TryMatchToken(TokenType tokenType)
+    {
+        // ReSharper disable once InvertIf
+        if (CheckCurrentToken(tokenType))
+        {
+            MoveNextToken();
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if the current token matches the specified token type
+    /// </summary>
+    /// <param name="tokenType">Token type to match</param>
     /// <param name="matchedToken">The matched token, if any</param>
     /// <returns><see langword="true"/> if a token was matched, otherwise <see langword="false"/></returns>
     private bool TryMatchToken(TokenType tokenType, out Token matchedToken)
     {
+        // ReSharper disable once InvertIf
         if (CheckCurrentToken(tokenType))
         {
             matchedToken = MoveNextToken();
@@ -264,7 +282,6 @@ public sealed partial class LoxCompiler : IDisposable
         this.scopeDepth--;
         Dictionary<string, Local> scope = this.localsPerScope[this.scopeDepth];
         int poppedCount = scope.Count;
-        this.totalLocalsCount -= poppedCount;
 
         switch (poppedCount)
         {
@@ -272,20 +289,15 @@ public sealed partial class LoxCompiler : IDisposable
                 return;
 
             case 1:
+                this.totalLocalsCount--;
                 scope.Clear();
                 EmitOpcode(LoxOpcode.POP);
                 break;
 
             default:
+                this.totalLocalsCount -= poppedCount;
                 scope.Clear();
-                if (poppedCount <= byte.MaxValue)
-                {
-                    EmitOpcode(LoxOpcode.POPN, (byte)poppedCount);
-                }
-                else
-                {
-                    EmitOpcode(LoxOpcode.POPN_16, (ushort)poppedCount);
-                }
+                EmitOpcode(LoxOpcode.POPN, (ushort)poppedCount);
                 break;
         }
     }
@@ -301,9 +313,9 @@ public sealed partial class LoxCompiler : IDisposable
     /// Emits the given opcode to the chunk
     /// </summary>
     /// <param name="opcode">Opcode to emit</param>
-    /// <param name="line">Line at which the opcode is emitted from</param>
+    /// <param name="token">Token to emit the opcode for</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void EmitOpcode(LoxOpcode opcode, int line) => this.Chunk.AddOpcode(opcode, line);
+    private void EmitOpcode(LoxOpcode opcode, in Token token) => this.Chunk.AddOpcode(opcode, token.Line);
 
     /// <summary>
     /// Emits the given opcode to the chunk, along with an operand, if the operand breaks the 8bit limit, the opcode is moved up to its 16bit version

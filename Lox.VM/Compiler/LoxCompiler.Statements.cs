@@ -43,7 +43,7 @@ public partial class LoxCompiler
 
         if (this.IsGlobalScope)
         {
-            if (TryMatchToken(TokenType.EQUAL, out Token _))
+            if (TryMatchToken(TokenType.EQUAL))
             {
                 ParseExpression();
                 EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after variable declaration.");
@@ -57,7 +57,7 @@ public partial class LoxCompiler
         }
         else
         {
-            if (TryMatchToken(TokenType.EQUAL, out Token _))
+            if (TryMatchToken(TokenType.EQUAL))
             {
                 Local declared = DeclareLocal(identifier);
                 ParseExpression();
@@ -121,6 +121,10 @@ public partial class LoxCompiler
                 ParseWhileStatement();
                 break;
 
+            case TokenType.FOR:
+                ParseForStatement();
+                break;
+
             case TokenType.LEFT_BRACE:
                 ParseBlockStatement();
                 break;
@@ -139,7 +143,7 @@ public partial class LoxCompiler
         Token printToken = MoveNextToken();
         ParseExpression();
         EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after value.");
-        EmitOpcode(LoxOpcode.PRINT, printToken.Line);
+        EmitOpcode(LoxOpcode.PRINT, printToken);
     }
 
     /// <summary>
@@ -182,6 +186,74 @@ public partial class LoxCompiler
         ParseStatement();
         EmitLoop(whileToken, whileStart);
         PatchJump(whileToken, exitJumpAddress);
+    }
+
+    /// <summary>
+    /// Parses a for statement
+    /// </summary>
+    private void ParseForStatement()
+    {
+        using Scope _ = Scope.Open(this);
+        Token forToken = MoveNextToken();
+        EnsureNextToken(TokenType.LEFT_PAREN, "Expected '(' after 'while'.");
+
+        // If the next token is a semicolon, there is no initializer
+        if (!TryMatchToken(TokenType.SEMICOLON))
+        {
+            // If the next token is actually var, then we have a variable declaration
+            if (CheckCurrentToken(TokenType.VAR))
+            {
+                ParseVariableDeclaration();
+            }
+            else
+            {
+                ParseExpressionStatement();
+            }
+        }
+
+        int forStart = this.Chunk.Count;
+        int forJumpAddress = -1;
+        // If the next token is a semicolon, there is no condition clause
+        if (!TryMatchToken(TokenType.SEMICOLON))
+        {
+            ParseExpression();
+            EnsureNextToken(TokenType.SEMICOLON, "Expected ';' after 'for' condition.");
+            forJumpAddress = EmitJump(LoxOpcode.JUMP_FALSE_POP);
+        }
+
+        // If the next token is a parenthesis, there is no increment clause
+        if (TryMatchToken(TokenType.RIGHT_PAREN))
+        {
+            // If there is no increment, simply parse the loop body
+            ParseStatement();
+        }
+        else
+        {
+            // Parse increment expression
+            int incrementStart = this.Chunk.Count;
+            ParseExpression();
+            EnsureNextToken(TokenType.RIGHT_PAREN, "Expected ')' after 'for' increment.");
+
+            // Fetch emitted bytecode
+            Span<byte> increment = stackalloc byte[this.Chunk.Count - incrementStart];
+            this.Chunk.RequestLastBytes(increment);
+
+            // Parse loop body
+            ParseStatement();
+
+            // Add back increment
+            this.Chunk.AppendBytes(increment);
+            EmitOpcode(LoxOpcode.POP);
+        }
+
+        // Finish by emitting loop
+        EmitLoop(forToken, forStart);
+
+        // If there was a condition, patch it now
+        if (forJumpAddress is not -1)
+        {
+            PatchJump(forToken, forJumpAddress);
+        }
     }
 
     /// <summary>

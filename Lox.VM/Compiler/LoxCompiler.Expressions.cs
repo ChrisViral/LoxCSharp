@@ -84,36 +84,36 @@ public partial class LoxCompiler
         {
             // Mathematical operators
             case TokenType.PLUS:
-                EmitOpcode(LoxOpcode.ADD, operatorToken.Line);
+                EmitOpcode(LoxOpcode.ADD, operatorToken);
                 break;
             case TokenType.MINUS:
-                EmitOpcode(LoxOpcode.SUBTRACT, operatorToken.Line);
+                EmitOpcode(LoxOpcode.SUBTRACT, operatorToken);
                 break;
             case TokenType.STAR:
-                EmitOpcode(LoxOpcode.MULTIPLY, operatorToken.Line);
+                EmitOpcode(LoxOpcode.MULTIPLY, operatorToken);
                 break;
             case TokenType.SLASH:
-                EmitOpcode(LoxOpcode.DIVIDE, operatorToken.Line);
+                EmitOpcode(LoxOpcode.DIVIDE, operatorToken);
                 break;
 
             // Logical operators
             case TokenType.EQUAL_EQUAL:
-                EmitOpcode(LoxOpcode.EQUALS, operatorToken.Line);
+                EmitOpcode(LoxOpcode.EQUALS, operatorToken);
                 break;
             case TokenType.BANG_EQUAL:
-                EmitOpcode(LoxOpcode.NOT_EQUALS, operatorToken.Line);
+                EmitOpcode(LoxOpcode.NOT_EQUALS, operatorToken);
                 break;
             case TokenType.GREATER:
-                EmitOpcode(LoxOpcode.GREATER, operatorToken.Line);
+                EmitOpcode(LoxOpcode.GREATER, operatorToken);
                 break;
             case TokenType.GREATER_EQUAL:
-                EmitOpcode(LoxOpcode.GREATER_EQUALS, operatorToken.Line);
+                EmitOpcode(LoxOpcode.GREATER_EQUALS, operatorToken);
                 break;
             case TokenType.LESS:
-                EmitOpcode(LoxOpcode.LESS, operatorToken.Line);
+                EmitOpcode(LoxOpcode.LESS, operatorToken);
                 break;
             case TokenType.LESS_EQUAL:
-                EmitOpcode(LoxOpcode.LESS_EQUALS, operatorToken.Line);
+                EmitOpcode(LoxOpcode.LESS_EQUALS, operatorToken);
                 break;
 
             default:
@@ -141,11 +141,11 @@ public partial class LoxCompiler
         switch (operatorToken.Type)
         {
             case TokenType.BANG:
-                EmitOpcode(LoxOpcode.NOT, operatorToken.Line);
+                EmitOpcode(LoxOpcode.NOT, operatorToken);
                 break;
 
             case TokenType.MINUS:
-                EmitOpcode(LoxOpcode.NEGATE, operatorToken.Line);
+                EmitOpcode(LoxOpcode.NEGATE, operatorToken);
                 break;
 
             default:
@@ -210,7 +210,7 @@ public partial class LoxCompiler
     {
         if (TryResolveLocal(this.previousToken, out ushort index))
         {
-            if (canAssign && TryMatchToken(TokenType.EQUAL, out Token _))
+            if (canAssign && TryMatchToken(TokenType.EQUAL))
             {
                 ParseExpression();
                 EmitOpcode(LoxOpcode.SET_LOCAL, index);
@@ -223,7 +223,7 @@ public partial class LoxCompiler
         else
         {
             Token identifier = this.previousToken;
-            if (canAssign && TryMatchToken(TokenType.EQUAL, out Token _))
+            if (canAssign && TryMatchToken(TokenType.EQUAL))
             {
                 ParseExpression();
                 EmitStringConstant(identifier.Lexeme, ConstantType.SET_GLOBAL);

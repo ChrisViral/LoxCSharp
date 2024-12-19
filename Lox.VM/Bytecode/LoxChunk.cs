@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Lox.VM.Runtime;
@@ -73,6 +74,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// <summary>
     /// Span of the bytecode
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<byte> AsSpan() => CollectionsMarshal.AsSpan(this.code);
 
     /// <summary>
@@ -120,6 +122,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// </summary>
     /// <param name="address">Operand address</param>
     /// <param name="operand">Operand value</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PatchJump(int address, ushort operand)
     {
         Span<byte> target = CollectionsMarshal.AsSpan(this.code).Slice(address, 2);
@@ -177,6 +180,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// </summary>
     /// <param name="index">Constant index to get</param>
     /// <returns>The constants value</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref LoxValue GetConstant(ushort index) => ref CollectionsMarshal.AsSpan(this.values)[index];
 
     /// <summary>
@@ -265,10 +269,36 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     }
 
     /// <summary>
+    /// Fills the provided buffer with the bytes at the end of the current chunk, then clears them from the chunk
+    /// </summary>
+    /// <param name="buffer">Buffer to fill</param>
+    public void RequestLastBytes(in Span<byte> buffer)
+    {
+        if (buffer.Length is 0) return;
+        if (buffer.Length > this.code.Count) throw new ArgumentOutOfRangeException(nameof(buffer), buffer.Length, "Expected buffer length is longer than current chunk length.");
+
+        // Copy to target buffer
+        int start = this.code.Count - buffer.Length;
+        Span<byte> requested = CollectionsMarshal.AsSpan(this.code)[start..];
+        requested.CopyTo(buffer);
+
+        // Clear requested buffer
+        this.code.RemoveRange(start, buffer.Length);
+    }
+
+    /// <summary>
+    /// Appends the provided buffer at the end of the current chunk
+    /// </summary>
+    /// <param name="buffer">Buffer to append</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AppendBytes(ReadOnlySpan<byte> buffer) => this.code.AddRange(buffer);
+
+    /// <summary>
     /// Get bytecode info at the given index
     /// </summary>
     /// <param name="index">Bytecode index</param>
     /// <returns>A tuple containing the bytecode and line for the given index</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (byte bytecode, int line) GetBytecodeInfo(int index) => (this.code[index], GetLine(index));
 
     /// <inheritdoc cref="List{T}.Clear" />
@@ -283,6 +313,7 @@ public partial class LoxChunk : IList<byte>, IReadOnlyList<byte>, IDisposable
     /// Grabs an array of the bytecode
     /// </summary>
     /// <returns>Bytecode array</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public byte[] ToBytecodeArray() => this.code.ToArray();
 
     /// <inheritdoc cref="List{T}.GetEnumerator" />
